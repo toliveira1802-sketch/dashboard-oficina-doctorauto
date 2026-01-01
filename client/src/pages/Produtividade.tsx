@@ -38,7 +38,7 @@ export default function Produtividade() {
   const [mecanicos, setMecanicos] = useState<MecanicoStats[]>([]);
   const [elevadores, setElevadores] = useState<ElevadorStats[]>([]);
   const [filtroMecanico, setFiltroMecanico] = useState<string>('todos');
-  const [filtroServico, setFiltroServico] = useState<string>('todos');
+  const [filtroCategoria, setFiltroCategoria] = useState<string>('todos');
   const [ultimaAtualizacao, setUltimaAtualizacao] = useState<string>('');
 
   const fetchData = async () => {
@@ -201,9 +201,7 @@ export default function Produtividade() {
     filtroMecanico === 'todos' || m.nome === filtroMecanico
   );
 
-  const elevadoresFiltrados = elevadores.filter(e =>
-    filtroMecanico === 'todos' || true // TODO: filtrar por mecânico que usou o elevador
-  );
+  const elevadoresFiltrados = elevadores;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 p-6">
@@ -238,16 +236,16 @@ export default function Produtividade() {
           </SelectContent>
         </Select>
 
-        <Select value={filtroServico} onValueChange={setFiltroServico}>
+        <Select value={filtroCategoria} onValueChange={setFiltroCategoria}>
           <SelectTrigger className="w-[200px] bg-white">
-            <SelectValue placeholder="Todos Serviços" />
+            <SelectValue placeholder="Todas Categorias" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="todos">Todos Serviços</SelectItem>
-            <SelectItem value="revisao">Revisão</SelectItem>
-            <SelectItem value="freios">Freios</SelectItem>
-            <SelectItem value="suspensao">Suspensão</SelectItem>
-            <SelectItem value="motor">Motor</SelectItem>
+            <SelectItem value="todos">Todas Categorias</SelectItem>
+            <SelectItem value="rapido">Rápido</SelectItem>
+            <SelectItem value="medio">Médio</SelectItem>
+            <SelectItem value="demorado">Demorado</SelectItem>
+            <SelectItem value="complexo">Complexo</SelectItem>
           </SelectContent>
         </Select>
       </div>
