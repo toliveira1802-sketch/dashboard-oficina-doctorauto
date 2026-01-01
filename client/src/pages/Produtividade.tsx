@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import Navigation from '@/components/Navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -81,6 +82,7 @@ export default function Produtividade() {
     // Encontrar campos
     const mecanicoField = customFields.find(f => f.name.includes('Mecânico Responsável'));
     const recursoField = customFields.find(f => f.name.includes('Recurso'));
+    const categoriaField = customFields.find(f => f.name.includes('Categoria'));
     const valorField = customFields.find(f => f.name.includes('Valor'));
     const dataEntradaField = customFields.find(f => f.name.includes('Data de Entrada'));
     const servicoField = customFields.find(f => f.name.includes('Serviço'));
@@ -99,6 +101,18 @@ export default function Produtividade() {
       
       // Ignorar agendados
       if (listName.includes('AGENDADOS')) return;
+
+      // Filtrar por categoria se selecionado
+      if (filtroCategoria !== 'todos' && categoriaField) {
+        const categoriaItem = card.customFieldItems?.find(item => item.idCustomField === categoriaField.id);
+        if (categoriaItem) {
+          const categoriaOption = categoriaField.options?.find((opt: any) => opt.id === categoriaItem.idValue);
+          const categoriaNome = categoriaOption?.value?.text?.toLowerCase();
+          if (categoriaNome !== filtroCategoria.toLowerCase()) return;
+        } else {
+          return; // Sem categoria definida
+        }
+      }
 
       // Buscar mecânico
       const mecanicoItem = card.customFieldItems?.find(item => item.idCustomField === mecanicoField.id);
@@ -195,7 +209,7 @@ export default function Produtividade() {
     fetchData();
     const interval = setInterval(fetchData, 30 * 60 * 1000); // 30 minutos
     return () => clearInterval(interval);
-  }, []);
+  }, [filtroCategoria]);
 
   const mecanicosFiltrados = mecanicos.filter(m => 
     filtroMecanico === 'todos' || m.nome === filtroMecanico
@@ -204,7 +218,9 @@ export default function Produtividade() {
   const elevadoresFiltrados = elevadores;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 p-6">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
+      <Navigation />
+      <div className="p-6">
       {/* Header */}
       <div className="mb-6 flex items-center justify-between">
         <div>
@@ -340,6 +356,7 @@ export default function Produtividade() {
             </tbody>
           </table>
         </div>
+      </div>
       </div>
     </div>
   );

@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import Navigation from '@/components/Navigation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -202,6 +203,7 @@ export default function Financeiro() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
+      <Navigation />
       {/* Header */}
       <div className="bg-white border-b border-slate-200 shadow-sm">
         <div className="container py-6">
