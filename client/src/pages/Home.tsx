@@ -162,15 +162,15 @@ export default function Home() {
         const listName = listMap[card.idList];
         
         // Contar apenas cards que estão "na oficina"
-        if (['Diagnóstico', 'Em orçamento', 'Aguardando Aprovar', 'Aguardando peça', 'Em serviço', 'Pronto'].includes(listName)) {
+        if (['Diagnóstico', 'Orçamento', 'Aguardando Aprovação', 'Aguardando Peças', 'Em Execução', 'Qualidade', '🟬 Pronto / Aguardando Retirada'].includes(listName)) {
           newMetrics.total++;
           
           if (listName === 'Diagnóstico') newMetrics.diagnostico++;
-          else if (listName === 'Em orçamento') newMetrics.orcamentos++;
-          else if (listName === 'Aguardando Aprovar') newMetrics.aguardando_aprovacao++;
-          else if (listName === 'Aguardando peça') newMetrics.aguardando_pecas++;
-          else if (listName === 'Em serviço') newMetrics.em_execucao++;
-          else if (listName === 'Pronto') newMetrics.prontos++;
+          else if (listName === 'Orçamento') newMetrics.orcamentos++;
+          else if (listName === 'Aguardando Aprovação') newMetrics.aguardando_aprovacao++;
+          else if (listName === 'Aguardando Peças') newMetrics.aguardando_pecas++;
+          else if (listName === 'Em Execução') newMetrics.em_execucao++;
+          else if (listName === 'Qualidade' || listName === '🟬 Pronto / Aguardando Retirada') newMetrics.prontos++;
 
           // Extrair recurso da descrição
           const recurso = extractRecursoFromDesc(card.desc);
