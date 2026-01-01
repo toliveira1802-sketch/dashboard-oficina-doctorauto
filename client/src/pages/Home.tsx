@@ -8,7 +8,7 @@ import { Loader2, AlertCircle, CheckCircle, Clock, Search, X, RefreshCw } from "
 // Configuração do Trello
 const TRELLO_API_KEY = 'e327cf4891fd2fcb6020899e3718c45e';
 const TRELLO_TOKEN = 'ATTAa37008bfb8c135e0815e9a964d5c7f2e0b2ed2530c6bfdd202061e53ae1a6c18F1F6F8C7';
-const TRELLO_BOARD_ID = 'NkhINjF2';
+const TRELLO_BOARD_ID = 'OMkNBIxH';
 
 interface TrelloCard {
   id: string;
@@ -156,14 +156,14 @@ export default function Home() {
         const listName = listMap[card.idList];
         
         // Contar apenas cards que estão "na oficina"
-        if (['Diagnóstico', 'Orçamento', 'Aguardando Aprovação', 'Aguardando Peças', 'Em Execução', 'Qualidade', 'Pronto / Aguardando Retirada'].includes(listName)) {
+        if (['Diagnóstico', 'Em orçamento', 'Aguardando Aprovar', 'Aguardando peça', 'Em serviço', 'Pronto'].includes(listName)) {
           newMetrics.total++;
           
           if (listName === 'Diagnóstico') newMetrics.diagnostico++;
-          else if (listName === 'Aguardando Aprovação') newMetrics.aguardando_aprovacao++;
-          else if (listName === 'Aguardando Peças') newMetrics.aguardando_pecas++;
-          else if (listName === 'Em Execução') newMetrics.em_execucao++;
-          else if (listName.includes('Pronto')) newMetrics.prontos++;
+          else if (listName === 'Aguardando Aprovar') newMetrics.aguardando_aprovacao++;
+          else if (listName === 'Aguardando peça') newMetrics.aguardando_pecas++;
+          else if (listName === 'Em serviço') newMetrics.em_execucao++;
+          else if (listName === 'Pronto') newMetrics.prontos++;
 
           // Extrair recurso da descrição
           const recurso = extractRecursoFromDesc(card.desc);
