@@ -23,17 +23,17 @@ export default function Navigation() {
             {links.map(({ path, label, icon: Icon }) => {
               const isActive = location === path;
               return (
-                <Link key={path} href={path}>
-                  <a
-                    className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
-                      isActive
-                        ? 'bg-blue-50 text-blue-600 font-semibold'
-                        : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
-                    }`}
-                  >
-                    <Icon className="h-4 w-4" />
-                    {label}
-                  </a>
+                <Link 
+                  key={path} 
+                  href={path}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
+                    isActive
+                      ? 'bg-blue-50 text-blue-600 font-semibold'
+                      : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
+                  }`}
+                >
+                  <Icon className="h-4 w-4" />
+                  {label}
                 </Link>
               );
             })}
