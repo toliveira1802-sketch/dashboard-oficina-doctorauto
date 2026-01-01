@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Loader2, AlertCircle, CheckCircle, Clock, Search, X, RefreshCw } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 // Configuração do Trello
 const TRELLO_API_KEY = 'e327cf4891fd2fcb6020899e3718c45e';
@@ -55,6 +56,7 @@ export default function Home() {
   const [allCards, setAllCards] = useState<TrelloCard[]>([]);
   const [lastUpdate, setLastUpdate] = useState<Date>(new Date());
   const [searchTerm, setSearchTerm] = useState('');
+  const [responsavelFilter, setResponsavelFilter] = useState<string>('todos');
   const [filterCliente, setFilterCliente] = useState<string>('todos');
 
   // Recursos base da oficina
@@ -356,6 +358,20 @@ export default function Home() {
         {/* Filtros e Busca */}
         <Card className="p-4 mb-6 bg-white">
           <div className="flex flex-col md:flex-row gap-3">
+            <div className="w-64">
+              <Select value={responsavelFilter} onValueChange={setResponsavelFilter}>
+                <SelectTrigger className="bg-white">
+                  <SelectValue placeholder="Responsável" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="todos">Todos Responsáveis</SelectItem>
+                  <SelectItem value="Pedro">Pedro</SelectItem>
+                  <SelectItem value="João">João</SelectItem>
+                  <SelectItem value="Não definido">Não definido</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            
             <div className="flex-1 relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400" />
               <Input
