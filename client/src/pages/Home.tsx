@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 // Configuração do Trello
 const TRELLO_API_KEY = 'e327cf4891fd2fcb6020899e3718c45e';
 const TRELLO_TOKEN = 'ATTAa37008bfb8c135e0815e9a964d5c7f2e0b2ed2530c6bfdd202061e53ae1a6c18F1F6F8C7';
-const TRELLO_BOARD_ID = 'OMkNBIxH';
+const TRELLO_BOARD_ID = 'NkhINjF2'; // Gestão de Pátio - Doctor Auto
 
 interface TrelloCard {
   id: string;
