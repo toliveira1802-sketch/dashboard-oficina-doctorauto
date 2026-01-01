@@ -24,6 +24,7 @@ interface TrelloCard {
 interface Metrics {
   total: number;
   diagnostico: number;
+  orcamentos: number;
   aguardando_aprovacao: number;
   aguardando_pecas: number;
   em_execucao: number;
@@ -48,6 +49,7 @@ export default function Home() {
   const [metrics, setMetrics] = useState<Metrics>({
     total: 0,
     diagnostico: 0,
+    orcamentos: 0,
     aguardando_aprovacao: 0,
     aguardando_pecas: 0,
     em_execucao: 0,
@@ -143,9 +145,10 @@ export default function Home() {
       }, {});
 
       // Calcular métricas
-      const newMetrics: Metrics = {
+      const newMetrics = {
         total: 0,
         diagnostico: 0,
+        orcamentos: 0,
         aguardando_aprovacao: 0,
         aguardando_pecas: 0,
         em_execucao: 0,
@@ -163,6 +166,7 @@ export default function Home() {
           newMetrics.total++;
           
           if (listName === 'Diagnóstico') newMetrics.diagnostico++;
+          else if (listName === 'Em orçamento') newMetrics.orcamentos++;
           else if (listName === 'Aguardando Aprovar') newMetrics.aguardando_aprovacao++;
           else if (listName === 'Aguardando peça') newMetrics.aguardando_pecas++;
           else if (listName === 'Em serviço') newMetrics.em_execucao++;
@@ -330,6 +334,12 @@ export default function Home() {
             <p className="text-xs text-blue-700 mb-1">Diagnóstico</p>
             <p className="text-2xl font-bold text-blue-900">{metrics.diagnostico}</p>
             <p className="text-xs text-blue-600 mt-1">em análise</p>
+          </Card>
+          
+          <Card className="p-3 bg-amber-50 hover:shadow-lg transition-shadow">
+            <p className="text-xs text-amber-700 mb-1">Orçamentos Pendentes</p>
+            <p className="text-2xl font-bold text-amber-900">{metrics.orcamentos}</p>
+            <p className="text-xs text-amber-600 mt-1">aguardando consultor</p>
           </Card>
           
           <Card className="p-3 bg-yellow-50 hover:shadow-lg transition-shadow">
