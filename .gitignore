@@ -105,3 +105,23 @@ temp/
 *.db
 *.sqlite
 *.sqlite3
+
+# Template-specific
+config.local.json
+secrets.json
+*.backup
+
+# PM2
+.pm2/
+ecosystem.config.js
+
+# Certificados SSL
+*.pem
+*.key
+*.crt
+*.cert
+
+# Uploads e arquivos de usuário
+uploads/
+user-files/
+storage/

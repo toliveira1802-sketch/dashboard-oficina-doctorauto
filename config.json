@@ -1,0 +1,117 @@
+{
+  "oficina": {
+    "nome": "Doctor Auto",
+    "logo": "/logo-doctorauto.jpeg",
+    "capacidadeMaxima": 20,
+    "horarios": {
+      "entrada": "08:00",
+      "saidaSemana": "17:30",
+      "saidaSabado": "12:00",
+      "almocoInicio": "12:15",
+      "almocoFim": "13:30",
+      "intervaloAtendimento": 60,
+      "horariosExtras": 3
+    }
+  },
+  "mecanicos": [
+    {
+      "id": "samuel",
+      "nome": "Samuel",
+      "ativo": true
+    },
+    {
+      "id": "aldo",
+      "nome": "Aldo",
+      "ativo": true
+    },
+    {
+      "id": "tadeu",
+      "nome": "Tadeu",
+      "ativo": true
+    },
+    {
+      "id": "wendel",
+      "nome": "Wendel",
+      "ativo": true
+    },
+    {
+      "id": "jp",
+      "nome": "JP",
+      "ativo": true
+    }
+  ],
+  "recursos": {
+    "boxes": [
+      { "id": "box-dino", "nome": "Box Dino" },
+      { "id": "box-lado-dino", "nome": "Box Lado Dino" },
+      { "id": "box-agua", "nome": "Box Água" },
+      { "id": "box-4", "nome": "Box 4" },
+      { "id": "box-5", "nome": "Box 5" },
+      { "id": "box-6", "nome": "Box 6" },
+      { "id": "box-7", "nome": "Box 7" }
+    ],
+    "elevadores": [
+      { "id": "elevador-1", "nome": "Elevador 1" },
+      { "id": "elevador-2", "nome": "Elevador 2" },
+      { "id": "elevador-3", "nome": "Elevador 3" },
+      { "id": "elevador-4", "nome": "Elevador 4" },
+      { "id": "elevador-5", "nome": "Elevador 5" },
+      { "id": "elevador-6", "nome": "Elevador 6" },
+      { "id": "elevador-7", "nome": "Elevador 7" },
+      { "id": "elevador-8", "nome": "Elevador 8" },
+      { "id": "elevador-9", "nome": "Elevador 9" }
+    ],
+    "vagasEspera": [
+      { "id": "espera-1", "nome": "Vaga Espera 1" },
+      { "id": "espera-2", "nome": "Vaga Espera 2" },
+      { "id": "espera-3", "nome": "Vaga Espera 3" }
+    ]
+  },
+  "trello": {
+    "enabled": true,
+    "apiKey": "e327cf4891fd2fcb6020899e3718c45e",
+    "token": "ATTAa37008bfb8c135e0815e9a964d5c7f2e0b2ed2530c6bfdd202061e53ae1a6c18F1F6F8C7",
+    "boardId": "NkhINjF2",
+    "listas": {
+      "diagnostico": "Diagnóstico",
+      "orcamento": "Orçamento",
+      "aguardandoAprovacao": "Aguardando Aprovação",
+      "aguardandoPecas": "Aguardando Peças",
+      "prontoParaIniciar": "Pronto pra Iniciar",
+      "emExecucao": "Em Execução",
+      "qualidade": "Qualidade",
+      "prontos": "🟬 Pronto / Aguardando Retirada",
+      "entregue": "Entregue"
+    },
+    "customFields": {
+      "recurso": "Recurso",
+      "previsaoEntrega": "Previsão de Entrega",
+      "previsaoChegadaPecas": "Previsão Chegada Peças"
+    }
+  },
+  "telegram": {
+    "enabled": true,
+    "botToken": "7975097336:AAE5g2C34tAba8fTwLEqSQ17Zv4OJnhcMRU",
+    "chatId": "-5168046940",
+    "sugestoes": {
+      "enabled": true,
+      "horarios": {
+        "segundaQuinta": "17:00",
+        "sexta": "17:00",
+        "sabado": "11:30"
+      }
+    }
+  },
+  "painel": {
+    "autoRefresh": 30,
+    "mostrarLogo": true,
+    "destacarGargalo": true
+  },
+  "features": {
+    "agenda": true,
+    "historico": true,
+    "feedback": true,
+    "automacaoTelegram": true,
+    "painelTV": true
+  }
+}

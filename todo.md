@@ -102,3 +102,21 @@
 - [x] Painel: destacar gargalo (coluna com mais carros)
 - [x] Limpar TODOS os dados de teste da agenda (banco)
 - [x] Deixar apenas dados reais do Trello
+
+## Template Genérico Exportável
+- [x] Criar config.json com todas as configurações
+- [ ] Refatorar código para ler de config.json (remover hardcoded)
+- [x] Criar README.md completo com guia de instalação
+- [x] Criar SETUP.md com guia de configuração
+- [x] Criar DEPLOY.md com guia de deploy
+- [x] Criar script customize.sh automatizado
+- [x] Criar arquivo LICENSE
+- [x] Criar PACKAGE.md com informações de venda
+- [ ] Criar script seed-database.js
+- [x] Criar script test-config.js
+- [x] Criar .gitignore atualizado
+- [x] Criar TEMPLATE_INFO.md com resumo executivo
+- [x] Testar validação de configuração
+- [x] Criar INDEX.md com guia de navegação
+- [x] Revisar documentação final
+- [ ] Criar checkpoint final do template
