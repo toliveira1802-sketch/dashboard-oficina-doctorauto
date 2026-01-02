@@ -1,156 +1,35 @@
 import { useState, useEffect } from 'react';
-import { Calendar, Clock, Save, RefreshCw } from 'lucide-react';
+import { Calendar, RefreshCw } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 import Navigation from '@/components/Navigation';
-
-const TRELLO_API_KEY = 'e327cf4891fd2fcb6020899e3718c45e';
-const TRELLO_TOKEN = 'ATTAa37008bfb8c135e0815e9a964d5c7f2e0b2ed2530c6bfdd202061e53ae1a6c18F1F6F8C7';
-const BOARD_ID = '69562921bad93c92c7922d0a';
-
-const HORARIOS = [
-  { id: 1, hora: '08h15', periodo: 'Manhã' },
-  { id: 2, hora: '10h15', periodo: 'Manhã' },
-  { id: 3, hora: '13h30', periodo: 'Tarde' },
-  { id: 4, hora: '15h30', periodo: 'Tarde' },
-];
+import { trpc } from '@/lib/trpc';
 
 const MECANICOS = ['Samuel', 'Aldo', 'Tadeu', 'Wendel', 'JP'];
 
-interface Card {
-  id: string;
-  name: string;
-  customFieldItems?: any[];
-}
-
-interface SlotData {
-  cardId: string;
-  placa: string;
-  modelo: string;
-  tipo: string;
-}
-
-interface AgendaData {
-  [mecanico: string]: {
-    [slotId: number]: SlotData | null;
-    encaixe1: SlotData | null;
-    encaixe2: SlotData | null;
-  };
-}
+const HORARIOS = [
+  '08h00',
+  '09h00',
+  '10h00',
+  '11h00',
+  // Almoço 12h15 - 13h30
+  '13h30',
+  '14h30',
+  '15h30',
+  '16h30',
+  '17h30',
+];
 
 export default function Agenda() {
-  const [cards, setCards] = useState<Card[]>([]);
-  const [agenda, setAgenda] = useState<AgendaData>({});
-  const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
+  const [selectedDate, setSelectedDate] = useState(() => {
+    const today = new Date();
+    return today.toISOString().split('T')[0]; // YYYY-MM-DD
+  });
 
-  useEffect(() => {
-    fetchCards();
-    loadAgenda();
-  }, []);
+  // Buscar agenda do dia
+  const { data: agendaData, isLoading, refetch } = trpc.agenda.getByDate.useQuery({ date: selectedDate });
 
-  const fetchCards = async () => {
-    try {
-      const response = await fetch(
-        `https://api.trello.com/1/boards/${BOARD_ID}/cards?key=${TRELLO_API_KEY}&token=${TRELLO_TOKEN}&customFieldItems=true`
-      );
-      const data = await response.json();
-      setCards(data);
-    } catch (error) {
-      console.error('Erro ao buscar cards:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const loadAgenda = () => {
-    const saved = localStorage.getItem('agenda_mecanicos');
-    if (saved) {
-      setAgenda(JSON.parse(saved));
-    } else {
-      // Inicializar agenda vazia
-      const initialAgenda: AgendaData = {};
-      MECANICOS.forEach(mec => {
-        initialAgenda[mec] = {
-          1: null,
-          2: null,
-          3: null,
-          4: null,
-          encaixe1: null,
-          encaixe2: null,
-        };
-      });
-      setAgenda(initialAgenda);
-    }
-  };
-
-  const saveAgenda = () => {
-    setSaving(true);
-    localStorage.setItem('agenda_mecanicos', JSON.stringify(agenda));
-    setTimeout(() => {
-      setSaving(false);
-    }, 500);
-  };
-
-  const getCardInfo = (cardId: string) => {
-    const card = cards.find(c => c.id === cardId);
-    if (!card) return null;
-
-    // Extrair placa do nome (formato: "Modelo Placa")
-    const parts = card.name.split(' ');
-    const placa = parts[parts.length - 1];
-    const modelo = parts.slice(0, -1).join(' ');
-
-    // Buscar categoria nos custom fields
-    let tipo = 'Manutenção';
-    if (card.customFieldItems) {
-      const categoriaField = card.customFieldItems.find((item: any) => 
-        item.idCustomField
-      );
-      if (categoriaField && categoriaField.value) {
-        tipo = categoriaField.value.text || 'Manutenção';
-      }
-    }
-
-    return { placa, modelo, tipo };
-  };
-
-  const handleSlotChange = (mecanico: string, slotId: number | string, cardId: string) => {
-    if (!cardId || cardId === 'none') {
-      // Limpar slot
-      setAgenda(prev => ({
-        ...prev,
-        [mecanico]: {
-          ...prev[mecanico],
-          [slotId]: null,
-        },
-      }));
-      return;
-    }
-
-    const cardInfo = getCardInfo(cardId);
-    if (!cardInfo) return;
-
-    setAgenda(prev => ({
-      ...prev,
-      [mecanico]: {
-        ...prev[mecanico],
-        [slotId]: {
-          cardId,
-          ...cardInfo,
-        },
-      },
-    }));
-  };
-
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="min-h-screen bg-slate-50">
         <Navigation />
@@ -163,6 +42,29 @@ export default function Agenda() {
     );
   }
 
+  // Agrupar agenda por mecânico
+  const agendaPorMecanico: Record<string, any[]> = {};
+  MECANICOS.forEach(mec => {
+    agendaPorMecanico[mec] = [];
+  });
+
+  if (agendaData) {
+    agendaData.forEach((item: any) => {
+      if (agendaPorMecanico[item.mecanico]) {
+        agendaPorMecanico[item.mecanico].push(item);
+      }
+    });
+  }
+
+  // Ordenar por horário
+  Object.keys(agendaPorMecanico).forEach(mec => {
+    agendaPorMecanico[mec].sort((a, b) => {
+      const timeA = a.horario.replace('h', ':');
+      const timeB = b.horario.replace('h', ':');
+      return timeA.localeCompare(timeB);
+    });
+  });
+
   return (
     <div className="min-h-screen bg-slate-50">
       <Navigation />
@@ -174,110 +76,113 @@ export default function Agenda() {
               <Calendar className="h-8 w-8 text-blue-600" />
               Agenda dos Mecânicos
             </h1>
-            <p className="text-slate-600 mt-1">Gestão Visual de Atendimentos</p>
+            <p className="text-slate-600 mt-1">Visão Kanban do Dia</p>
           </div>
           
-          <div className="flex gap-2">
-            <Button onClick={fetchCards} variant="outline">
+          <div className="flex gap-3 items-center">
+            <input
+              type="date"
+              value={selectedDate}
+              onChange={(e) => setSelectedDate(e.target.value)}
+              className="px-3 py-2 border border-slate-300 rounded-md"
+            />
+            <Button onClick={() => refetch()} variant="outline">
               <RefreshCw className="h-4 w-4 mr-2" />
-              Atualizar Placas
-            </Button>
-            <Button onClick={saveAgenda} disabled={saving}>
-              <Save className="h-4 w-4 mr-2" />
-              {saving ? 'Salvando...' : 'Salvar Agenda'}
+              Atualizar
             </Button>
           </div>
         </div>
 
-        <div className="space-y-6">
+        {/* Kanban Board */}
+        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4">
           {MECANICOS.map(mecanico => (
-            <Card key={mecanico} className="p-6">
-              <h2 className="text-xl font-bold text-slate-900 mb-4 flex items-center gap-2">
-                <div className="h-3 w-3 rounded-full bg-blue-600"></div>
-                {mecanico}
-              </h2>
+            <div key={mecanico} className="flex flex-col">
+              {/* Header da Coluna */}
+              <Card className="p-4 mb-3 bg-blue-600 text-white">
+                <h2 className="text-lg font-bold text-center">{mecanico}</h2>
+                <p className="text-xs text-center text-blue-100 mt-1">
+                  {agendaPorMecanico[mecanico].length} atendimentos
+                </p>
+              </Card>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
-                {HORARIOS.map(horario => {
-                  const slot = agenda[mecanico]?.[horario.id];
-                  return (
-                    <div key={horario.id} className="space-y-2">
-                      <div className="flex items-center gap-2 text-sm font-semibold text-slate-700">
-                        <Clock className="h-4 w-4" />
-                        {horario.hora} - {horario.periodo}
-                      </div>
-                      
-                      <Select
-                        value={slot?.cardId || ''}
-                        onValueChange={(value) => handleSlotChange(mecanico, horario.id, value)}
-                      >
-                        <SelectTrigger className="w-full">
-                          <SelectValue placeholder="Selecionar veículo" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="none">Vazio</SelectItem>
-                          {cards.map(card => (
-                            <SelectItem key={card.id} value={card.id}>
-                              {card.name}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-
-                      {slot && (
-                        <div className="bg-blue-50 p-3 rounded-lg border border-blue-200">
-                          <div className="text-sm font-bold text-blue-900">{slot.placa}</div>
-                          <div className="text-xs text-blue-700">{slot.modelo}</div>
-                          <div className="text-xs text-blue-600 mt-1">{slot.tipo}</div>
-                        </div>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
-
-              <div className="border-t pt-4 mt-4">
-                <h3 className="text-sm font-semibold text-slate-700 mb-3">Encaixes</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {['encaixe1', 'encaixe2'].map((encaixe, idx) => {
-                    const slot = agenda[mecanico]?.[encaixe as keyof typeof agenda[typeof mecanico]];
-                    return (
-                      <div key={encaixe} className="space-y-2">
-                        <div className="text-sm font-semibold text-orange-700">
-                          Encaixe {idx + 1}
-                        </div>
-                        
-                        <Select
-                          value={slot?.cardId || ''}
-                          onValueChange={(value) => handleSlotChange(mecanico, encaixe, value)}
-                        >
-                          <SelectTrigger className="w-full">
-                            <SelectValue placeholder="Selecionar veículo" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="none">Vazio</SelectItem>
-                            {cards.map(card => (
-                              <SelectItem key={card.id} value={card.id}>
-                                {card.name}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-
-                        {slot && (
-                          <div className="bg-orange-50 p-3 rounded-lg border border-orange-200">
-                            <div className="text-sm font-bold text-orange-900">{slot.placa}</div>
-                            <div className="text-xs text-orange-700">{slot.modelo}</div>
-                            <div className="text-xs text-orange-600 mt-1">{slot.tipo}</div>
-                          </div>
+              {/* Cards de Veículos */}
+              <div className="space-y-2 flex-1">
+                {agendaPorMecanico[mecanico].length === 0 ? (
+                  <Card className="p-4 bg-white border-2 border-dashed border-slate-300">
+                    <p className="text-sm text-slate-500 text-center">Sem atendimentos</p>
+                  </Card>
+                ) : (
+                  agendaPorMecanico[mecanico].map((item: any) => (
+                    <Card 
+                      key={item.id} 
+                      className={`p-3 bg-white hover:shadow-md transition-shadow border-l-4 ${
+                        item.isEncaixe ? 'border-l-orange-500' : 'border-l-blue-500'
+                      }`}
+                    >
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-xs font-bold text-slate-600">{item.horario}</span>
+                        {item.isEncaixe && (
+                          <span className="text-xs bg-orange-100 text-orange-700 px-2 py-0.5 rounded">
+                            Encaixe
+                          </span>
                         )}
                       </div>
-                    );
-                  })}
-                </div>
+                      
+                      <div className="space-y-1">
+                        <p className="font-bold text-slate-900 text-sm">{item.placa || 'N/A'}</p>
+                        <p className="text-xs text-slate-600 truncate">{item.modelo || 'Sem modelo'}</p>
+                        <p className="text-xs text-slate-500">{item.tipo || 'Manutenção'}</p>
+                      </div>
+
+                      {item.status && (
+                        <div className="mt-2 pt-2 border-t border-slate-100">
+                          <span className={`text-xs px-2 py-1 rounded ${
+                            item.status === 'concluido' ? 'bg-green-100 text-green-700' :
+                            item.status === 'em_andamento' ? 'bg-yellow-100 text-yellow-700' :
+                            item.status === 'cancelado' ? 'bg-red-100 text-red-700' :
+                            'bg-slate-100 text-slate-700'
+                          }`}>
+                            {item.status === 'planejado' ? 'Planejado' :
+                             item.status === 'em_andamento' ? 'Em Andamento' :
+                             item.status === 'concluido' ? 'Concluído' :
+                             'Cancelado'}
+                          </span>
+                        </div>
+                      )}
+                    </Card>
+                  ))
+                )}
               </div>
-            </Card>
+            </div>
           ))}
+        </div>
+
+        {/* Legenda */}
+        <Card className="mt-6 p-4 bg-white">
+          <h3 className="text-sm font-semibold text-slate-700 mb-3">Legenda</h3>
+          <div className="flex flex-wrap gap-4 text-sm">
+            <div className="flex items-center gap-2">
+              <div className="w-4 h-4 bg-blue-500 rounded"></div>
+              <span className="text-slate-600">Atendimento Normal</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-4 h-4 bg-orange-500 rounded"></div>
+              <span className="text-slate-600">Encaixe</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-3 h-3 bg-green-100 rounded"></div>
+              <span className="text-slate-600">Concluído</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-3 h-3 bg-yellow-100 rounded"></div>
+              <span className="text-slate-600">Em Andamento</span>
+            </div>
+          </div>
+        </Card>
+
+        <div className="mt-4 text-center text-xs text-slate-500">
+          <p>Horários: 8h-17h30 • Almoço: 12h15-13h30</p>
+          <p className="mt-1">Agenda preenchida automaticamente após aprovação via WhatsApp</p>
         </div>
       </div>
     </div>

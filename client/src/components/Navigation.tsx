@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'wouter';
-import { LayoutDashboard, DollarSign, TrendingUp } from 'lucide-react';
+import { LayoutDashboard, DollarSign, TrendingUp, Calendar, History } from 'lucide-react';
 
 export default function Navigation() {
   const [location] = useLocation();
@@ -8,7 +8,8 @@ export default function Navigation() {
     { path: '/', label: 'Operacional', icon: LayoutDashboard },
     { path: '/financeiro', label: 'Financeiro', icon: DollarSign },
     { path: '/produtividade', label: 'Produtividade', icon: TrendingUp },
-    { path: '/agenda', label: 'Agenda', icon: LayoutDashboard },
+    { path: '/agenda', label: 'Agenda', icon: Calendar },
+    { path: '/historico', label: 'Histórico', icon: History },
   ];
 
   return (
