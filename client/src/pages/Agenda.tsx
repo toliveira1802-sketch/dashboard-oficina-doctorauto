@@ -51,6 +51,8 @@ export default function Agenda() {
   });
 
   const [localAgenda, setLocalAgenda] = useState<Record<string, Record<string, AgendaItem | null>>>({});
+  const [editingCell, setEditingCell] = useState<{ mecanico: string; horario: string } | null>(null);
+  const [inputValue, setInputValue] = useState('');
   // Buscar agenda do dia
   const { data: agendaData, isLoading, refetch } = trpc.agenda.getByDate.useQuery({ date: selectedDate });
 
@@ -288,20 +290,38 @@ export default function Agenda() {
                               </div>
                             </div>
                           </>
+                        ) : editingCell?.mecanico === mecanico && editingCell?.horario === hora ? (
+                          <input
+                            type="text"
+                            value={inputValue}
+                            onChange={(e) => setInputValue(e.target.value)}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter' && inputValue.trim()) {
+                                handleSelectPlaca(mecanico, hora, inputValue.trim());
+                                setEditingCell(null);
+                                setInputValue('');
+                              } else if (e.key === 'Escape') {
+                                setEditingCell(null);
+                                setInputValue('');
+                              }
+                            }}
+                            onBlur={() => {
+                              setEditingCell(null);
+                              setInputValue('');
+                            }}
+                            autoFocus
+                            placeholder="Placa..."
+                            className="w-full h-full text-xs px-2 border-0 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 rounded"
+                          />
                         ) : (
-                          <div className="flex items-center justify-center h-full">
-                            <select
-                              onChange={(e) => handleSelectPlaca(mecanico, hora, e.target.value)}
-                              className="w-full h-full text-xs p-1 border-0 bg-transparent text-slate-400 cursor-pointer hover:bg-slate-50"
-                              defaultValue=""
-                            >
-                              <option value="" disabled>
-                                + Adicionar
-                              </option>
-                            </select>
-                            <div className="text-xs text-slate-500 mt-1">
-                              Dropdown desabilitado - use botão Editar
-                            </div>
+                          <div 
+                            onClick={() => {
+                              setEditingCell({ mecanico, horario: hora });
+                              setInputValue('');
+                            }}
+                            className="flex items-center justify-center h-full text-slate-400 text-sm cursor-pointer hover:bg-slate-50 hover:text-slate-600 transition-colors"
+                          >
+                            +
                           </div>
                         )}
                       </td>

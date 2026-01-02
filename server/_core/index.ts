@@ -35,6 +35,9 @@ async function startServer() {
   app.use(express.urlencoded({ limit: "50mb", extended: true }));
   // OAuth callback under /api/oauth/callback
   registerOAuthRoutes(app);
+  // Trello API routes (must be before tRPC to avoid conflicts)
+  const trelloRoutes = await import('../routes/trello.js');
+  app.use('/api/trello', trelloRoutes.default);
   // tRPC API
   app.use(
     "/api/trpc",

@@ -72,3 +72,19 @@
 ## Correções e Dados de Teste
 - [x] Corrigir erro de busca Trello na página Agenda
 - [x] Popular dados de teste: agenda completa + entregas do dia + status
+
+## Reativar Dropdown de Placas na Agenda
+- [ ] Criar rota API /api/trello/cards no servidor
+- [ ] Reativar dropdown com lista de placas do Trello
+- [ ] Testar encaixe rápido funcionando
+
+## Substituir Dropdown por Campo de Texto
+- [ ] Remover dropdown de placas
+- [ ] Adicionar campo de input para digitar placa
+- [ ] Enter salva o encaixe automaticamente
+
+## Melhorar UX de Encaixe na Agenda
+- [x] Remover dropdown feio
+- [x] Célula vazia: só "+" discreto
+- [x] Clica "+" → input inline aparece
+- [x] Digita placa + Enter → salva
