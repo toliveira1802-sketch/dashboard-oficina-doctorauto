@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Clock } from 'lucide-react';
 import GaugeLotacao from '@/components/GaugeLotacao';
 import { trpc } from '@/lib/trpc';
@@ -9,29 +9,6 @@ const TRELLO_BOARD_ID = 'NkhINjF2';
 
 const MECANICOS = ['Samuel', 'Aldo', 'Tadeu', 'Wendel', 'JP'];
 
-// Definição dos recursos da oficina (baseado no dashboard operacional)
-const RECURSOS_OFICINA = [
-  { nome: 'Box Dino', tipo: 'box' as const },
-  { nome: 'Box Lado Dino', tipo: 'box' as const },
-  { nome: 'Box Água', tipo: 'box' as const },
-  { nome: 'Box 4', tipo: 'box' as const },
-  { nome: 'Box 5', tipo: 'box' as const },
-  { nome: 'Box 6', tipo: 'box' as const },
-  { nome: 'Box 7', tipo: 'box' as const },
-  { nome: 'Elevador 1', tipo: 'elevador' as const },
-  { nome: 'Elevador 2', tipo: 'elevador' as const },
-  { nome: 'Elevador 3', tipo: 'elevador' as const },
-  { nome: 'Elevador 4', tipo: 'elevador' as const },
-  { nome: 'Elevador 5', tipo: 'elevador' as const },
-  { nome: 'Elevador 6', tipo: 'elevador' as const },
-  { nome: 'Elevador 7', tipo: 'elevador' as const },
-  { nome: 'Elevador 8', tipo: 'elevador' as const },
-  { nome: 'Elevador 9', tipo: 'elevador' as const },
-  { nome: 'Vaga Espera 1', tipo: 'espera' as const },
-  { nome: 'Vaga Espera 2', tipo: 'espera' as const },
-  { nome: 'Vaga Espera 3', tipo: 'espera' as const },
-];
-
 interface TrelloCard {
   id: string;
   name: string;
@@ -39,18 +16,17 @@ interface TrelloCard {
   customFieldItems?: any[];
 }
 
-interface Recurso {
+interface FluxoColuna {
   nome: string;
-  status: 'livre' | 'ocupado';
-  placa?: string;
-  tipo: 'box' | 'elevador' | 'espera';
+  count: number;
+  tipo: 'mecanico' | 'consultor';
+  placas: string[];
 }
 
 export default function Painel() {
   const [horaAtual, setHoraAtual] = useState(new Date());
   const [cards, setCards] = useState<TrelloCard[]>([]);
   const [lists, setLists] = useState<any[]>([]);
-  const [customFields, setCustomFields] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   
   const hoje = new Date().toISOString().split('T')[0];
@@ -74,13 +50,6 @@ export default function Painel() {
       const listsData = await listsRes.json();
       setLists(listsData);
       
-      // Buscar custom fields
-      const fieldsRes = await fetch(
-        `https://api.trello.com/1/boards/${TRELLO_BOARD_ID}/customFields?key=${TRELLO_API_KEY}&token=${TRELLO_TOKEN}`
-      );
-      const fieldsData = await fieldsRes.json();
-      setCustomFields(fieldsData);
-      
       // Buscar cards
       const cardsRes = await fetch(
         `https://api.trello.com/1/boards/${TRELLO_BOARD_ID}/cards?key=${TRELLO_API_KEY}&token=${TRELLO_TOKEN}&customFieldItems=true`
@@ -103,269 +72,278 @@ export default function Painel() {
   }, []);
   
   // Extrair placa do nome do card
-  const extrairPlaca = (nome: string) => {
-    const parts = nome.split(' ');
-    return parts[parts.length - 1] || 'N/A';
+  const extractPlaca = (name: string): string => {
+    const match = name.match(/^([A-Z0-9-]+)/);
+    return match ? match[1] : name.substring(0, 8);
   };
   
-  // Buscar valor de custom field
-  const getCustomFieldValue = (card: TrelloCard, fieldName: string) => {
-    if (!card.customFieldItems || !customFields.length) return null;
+  // Calcular dados do fluxo (kanban)
+  const fluxoData = useMemo(() => {
+    const listMap = lists.reduce((acc: any, list: any) => {
+      acc[list.id] = list.name;
+      return acc;
+    }, {});
     
-    const field = customFields.find(f => f.name === fieldName);
-    if (!field) return null;
+    const colunas: FluxoColuna[] = [
+      { nome: 'Diagnóstico', count: 0, tipo: 'mecanico', placas: [] },
+      { nome: 'Orçamentos', count: 0, tipo: 'consultor', placas: [] },
+      { nome: 'Aguard. Aprovação', count: 0, tipo: 'consultor', placas: [] },
+      { nome: 'Aguard. Peças', count: 0, tipo: 'consultor', placas: [] },
+      { nome: 'Pronto pra Iniciar', count: 0, tipo: 'mecanico', placas: [] },
+      { nome: 'Em Execução', count: 0, tipo: 'mecanico', placas: [] },
+    ];
     
-    const item = card.customFieldItems.find(i => i.idCustomField === field.id);
-    if (!item) return null;
-    
-    // Retornar valor baseado no tipo
-    if (item.value?.date) return item.value.date;
-    if (item.value?.text) return item.value.text;
-    if (item.value?.number) return item.value.number;
-    if (item.idValue) {
-      const option = field.options?.find((o: any) => o.id === item.idValue);
-      return option?.value?.text || null;
-    }
-    
-    return null;
-  };
-  
-  // Encontrar ID da lista "Pronto para Iniciar"
-  const listaProntoParaIniciar = lists.find(l => l.name.includes('Pronto para Iniciar'));
-  
-  // Próximos a entrar (cards na lista "Pronto para Iniciar")
-  const proximosEntrar = cards
-    .filter(c => c.idList === listaProntoParaIniciar?.id)
-    .slice(0, 8)
-    .map(c => ({
-      placa: extrairPlaca(c.name),
-      tipo: getCustomFieldValue(c, 'Categoria') || 'Manutenção',
-      recursoSugerido: getCustomFieldValue(c, 'Recurso Sugerido') || 'A definir',
-    }));
-  
-  // Entregas do dia (cards com "Previsão de Entrega" = hoje)
-  const entregasHoje = cards
-    .filter(c => {
-      const previsao = getCustomFieldValue(c, 'Previsão de Entrega');
-      if (!previsao) return false;
-      const dataPrevisao = new Date(previsao).toISOString().split('T')[0];
-      return dataPrevisao === hoje;
-    })
-    .map(c => {
-      const previsao = getCustomFieldValue(c, 'Previsão de Entrega');
-      const dataPrevisao = new Date(previsao);
-      const agora = new Date();
+    cards.forEach(card => {
+      const listName = listMap[card.idList];
+      const placa = extractPlaca(card.name);
       
-      // Determinar status
-      let status = 'no_prazo';
-      if (dataPrevisao < agora) status = 'atrasado';
-      else if ((dataPrevisao.getTime() - agora.getTime()) < 3600000 * 4) status = 'proximo'; // menos de 4h
-      
-      return {
-        placa: extrairPlaca(c.name),
-        status,
-      };
-    })
-    .slice(0, 5);
-  
-  // Mapa da oficina (buscar cards com localização)
-  const recursos: Recurso[] = RECURSOS_OFICINA.map(recurso => {
-    // Buscar card que está nesse recurso
-    const cardNoRecurso = cards.find(c => {
-      const loc = getCustomFieldValue(c, 'Recurso');
-      return loc === recurso.nome;
-    });
-    
-    return {
-      nome: recurso.nome,
-      status: cardNoRecurso ? 'ocupado' : 'livre',
-      placa: cardNoRecurso ? extrairPlaca(cardNoRecurso.name) : undefined,
-      tipo: recurso.tipo,
-    };
-  });
-  
-  // Agrupar agenda por mecânico
-  const agendaPorMecanico: Record<string, any[]> = {};
-  MECANICOS.forEach(mec => {
-    agendaPorMecanico[mec] = [];
-  });
-  
-  if (agendaData) {
-    agendaData.forEach((item: any) => {
-      if (agendaPorMecanico[item.mecanico]) {
-        agendaPorMecanico[item.mecanico].push(item);
+      if (listName === 'Diagnóstico') {
+        colunas[0].count++;
+        colunas[0].placas.push(placa);
+      } else if (listName === 'Orçamento') {
+        colunas[1].count++;
+        colunas[1].placas.push(placa);
+      } else if (listName === 'Aguardando Aprovação') {
+        colunas[2].count++;
+        colunas[2].placas.push(placa);
+      } else if (listName === 'Aguardando Peças') {
+        colunas[3].count++;
+        colunas[3].placas.push(placa);
+      } else if (listName === 'Pronto pra Iniciar') {
+        colunas[4].count++;
+        colunas[4].placas.push(placa);
+      } else if (listName === 'Em Execução') {
+        colunas[5].count++;
+        colunas[5].placas.push(placa);
       }
     });
     
-    // Ordenar por horário
-    Object.keys(agendaPorMecanico).forEach(mec => {
-      agendaPorMecanico[mec].sort((a, b) => a.horario.localeCompare(b.horario));
-    });
-  }
+    return colunas;
+  }, [cards, lists]);
   
-  // Calcular lotação REAL
-  const totalCarros = cards.length;
-  const capacidadeTotal = 20;
+  // Encontrar gargalo (coluna com mais carros)
+  const gargalo = useMemo(() => {
+    return fluxoData.reduce((max, col) => col.count > max.count ? col : max, fluxoData[0]);
+  }, [fluxoData]);
+  
+  // Calcular lotação do pátio
+  const lotacao = useMemo(() => {
+    const total = cards.filter(card => {
+      const listName = lists.find(l => l.id === card.idList)?.name;
+      return ['Diagnóstico', 'Orçamento', 'Aguardando Aprovação', 'Aguardando Peças', 'Pronto pra Iniciar', 'Em Execução', 'Qualidade', '🟬 Pronto / Aguardando Retirada'].includes(listName);
+    }).length;
+    
+    return {
+      atual: total,
+      total: 20,
+      percentual: Math.round((total / 20) * 100)
+    };
+  }, [cards, lists]);
+  
+  // Calcular entregas previstas hoje
+  const entregasHoje = useMemo(() => {
+    // TODO: Filtrar por custom field "Previsão de Entrega" = hoje
+    return [];
+  }, [cards]);
+  
+  // Calcular próximos a entrar
+  const proximosEntrar = useMemo(() => {
+    const listProntoId = lists.find(l => l.name === 'Pronto pra Iniciar')?.id;
+    if (!listProntoId) return [];
+    
+    return cards
+      .filter(c => c.idList === listProntoId)
+      .slice(0, 5)
+      .map(c => extractPlaca(c.name));
+  }, [cards, lists]);
+  
+  // Determinar horários a mostrar (manhã ou tarde)
+  const horariosAgenda = useMemo(() => {
+    const hora = horaAtual.getHours();
+    if (hora < 12) {
+      return ['08h00', '09h00', '10h00', '11h00'];
+    } else {
+      return ['13h30', '14h30', '15h30', '16h30'];
+    }
+  }, [horaAtual]);
+  
+  // Agrupar agenda por mecânico
+  const agendaPorMecanico = useMemo(() => {
+    if (!agendaData) return {};
+    
+    const grouped: Record<string, any[]> = {};
+    MECANICOS.forEach(mec => grouped[mec] = []);
+    
+    agendaData.forEach((item: any) => {
+      if (grouped[item.mecanico]) {
+        grouped[item.mecanico].push(item);
+      }
+    });
+    
+    return grouped;
+  }, [agendaData]);
   
   if (loading) {
     return (
       <div className="min-h-screen bg-slate-900 flex items-center justify-center">
-        <div className="text-white text-2xl">Carregando painel...</div>
+        <div className="text-white text-2xl">Carregando...</div>
       </div>
     );
   }
   
   return (
-    <div className="min-h-screen bg-slate-900 p-4 overflow-hidden">
+    <div className="min-h-screen bg-slate-900 text-white p-4">
       {/* Header */}
-      <div className="bg-blue-600 rounded-lg p-4 mb-4 flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-white">Doctor Auto - Gestão de Pátio</h1>
-          <p className="text-blue-100 text-sm">Painel em Tempo Real</p>
-        </div>
-        <div className="flex items-center gap-3 text-white">
-          <Clock className="h-8 w-8" />
-          <div className="text-right">
-            <div className="text-3xl font-bold">
-              {horaAtual.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
-            </div>
-            <div className="text-sm text-blue-100">
-              {horaAtual.toLocaleDateString('pt-BR', { weekday: 'long', day: '2-digit', month: 'long' })}
+      <header className="bg-gradient-to-r from-blue-600 to-blue-800 rounded-lg p-4 mb-4 shadow-xl">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold">Doctor Auto - Gestão de Pátio</h1>
+            <p className="text-blue-100 text-sm">Painel em Tempo Real</p>
+          </div>
+          <div className="flex items-center gap-3 bg-white/10 rounded-lg px-6 py-3">
+            <Clock className="w-6 h-6" />
+            <div className="text-right">
+              <div className="text-3xl font-bold">{horaAtual.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}</div>
+              <div className="text-sm text-blue-100">
+                {horaAtual.toLocaleDateString('pt-BR', { weekday: 'long', day: '2-digit', month: 'long' })}
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      </header>
       
-      {/* Grid Principal: 2 linhas x 2 colunas */}
-      <div className="grid grid-cols-2 grid-rows-2 gap-4 h-[calc(100vh-140px)]">
+      {/* Layout Principal: 50% cima, 50% baixo */}
+      <div className="grid grid-rows-2 gap-4" style={{ height: 'calc(100vh - 140px)' }}>
         
-        {/* QUADRANTE 1: Kanban Mecânicos (Topo Esquerda) */}
-        <div className="bg-slate-800 rounded-lg p-4 overflow-hidden">
-          <h2 className="text-xl font-bold text-white mb-3 border-b border-slate-700 pb-2">
-            Agenda dos Mecânicos
-          </h2>
-          <div className="grid grid-cols-5 gap-2 h-[calc(100%-50px)] overflow-y-auto">
-            {MECANICOS.map((mecanico) => {
-              const atendimentos = agendaPorMecanico[mecanico] || [];
-              return (
-                <div key={mecanico} className="flex flex-col">
-                  <div className="bg-blue-600 text-white text-center py-2 rounded-t font-bold text-sm">
-                    {mecanico}
-                  </div>
-                  <div className="space-y-1 bg-slate-700 rounded-b p-2 flex-1">
-                    {atendimentos.length === 0 ? (
-                      <div className="text-slate-400 text-xs text-center py-2">Sem agenda</div>
-                    ) : (
-                      atendimentos.slice(0, 6).map((item, idx) => (
-                        <div key={idx} className="bg-slate-600 text-white p-2 rounded text-xs">
-                          <div className="font-bold">{item.horario}</div>
-                          <div className="text-slate-300">{item.placa || 'N/A'}</div>
-                        </div>
-                      ))
-                    )}
-                  </div>
+        {/* METADE DE CIMA: Agenda dos Mecânicos (100% largura) */}
+        <div className="bg-slate-800 rounded-lg p-4 shadow-xl">
+          <h2 className="text-xl font-bold mb-3">Agenda dos Mecânicos</h2>
+          <div className="grid grid-cols-5 gap-2 h-full">
+            {MECANICOS.map(mecanico => (
+              <div key={mecanico} className="bg-blue-900/30 rounded-lg p-2">
+                <div className="bg-blue-600 text-center py-2 rounded mb-2 font-bold">
+                  {mecanico}
                 </div>
-              );
-            })}
-          </div>
-        </div>
-        
-        {/* QUADRANTE 2: Widgets (Topo Direita) */}
-        <div className="flex flex-col gap-4">
-          {/* Widget Lotação */}
-          <div className="flex-1">
-            <GaugeLotacao atual={totalCarros} total={capacidadeTotal} />
-          </div>
-          
-          {/* Widget Entregas do Dia */}
-          <div className="flex-1 bg-slate-800 rounded-lg p-4">
-            <h2 className="text-xl font-bold text-white mb-3 border-b border-slate-700 pb-2">
-              Entregas Previstas Hoje
-            </h2>
-            <div className="space-y-2 overflow-y-auto h-[calc(100%-50px)]">
-              {entregasHoje.length === 0 ? (
-                <p className="text-slate-400 text-center py-4">Nenhuma entrega prevista</p>
-              ) : (
-                entregasHoje.map((item, idx) => (
-                  <div
-                    key={idx}
-                    className={`p-3 rounded flex items-center justify-between ${
-                      item.status === 'no_prazo' ? 'bg-green-900/50 border-l-4 border-green-500' :
-                      item.status === 'proximo' ? 'bg-yellow-900/50 border-l-4 border-yellow-500' :
-                      'bg-red-900/50 border-l-4 border-red-500'
-                    }`}
-                  >
-                    <span className="text-white font-bold text-lg">{item.placa}</span>
-                    <span className={`text-xs font-semibold ${
-                      item.status === 'no_prazo' ? 'text-green-400' :
-                      item.status === 'proximo' ? 'text-yellow-400' :
-                      'text-red-400'
-                    }`}>
-                      {item.status === 'no_prazo' ? 'NO PRAZO' :
-                       item.status === 'proximo' ? 'PRÓXIMO' :
-                       'ATRASADO'}
-                    </span>
-                  </div>
-                ))
-              )}
-            </div>
-          </div>
-        </div>
-        
-        {/* QUADRANTE 3: Mapa da Oficina (Baixo Esquerda) */}
-        <div className="bg-slate-800 rounded-lg p-4 overflow-hidden">
-          <h2 className="text-xl font-bold text-white mb-3 border-b border-slate-700 pb-2">
-            Mapa da Oficina
-          </h2>
-          <div className="grid grid-cols-5 gap-2 h-[calc(100%-50px)] overflow-y-auto">
-            {recursos.map((recurso, idx) => (
-              <div
-                key={idx}
-                className={`rounded-lg p-3 flex flex-col items-center justify-center ${
-                  recurso.status === 'ocupado'
-                    ? recurso.tipo === 'elevador'
-                      ? 'bg-purple-600'
-                      : recurso.tipo === 'espera'
-                      ? 'bg-orange-600'
-                      : 'bg-blue-600'
-                    : 'bg-slate-600'
-                }`}
-              >
-                <div className="text-white text-xs font-semibold mb-1 text-center">{recurso.nome}</div>
-                {recurso.status === 'ocupado' && recurso.placa ? (
-                  <div className="text-white font-bold text-sm">{recurso.placa}</div>
-                ) : (
-                  <div className="text-slate-400 text-xs">Livre</div>
-                )}
+                <div className="space-y-1">
+                  {horariosAgenda.map(horario => {
+                    const atendimento = agendaPorMecanico[mecanico]?.find((a: any) => a.horario === horario);
+                    
+                    if (atendimento) {
+                      return (
+                        <div key={horario} className={`text-xs p-2 rounded ${atendimento.encaixe ? 'bg-orange-500' : 'bg-blue-500'}`}>
+                          <div className="font-bold">{horario}</div>
+                          <div className="font-semibold">{atendimento.placa}</div>
+                        </div>
+                      );
+                    }
+                    
+                    return (
+                      <div key={horario} className="text-xs p-2 rounded bg-slate-700/50 text-slate-500">
+                        {horario}
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
             ))}
           </div>
         </div>
         
-        {/* QUADRANTE 4: Próximos a Entrar (Baixo Direita) */}
-        <div className="bg-slate-800 rounded-lg p-4">
-          <h2 className="text-xl font-bold text-white mb-3 border-b border-slate-700 pb-2">
-            Próximos a Entrar
-          </h2>
-          <div className="space-y-2 h-[calc(100%-50px)] overflow-y-auto">
-            {proximosEntrar.length === 0 ? (
-              <p className="text-slate-400 text-center py-4">Nenhum carro aguardando</p>
-            ) : (
-              proximosEntrar.map((item, idx) => (
-                <div key={idx} className="bg-slate-700 p-3 rounded flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="bg-blue-600 text-white font-bold text-sm px-3 py-1 rounded">
-                      {item.placa}
-                    </div>
-                    <span className="text-slate-300 text-sm">{item.tipo}</span>
-                  </div>
-                  <div className="bg-green-600 text-white text-xs font-semibold px-3 py-1 rounded">
-                    → {item.recursoSugerido}
-                  </div>
-                </div>
-              ))
-            )}
+        {/* METADE DE BAIXO: 3 colunas */}
+        <div className="grid grid-cols-3 gap-4">
+          
+          {/* Coluna 1: Lotação do Pátio (MAIOR) */}
+          <div className="bg-slate-800 rounded-lg p-4 shadow-xl">
+            <h2 className="text-xl font-bold mb-3 text-center">Lotação do Pátio</h2>
+            <div className="flex items-center justify-center h-full">
+              <GaugeLotacao atual={lotacao.atual} total={lotacao.total} />
+            </div>
+            <div className="text-center mt-4">
+              <div className="text-3xl font-bold">{lotacao.atual} / {lotacao.total}</div>
+              <div className="text-sm text-slate-400">carros na oficina</div>
+              <div className={`mt-2 font-bold ${lotacao.percentual < 70 ? 'text-green-400' : lotacao.percentual < 90 ? 'text-yellow-400' : 'text-red-400'}`}>
+                {lotacao.percentual < 70 ? '✓ CAPACIDADE OK' : lotacao.percentual < 90 ? '⚠ ATENÇÃO' : '🚨 LOTADO'}
+              </div>
+            </div>
           </div>
+          
+          {/* Coluna 2: Kanban de Fluxo (com destaque de gargalo) */}
+          <div className="bg-slate-800 rounded-lg p-4 shadow-xl">
+            <h2 className="text-xl font-bold mb-3 text-center">Fluxo da Oficina</h2>
+            <div className="space-y-2">
+              {fluxoData.map(coluna => {
+                const isGargalo = coluna.nome === gargalo.nome && coluna.count > 0;
+                const bgColor = coluna.tipo === 'mecanico' ? 'bg-blue-600' : 'bg-amber-600';
+                const borderColor = isGargalo ? 'border-4 border-red-500' : '';
+                
+                return (
+                  <div key={coluna.nome} className={`${bgColor} ${borderColor} rounded-lg p-2 relative`}>
+                    <div className="flex items-center justify-between">
+                      <div className="text-sm font-semibold">{coluna.nome}</div>
+                      <div className="bg-white text-slate-900 rounded-full w-8 h-8 flex items-center justify-center font-bold">
+                        {coluna.count}
+                      </div>
+                    </div>
+                    {isGargalo && (
+                      <div className="absolute -top-2 -right-2 bg-red-500 text-white text-xs px-2 py-1 rounded-full font-bold animate-pulse">
+                        GARGALO
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+            <div className="mt-4 text-xs text-slate-400 text-center">
+              <div className="flex items-center justify-center gap-2">
+                <div className="w-3 h-3 bg-blue-600 rounded"></div>
+                <span>Mecânico</span>
+                <div className="w-3 h-3 bg-amber-600 rounded ml-2"></div>
+                <span>Consultor</span>
+              </div>
+            </div>
+          </div>
+          
+          {/* Coluna 3: Próximos a Entrar + Entregas */}
+          <div className="space-y-4">
+            {/* Próximos a Entrar */}
+            <div className="bg-slate-800 rounded-lg p-4 shadow-xl">
+              <h2 className="text-lg font-bold mb-2">Próximos a Entrar</h2>
+              {proximosEntrar.length > 0 ? (
+                <div className="space-y-1">
+                  {proximosEntrar.map((placa, idx) => (
+                    <div key={idx} className="bg-cyan-600 rounded px-2 py-1 text-sm font-semibold">
+                      {placa}
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="flex flex-col items-center justify-center py-4">
+                  <img src="/logo-doctorauto.jpeg" alt="Logo" className="w-16 h-16 opacity-50 mb-2" />
+                  <p className="text-slate-400 text-sm">Nenhum carro aguardando</p>
+                </div>
+              )}
+            </div>
+            
+            {/* Entregas Previstas Hoje */}
+            <div className="bg-slate-800 rounded-lg p-4 shadow-xl">
+              <h2 className="text-lg font-bold mb-2">Entregas Previstas Hoje</h2>
+              {entregasHoje.length > 0 ? (
+                <div className="space-y-1">
+                  {entregasHoje.map((placa: string, idx: number) => (
+                    <div key={idx} className="bg-green-600 rounded px-2 py-1 text-sm font-semibold">
+                      {placa}
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="flex flex-col items-center justify-center py-4">
+                  <img src="/logo-doctorauto.jpeg" alt="Logo" className="w-16 h-16 opacity-50 mb-2" />
+                  <p className="text-slate-400 text-sm">Nenhuma entrega prevista</p>
+                </div>
+              )}
+            </div>
+          </div>
+          
         </div>
         
       </div>

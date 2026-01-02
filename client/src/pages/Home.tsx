@@ -27,6 +27,7 @@ interface Metrics {
   orcamentos: number;
   aguardando_aprovacao: number;
   aguardando_pecas: number;
+  pronto_pra_iniciar: number;
   em_execucao: number;
   prontos: number;
 }
@@ -53,6 +54,7 @@ export default function Home() {
     orcamentos: 0,
     aguardando_aprovacao: 0,
     aguardando_pecas: 0,
+    pronto_pra_iniciar: 0,
     em_execucao: 0,
     prontos: 0
   });
@@ -152,6 +154,7 @@ export default function Home() {
         orcamentos: 0,
         aguardando_aprovacao: 0,
         aguardando_pecas: 0,
+        pronto_pra_iniciar: 0,
         em_execucao: 0,
         prontos: 0
       };
@@ -163,13 +166,14 @@ export default function Home() {
         const listName = listMap[card.idList];
         
         // Contar apenas cards que estão "na oficina"
-        if (['Diagnóstico', 'Orçamento', 'Aguardando Aprovação', 'Aguardando Peças', 'Em Execução', 'Qualidade', '🟬 Pronto / Aguardando Retirada'].includes(listName)) {
+        if (['Diagnóstico', 'Orçamento', 'Aguardando Aprovação', 'Aguardando Peças', 'Pronto pra Iniciar', 'Em Execução', 'Qualidade', '🟬 Pronto / Aguardando Retirada'].includes(listName)) {
           newMetrics.total++;
           
           if (listName === 'Diagnóstico') newMetrics.diagnostico++;
           else if (listName === 'Orçamento') newMetrics.orcamentos++;
           else if (listName === 'Aguardando Aprovação') newMetrics.aguardando_aprovacao++;
           else if (listName === 'Aguardando Peças') newMetrics.aguardando_pecas++;
+          else if (listName === 'Pronto pra Iniciar') newMetrics.pronto_pra_iniciar++;
           else if (listName === 'Em Execução') newMetrics.em_execucao++;
           else if (listName === 'Qualidade' || listName === '🟬 Pronto / Aguardando Retirada') newMetrics.prontos++;
 
@@ -324,7 +328,7 @@ export default function Home() {
         </Card>
 
         {/* Métricas Principais */}
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 mb-6">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-7 gap-3 mb-6">
           <Card className="p-3 bg-white hover:shadow-lg transition-shadow">
             <p className="text-xs text-slate-600 mb-1">Total na Oficina</p>
             <p className="text-2xl font-bold text-slate-900">{metrics.total}</p>
@@ -353,6 +357,12 @@ export default function Home() {
             <p className="text-xs text-purple-700 mb-1">Aguard. Peças</p>
             <p className="text-2xl font-bold text-purple-900">{metrics.aguardando_pecas}</p>
             <p className="text-xs text-purple-600 mt-1">esperando</p>
+          </Card>
+          
+          <Card className="p-3 bg-cyan-50 hover:shadow-lg transition-shadow">
+            <p className="text-xs text-cyan-700 mb-1">Pronto pra Iniciar</p>
+            <p className="text-2xl font-bold text-cyan-900">{metrics.pronto_pra_iniciar}</p>
+            <p className="text-xs text-cyan-600 mt-1">aguardando</p>
           </Card>
           
           <Card className="p-3 bg-green-50 hover:shadow-lg transition-shadow">

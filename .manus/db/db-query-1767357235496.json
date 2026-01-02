@@ -1,0 +1,9 @@
+{
+  "query": "DELETE FROM agendas;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3dWo49LZM7B1Gvy.root --database 7A2gwQ2A8kNLBRdn5ZJDvH --execute DELETE FROM agendas;",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 152
+}

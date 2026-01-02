@@ -93,3 +93,12 @@
 - [x] Voltar layout: Kanban + Gauge + Próximos (cima) | Mapa + Entregas (baixo)
 - [x] Remover gráficos de Status e SLA
 - [x] Restaurar mapa da oficina visual
+
+## Alterações Finais - Redução de Custos Trello
+- [x] Dashboard Operacional: adicionar coluna "Pronto pra Iniciar"
+- [x] Painel: aumentar "Lotação do Pátio" para mesmo tamanho da agenda
+- [x] Painel: remover "Mapa da Oficina"
+- [x] Painel: adicionar Kanban de Fluxo (6 colunas com contadores)
+- [x] Painel: destacar gargalo (coluna com mais carros)
+- [x] Limpar TODOS os dados de teste da agenda (banco)
+- [x] Deixar apenas dados reais do Trello
