@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Clock } from 'lucide-react';
 import GaugeLotacao from '@/components/GaugeLotacao';
 import { trpc } from '@/lib/trpc';
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 
 const TRELLO_API_KEY = 'e327cf4891fd2fcb6020899e3718c45e';
 const TRELLO_TOKEN = 'ATTAa37008bfb8c135e0815e9a964d5c7f2e0b2ed2530c6bfdd202061e53ae1a6c18F1F6F8C7';
@@ -9,46 +10,12 @@ const TRELLO_BOARD_ID = 'NkhINjF2';
 
 const MECANICOS = ['Samuel', 'Aldo', 'Tadeu', 'Wendel', 'JP'];
 
-// Definição dos recursos da oficina (baseado no dashboard operacional)
-const RECURSOS_OFICINA = [
-  { nome: 'Box Dino', tipo: 'box' as const },
-  { nome: 'Box Lado Dino', tipo: 'box' as const },
-  { nome: 'Box Água', tipo: 'box' as const },
-  { nome: 'Box 4', tipo: 'box' as const },
-  { nome: 'Box 5', tipo: 'box' as const },
-  { nome: 'Box 6', tipo: 'box' as const },
-  { nome: 'Box 7', tipo: 'box' as const },
-  { nome: 'Elevador 1', tipo: 'elevador' as const },
-  { nome: 'Elevador 2', tipo: 'elevador' as const },
-  { nome: 'Elevador 3', tipo: 'elevador' as const },
-  { nome: 'Elevador 4', tipo: 'elevador' as const },
-  { nome: 'Elevador 5', tipo: 'elevador' as const },
-  { nome: 'Elevador 6', tipo: 'elevador' as const },
-  { nome: 'Elevador 7', tipo: 'elevador' as const },
-  { nome: 'Elevador 8', tipo: 'elevador' as const },
-  { nome: 'Elevador 9', tipo: 'elevador' as const },
-  { nome: 'Vaga Espera 1', tipo: 'espera' as const },
-  { nome: 'Vaga Espera 2', tipo: 'espera' as const },
-  { nome: 'Vaga Espera 3', tipo: 'espera' as const },
-];
-
-interface TrelloCard {
-  id: string;
-  name: string;
-  idList: string;
-  customFieldItems?: any[];
-}
-
-interface Recurso {
-  nome: string;
-  status: 'livre' | 'ocupado';
-  placa?: string;
-  tipo: 'box' | 'elevador' | 'espera';
-}
+const HORARIOS_MANHA = ['08h00', '09h00', '10h00', '11h00'];
+const HORARIOS_TARDE = ['13h30', '14h30', '15h30', '16h30'];
 
 export default function Painel() {
   const [horaAtual, setHoraAtual] = useState(new Date());
-  const [cards, setCards] = useState<TrelloCard[]>([]);
+  const [cards, setCards] = useState<any[]>([]);
   const [lists, setLists] = useState<any[]>([]);
   const [customFields, setCustomFields] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -57,6 +24,11 @@ export default function Painel() {
   
   // Buscar agenda do dia da API
   const { data: agendaData } = trpc.agenda.getByDate.useQuery({ date: hoje });
+  
+  // Determinar se é manhã ou tarde
+  const horaAtualNum = horaAtual.getHours();
+  const isManha = horaAtualNum < 12;
+  const horariosExibir = isManha ? HORARIOS_MANHA : HORARIOS_TARDE;
   
   // Atualizar hora a cada segundo
   useEffect(() => {
@@ -67,21 +39,18 @@ export default function Painel() {
   // Buscar dados do Trello
   const fetchTrelloData = async () => {
     try {
-      // Buscar listas
       const listsRes = await fetch(
         `https://api.trello.com/1/boards/${TRELLO_BOARD_ID}/lists?key=${TRELLO_API_KEY}&token=${TRELLO_TOKEN}`
       );
       const listsData = await listsRes.json();
       setLists(listsData);
       
-      // Buscar custom fields
       const fieldsRes = await fetch(
         `https://api.trello.com/1/boards/${TRELLO_BOARD_ID}/customFields?key=${TRELLO_API_KEY}&token=${TRELLO_TOKEN}`
       );
       const fieldsData = await fieldsRes.json();
       setCustomFields(fieldsData);
       
-      // Buscar cards
       const cardsRes = await fetch(
         `https://api.trello.com/1/boards/${TRELLO_BOARD_ID}/cards?key=${TRELLO_API_KEY}&token=${TRELLO_TOKEN}&customFieldItems=true`
       );
@@ -97,277 +66,225 @@ export default function Painel() {
   
   useEffect(() => {
     fetchTrelloData();
-    // Auto-refresh a cada 30 segundos
     const interval = setInterval(fetchTrelloData, 30000);
     return () => clearInterval(interval);
   }, []);
   
-  // Extrair placa do nome do card
-  const extrairPlaca = (nome: string) => {
-    const parts = nome.split(' ');
-    return parts[parts.length - 1] || 'N/A';
-  };
-  
-  // Buscar valor de custom field
-  const getCustomFieldValue = (card: TrelloCard, fieldName: string) => {
-    if (!card.customFieldItems || !customFields.length) return null;
-    
-    const field = customFields.find(f => f.name === fieldName);
-    if (!field) return null;
-    
-    const item = card.customFieldItems.find(i => i.idCustomField === field.id);
-    if (!item) return null;
-    
-    // Retornar valor baseado no tipo
-    if (item.value?.date) return item.value.date;
-    if (item.value?.text) return item.value.text;
-    if (item.value?.number) return item.value.number;
-    if (item.idValue) {
-      const option = field.options?.find((o: any) => o.id === item.idValue);
-      return option?.value?.text || null;
-    }
-    
-    return null;
-  };
-  
-  // Encontrar ID da lista "Pronto para Iniciar"
-  const listaProntoParaIniciar = lists.find(l => l.name.includes('Pronto para Iniciar'));
-  
-  // Próximos a entrar (cards na lista "Pronto para Iniciar")
-  const proximosEntrar = cards
-    .filter(c => c.idList === listaProntoParaIniciar?.id)
-    .slice(0, 8)
-    .map(c => ({
-      placa: extrairPlaca(c.name),
-      tipo: getCustomFieldValue(c, 'Categoria') || 'Manutenção',
-      recursoSugerido: getCustomFieldValue(c, 'Recurso Sugerido') || 'A definir',
-    }));
-  
-  // Entregas do dia (cards com "Previsão de Entrega" = hoje)
-  const entregasHoje = cards
-    .filter(c => {
-      const previsao = getCustomFieldValue(c, 'Previsão de Entrega');
-      if (!previsao) return false;
-      const dataPrevisao = new Date(previsao).toISOString().split('T')[0];
-      return dataPrevisao === hoje;
-    })
-    .map(c => {
-      const previsao = getCustomFieldValue(c, 'Previsão de Entrega');
-      const dataPrevisao = new Date(previsao);
-      const agora = new Date();
-      
-      // Determinar status
-      let status = 'no_prazo';
-      if (dataPrevisao < agora) status = 'atrasado';
-      else if ((dataPrevisao.getTime() - agora.getTime()) < 3600000 * 4) status = 'proximo'; // menos de 4h
-      
-      return {
-        placa: extrairPlaca(c.name),
-        status,
-      };
-    })
-    .slice(0, 5);
-  
-  // Mapa da oficina (buscar cards com localização)
-  const recursos: Recurso[] = RECURSOS_OFICINA.map(recurso => {
-    // Buscar card que está nesse recurso
-    const cardNoRecurso = cards.find(c => {
-      const loc = getCustomFieldValue(c, 'Recurso');
-      return loc === recurso.nome;
-    });
-    
-    return {
-      nome: recurso.nome,
-      status: cardNoRecurso ? 'ocupado' : 'livre',
-      placa: cardNoRecurso ? extrairPlaca(cardNoRecurso.name) : undefined,
-      tipo: recurso.tipo,
-    };
-  });
-  
-  // Agrupar agenda por mecânico
-  const agendaPorMecanico: Record<string, any[]> = {};
-  MECANICOS.forEach(mec => {
-    agendaPorMecanico[mec] = [];
-  });
-  
-  if (agendaData) {
-    agendaData.forEach((item: any) => {
-      if (agendaPorMecanico[item.mecanico]) {
-        agendaPorMecanico[item.mecanico].push(item);
-      }
-    });
-    
-    // Ordenar por horário
-    Object.keys(agendaPorMecanico).forEach(mec => {
-      agendaPorMecanico[mec].sort((a, b) => a.horario.localeCompare(b.horario));
-    });
-  }
-  
-  // Calcular lotação REAL
+  // Calcular lotação
   const totalCarros = cards.length;
   const capacidadeTotal = 20;
+  
+  // Buscar custom field "Previsão de Entrega"
+  const previsaoEntregaField = customFields.find((f) => f.name === 'Previsão de Entrega');
+  
+  // Calcular status dos carros (atrasado/em dia/adiantado)
+  const statusCarros = cards.reduce(
+    (acc, card) => {
+      const previsaoItem = card.customFieldItems?.find(
+        (item: any) => item.idCustomField === previsaoEntregaField?.id
+      );
+      
+      if (!previsaoItem?.value?.date) {
+        acc.semPrevisao++;
+        return acc;
+      }
+      
+      const previsaoDate = new Date(previsaoItem.value.date);
+      const hoje = new Date();
+      hoje.setHours(0, 0, 0, 0);
+      previsaoDate.setHours(0, 0, 0, 0);
+      
+      const listName = lists.find((l) => l.id === card.idList)?.name || '';
+      
+      // Se já está em "Prontos", considerar em dia
+      if (listName === 'Prontos') {
+        if (previsaoDate >= hoje) {
+          acc.emDia++;
+        } else {
+          acc.atrasado++;
+        }
+      } else {
+        // Se ainda não está pronto
+        if (previsaoDate < hoje) {
+          acc.atrasado++;
+        } else if (previsaoDate.getTime() === hoje.getTime()) {
+          acc.emDia++;
+        } else {
+          acc.adiantado++;
+        }
+      }
+      
+      return acc;
+    },
+    { atrasado: 0, emDia: 0, adiantado: 0, semPrevisao: 0 }
+  );
+  
+  const statusData = [
+    { name: 'Atrasados', value: statusCarros.atrasado, color: '#ef4444' },
+    { name: 'Em Dia', value: statusCarros.emDia, color: '#22c55e' },
+    { name: 'Adiantados', value: statusCarros.adiantado, color: '#3b82f6' },
+  ];
+  
+  // Calcular SLA por coluna (tempo médio em dias)
+  const slaData = lists
+    .filter((list) => !list.name.includes('Entregue'))
+    .map((list) => {
+      const cardsNaLista = cards.filter((c) => c.idList === list.id);
+      
+      if (cardsNaLista.length === 0) {
+        return { name: list.name, dias: 0, color: '#64748b' };
+      }
+      
+      // Calcular tempo médio (simplificado - baseado em data de criação)
+      const tempoTotal = cardsNaLista.reduce((acc, card) => {
+        const criacao = new Date(parseInt(card.id.substring(0, 8), 16) * 1000);
+        const agora = new Date();
+        const dias = Math.floor((agora.getTime() - criacao.getTime()) / (1000 * 60 * 60 * 24));
+        return acc + dias;
+      }, 0);
+      
+      const tempoMedio = Math.round(tempoTotal / cardsNaLista.length);
+      
+      // Definir cor por SLA (exemplo: < 3 dias = verde, 3-7 = amarelo, > 7 = vermelho)
+      let color = '#22c55e'; // Verde
+      if (tempoMedio > 7) color = '#ef4444'; // Vermelho
+      else if (tempoMedio > 3) color = '#eab308'; // Amarelo
+      
+      return {
+        name: list.name.length > 15 ? list.name.substring(0, 12) + '...' : list.name,
+        dias: tempoMedio,
+        color,
+      };
+    })
+    .slice(0, 6); // Limitar a 6 colunas
+  
+  // Organizar agenda por mecânico
+  const agendaPorMecanico: Record<string, any[]> = {};
+  MECANICOS.forEach((mec) => {
+    agendaPorMecanico[mec] = horariosExibir.map((hora) => {
+      return agendaData?.find((item: any) => item.mecanico === mec && item.horario === hora) || null;
+    });
+  });
   
   if (loading) {
     return (
       <div className="min-h-screen bg-slate-900 flex items-center justify-center">
-        <div className="text-white text-2xl">Carregando painel...</div>
+        <div className="text-white text-2xl">Carregando...</div>
       </div>
     );
   }
   
   return (
-    <div className="min-h-screen bg-slate-900 p-4 overflow-hidden">
-      {/* Header */}
-      <div className="bg-blue-600 rounded-lg p-4 mb-4 flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-white">Doctor Auto - Gestão de Pátio</h1>
-          <p className="text-blue-100 text-sm">Painel em Tempo Real</p>
-        </div>
-        <div className="flex items-center gap-3 text-white">
-          <Clock className="h-8 w-8" />
-          <div className="text-right">
-            <div className="text-3xl font-bold">
-              {horaAtual.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
-            </div>
-            <div className="text-sm text-blue-100">
-              {horaAtual.toLocaleDateString('pt-BR', { weekday: 'long', day: '2-digit', month: 'long' })}
-            </div>
-          </div>
+    <div className="min-h-screen bg-slate-900 text-white p-4">
+      {/* Header com relógio */}
+      <div className="flex items-center justify-between mb-4">
+        <h1 className="text-3xl font-bold">Painel de Gestão Visual</h1>
+        <div className="flex items-center gap-2 text-2xl font-mono bg-slate-800 px-4 py-2 rounded">
+          <Clock className="h-6 w-6" />
+          {horaAtual.toLocaleTimeString('pt-BR')}
         </div>
       </div>
       
-      {/* Grid Principal: 2 linhas x 2 colunas */}
-      <div className="grid grid-cols-2 grid-rows-2 gap-4 h-[calc(100vh-140px)]">
-        
-        {/* QUADRANTE 1: Kanban Mecânicos (Topo Esquerda) */}
-        <div className="bg-slate-800 rounded-lg p-4 overflow-hidden">
-          <h2 className="text-xl font-bold text-white mb-3 border-b border-slate-700 pb-2">
-            Agenda dos Mecânicos
+      {/* METADE DE CIMA - Kanban 5 Mecânicos */}
+      <div className="mb-4 h-[48vh]">
+        <div className="bg-slate-800 rounded-lg p-4 h-full">
+          <h2 className="text-xl font-bold mb-3">
+            Agenda dos Mecânicos - {isManha ? 'Manhã' : 'Tarde'}
           </h2>
-          <div className="grid grid-cols-5 gap-2 h-[calc(100%-50px)] overflow-y-auto">
-            {MECANICOS.map((mecanico) => {
-              const atendimentos = agendaPorMecanico[mecanico] || [];
-              return (
-                <div key={mecanico} className="flex flex-col">
-                  <div className="bg-blue-600 text-white text-center py-2 rounded-t font-bold text-sm">
-                    {mecanico}
-                  </div>
-                  <div className="space-y-1 bg-slate-700 rounded-b p-2 flex-1">
-                    {atendimentos.length === 0 ? (
-                      <div className="text-slate-400 text-xs text-center py-2">Sem agenda</div>
-                    ) : (
-                      atendimentos.slice(0, 6).map((item, idx) => (
-                        <div key={idx} className="bg-slate-600 text-white p-2 rounded text-xs">
-                          <div className="font-bold">{item.horario}</div>
-                          <div className="text-slate-300">{item.placa || 'N/A'}</div>
-                        </div>
-                      ))
-                    )}
-                  </div>
+          <div className="grid grid-cols-5 gap-3 h-[calc(100%-3rem)]">
+            {MECANICOS.map((mec) => (
+              <div key={mec} className="bg-slate-700 rounded-lg p-3 overflow-auto">
+                <div className="font-bold text-lg mb-3 text-center border-b border-slate-600 pb-2">
+                  {mec}
                 </div>
-              );
-            })}
-          </div>
-        </div>
-        
-        {/* QUADRANTE 2: Widgets (Topo Direita) */}
-        <div className="flex flex-col gap-4">
-          {/* Widget Lotação */}
-          <div className="flex-1">
-            <GaugeLotacao atual={totalCarros} total={capacidadeTotal} />
-          </div>
-          
-          {/* Widget Entregas do Dia */}
-          <div className="flex-1 bg-slate-800 rounded-lg p-4">
-            <h2 className="text-xl font-bold text-white mb-3 border-b border-slate-700 pb-2">
-              Entregas Previstas Hoje
-            </h2>
-            <div className="space-y-2 overflow-y-auto h-[calc(100%-50px)]">
-              {entregasHoje.length === 0 ? (
-                <p className="text-slate-400 text-center py-4">Nenhuma entrega prevista</p>
-              ) : (
-                entregasHoje.map((item, idx) => (
-                  <div
-                    key={idx}
-                    className={`p-3 rounded flex items-center justify-between ${
-                      item.status === 'no_prazo' ? 'bg-green-900/50 border-l-4 border-green-500' :
-                      item.status === 'proximo' ? 'bg-yellow-900/50 border-l-4 border-yellow-500' :
-                      'bg-red-900/50 border-l-4 border-red-500'
-                    }`}
-                  >
-                    <span className="text-white font-bold text-lg">{item.placa}</span>
-                    <span className={`text-xs font-semibold ${
-                      item.status === 'no_prazo' ? 'text-green-400' :
-                      item.status === 'proximo' ? 'text-yellow-400' :
-                      'text-red-400'
-                    }`}>
-                      {item.status === 'no_prazo' ? 'NO PRAZO' :
-                       item.status === 'proximo' ? 'PRÓXIMO' :
-                       'ATRASADO'}
-                    </span>
-                  </div>
-                ))
-              )}
-            </div>
-          </div>
-        </div>
-        
-        {/* QUADRANTE 3: Mapa da Oficina (Baixo Esquerda) */}
-        <div className="bg-slate-800 rounded-lg p-4 overflow-hidden">
-          <h2 className="text-xl font-bold text-white mb-3 border-b border-slate-700 pb-2">
-            Mapa da Oficina
-          </h2>
-          <div className="grid grid-cols-5 gap-2 h-[calc(100%-50px)] overflow-y-auto">
-            {recursos.map((recurso, idx) => (
-              <div
-                key={idx}
-                className={`rounded-lg p-3 flex flex-col items-center justify-center ${
-                  recurso.status === 'ocupado'
-                    ? recurso.tipo === 'elevador'
-                      ? 'bg-purple-600'
-                      : recurso.tipo === 'espera'
-                      ? 'bg-orange-600'
-                      : 'bg-blue-600'
-                    : 'bg-slate-600'
-                }`}
-              >
-                <div className="text-white text-xs font-semibold mb-1 text-center">{recurso.nome}</div>
-                {recurso.status === 'ocupado' && recurso.placa ? (
-                  <div className="text-white font-bold text-sm">{recurso.placa}</div>
-                ) : (
-                  <div className="text-slate-400 text-xs">Livre</div>
-                )}
+                <div className="space-y-2">
+                  {agendaPorMecanico[mec].map((item, idx) => (
+                    <div
+                      key={idx}
+                      className={`p-2 rounded text-sm ${
+                        item
+                          ? item.isEncaixe
+                            ? 'bg-orange-600'
+                            : 'bg-blue-600'
+                          : 'bg-slate-600 text-slate-400'
+                      }`}
+                    >
+                      <div className="font-bold text-xs mb-1">{horariosExibir[idx]}</div>
+                      {item ? (
+                        <>
+                          <div className="font-mono text-sm">{item.placa}</div>
+                          <div className="text-xs opacity-80">{item.modelo}</div>
+                        </>
+                      ) : (
+                        <div className="text-center">-</div>
+                      )}
+                    </div>
+                  ))}
+                </div>
               </div>
             ))}
           </div>
         </div>
-        
-        {/* QUADRANTE 4: Próximos a Entrar (Baixo Direita) */}
-        <div className="bg-slate-800 rounded-lg p-4">
-          <h2 className="text-xl font-bold text-white mb-3 border-b border-slate-700 pb-2">
-            Próximos a Entrar
-          </h2>
-          <div className="space-y-2 h-[calc(100%-50px)] overflow-y-auto">
-            {proximosEntrar.length === 0 ? (
-              <p className="text-slate-400 text-center py-4">Nenhum carro aguardando</p>
-            ) : (
-              proximosEntrar.map((item, idx) => (
-                <div key={idx} className="bg-slate-700 p-3 rounded flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="bg-blue-600 text-white font-bold text-sm px-3 py-1 rounded">
-                      {item.placa}
-                    </div>
-                    <span className="text-slate-300 text-sm">{item.tipo}</span>
-                  </div>
-                  <div className="bg-green-600 text-white text-xs font-semibold px-3 py-1 rounded">
-                    → {item.recursoSugerido}
-                  </div>
-                </div>
-              ))
-            )}
+      </div>
+      
+      {/* METADE DE BAIXO - 3 Colunas */}
+      <div className="grid grid-cols-3 gap-4 h-[42vh]">
+        {/* Lotação do Pátio */}
+        <div className="bg-slate-800 rounded-lg p-4 flex flex-col items-center justify-center">
+          <h2 className="text-lg font-bold mb-4">Lotação do Pátio</h2>
+          <GaugeLotacao atual={totalCarros} total={capacidadeTotal} />
+          <div className="text-center mt-4">
+            <div className="text-3xl font-bold">{totalCarros}/{capacidadeTotal}</div>
+            <div className="text-sm text-slate-400">carros na oficina</div>
           </div>
         </div>
         
+        {/* Status dos Carros */}
+        <div className="bg-slate-800 rounded-lg p-4">
+          <h2 className="text-lg font-bold mb-3">Status dos Carros</h2>
+          <ResponsiveContainer width="100%" height="85%">
+            <BarChart data={statusData}>
+              <XAxis dataKey="name" stroke="#94a3b8" style={{ fontSize: '12px' }} />
+              <YAxis stroke="#94a3b8" />
+              <Tooltip
+                contentStyle={{ backgroundColor: '#1e293b', border: 'none', borderRadius: '8px' }}
+                labelStyle={{ color: '#f1f5f9' }}
+              />
+              <Bar dataKey="value" radius={[8, 8, 0, 0]}>
+                {statusData.map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={entry.color} />
+                ))}
+              </Bar>
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+        
+        {/* SLA por Coluna */}
+        <div className="bg-slate-800 rounded-lg p-4">
+          <h2 className="text-lg font-bold mb-3">SLA por Etapa (dias)</h2>
+          <ResponsiveContainer width="100%" height="85%">
+            <BarChart data={slaData}>
+              <XAxis
+                dataKey="name"
+                stroke="#94a3b8"
+                style={{ fontSize: '10px' }}
+                angle={-45}
+                textAnchor="end"
+                height={80}
+              />
+              <YAxis stroke="#94a3b8" />
+              <Tooltip
+                contentStyle={{ backgroundColor: '#1e293b', border: 'none', borderRadius: '8px' }}
+                labelStyle={{ color: '#f1f5f9' }}
+              />
+              <Bar dataKey="dias" radius={[8, 8, 0, 0]}>
+                {slaData.map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={entry.color} />
+                ))}
+              </Bar>
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
       </div>
     </div>
   );

@@ -10,6 +10,13 @@ async function startServer() {
   const app = express();
   const server = createServer(app);
 
+  // Parse JSON body
+  app.use(express.json());
+
+  // Import and use Trello routes
+  const trelloRoutes = await import('./routes/trello.js');
+  app.use('/api/trello', trelloRoutes.default);
+
   // Serve static files from dist/public in production
   const staticPath =
     process.env.NODE_ENV === "production"

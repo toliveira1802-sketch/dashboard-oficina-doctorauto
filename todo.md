@@ -35,3 +35,40 @@
 - [x] Transformar /agenda em editável (drag & drop, adicionar, remover)
 - [x] Adicionar botão "Salvar Alterações"
 - [x] Integrar com API de atualização
+
+## Agenda Formato Tabela + Botões de Ação
+- [x] Redesenhar layout: linhas=mecânicos, colunas=horários
+- [x] Adicionar coluna cinza de almoço
+- [x] Adicionar 3 colunas extras para encaixes
+- [x] Implementar dropdown de placas em células vazias
+- [x] Células de encaixe ficam laranjas
+- [x] Botão "Finalizado → Teste" (move Trello + registra timestamp)
+- [x] Botão "Liberado → Entrega" (move Trello + limpa recurso)
+- [x] Criar APIs de integração Trello
+
+## Agenda Compacta com Hover
+- [x] Células vazias por padrão (só ícone ou cor)
+- [x] Hover mostra placa + modelo + tipo + botões
+- [x] Reduzir largura das colunas para caber tudo na tela
+
+## Melhorias Painel de Gestão Visual
+- [x] Inverter: Próximos a Entrar (cima direita) ↔ Entregas do Dia (baixo direita)
+- [x] Kanban adaptativo: antes 12h mostra manhã, depois mostra tarde
+- [x] Logo da oficina quando listas vazias (Próximos/Entregas)
+- [ ] Testar integração completa com dados reais
+
+## Logo Doctor Auto no Painel
+- [x] Copiar logo para client/public
+- [x] Substituir ícone de chave pelo logo nos estados vazios
+
+## Redesign Completo do Painel
+- [x] Metade de cima: Kanban 5 mecânicos lado a lado (Samuel, Aldo, Tadeu, Wendel, JP)
+- [x] Kanban adaptativo: manhã (08h-11h) ou tarde (13h30-16h30)
+- [x] Metade de baixo: 3 colunas (Lotação + Status + SLA)
+- [x] Gráfico de barras: Status dos carros (atrasado/em dia/adiantado)
+- [x] Gráfico de barras: SLA por coluna do Trello
+- [x] Remover: Mapa da oficina, Próximos a entrar, Entregas do dia
+
+## Correções e Dados de Teste
+- [x] Corrigir erro de busca Trello na página Agenda
+- [x] Popular dados de teste: agenda completa + entregas do dia + status
