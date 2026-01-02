@@ -32,6 +32,6 @@
 - [x] Testar fluxo completo de aprovação
 
 ## Dashboard Agenda Editável
-- [ ] Transformar /agenda em editável (drag & drop, adicionar, remover)
-- [ ] Adicionar botão "Salvar Alterações"
-- [ ] Integrar com API de atualização
+- [x] Transformar /agenda em editável (drag & drop, adicionar, remover)
+- [x] Adicionar botão "Salvar Alterações"
+- [x] Integrar com API de atualização

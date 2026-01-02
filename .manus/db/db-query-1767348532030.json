@@ -1,0 +1,9 @@
+{
+  "query": "INSERT INTO agendas (date, mecanico, horario, placa, modelo, tipo, status, isEncaixe) VALUES\n('2026-01-02', 'Samuel', '08h00', 'ABC-1234', 'Gol 1.0', 'Manutenção', 'planejado', 0),\n('2026-01-02', 'Samuel', '09h00', 'DEF-5678', 'Civic', 'Revisão', 'planejado', 0),\n('2026-01-02', 'Aldo', '08h00', 'GHI-9012', 'Corolla', 'Diagnóstico', 'planejado', 0),\n('2026-01-02', 'Aldo', '10h00', 'JKL-3456', 'HB20', 'Manutenção', 'planejado', 1),\n('2026-01-02', 'Tadeu', '13h30', 'MNO-7890', 'Onix', 'Reparo', 'planejado', 0),\n('2026-01-02', 'Wendel', '08h00', 'PQR-1122', 'Polo', 'Manutenção', 'planejado', 0),\n('2026-01-02', 'JP', '09h00', 'STU-3344', 'Fit', 'Revisão', 'planejado', 0);",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3dWo49LZM7B1Gvy.root --database 7A2gwQ2A8kNLBRdn5ZJDvH --execute INSERT INTO agendas (date, mecanico, horario, placa, modelo, tipo, status, isEncaixe) VALUES\n('2026-01-02', 'Samuel', '08h00', 'ABC-1234', 'Gol 1.0', 'Manutenção', 'planejado', 0),\n('2026-01-02', 'Samuel', '09h00', 'DEF-5678', 'Civic', 'Revisão', 'planejado', 0),\n('2026-01-02', 'Aldo', '08h00', 'GHI-9012', 'Corolla', 'Diagnóstico', 'planejado', 0),\n('2026-01-02', 'Aldo', '10h00', 'JKL-3456', 'HB20', 'Manutenção', 'planejado', 1),\n('2026-01-02', 'Tadeu', '13h30', 'MNO-7890', 'Onix', 'Reparo', 'planejado', 0),\n('2026-01-02', 'Wendel', '08h00', 'PQR-1122', 'Polo', 'Manutenção', 'planejado', 0),\n('2026-01-02', 'JP', '09h00', 'STU-3344', 'Fit', 'Revisão', 'planejado', 0);",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 86
+}
