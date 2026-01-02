@@ -24,3 +24,14 @@
 - [x] Criar dados de teste para visualização completa do painel
 - [x] Corrigir painel para usar APENAS dados reais do Trello (sem simulação)
 - [x] Criar guia de automação Butler para limpar recurso ao entregar
+
+## Automação Telegram via Scheduler
+- [x] Criar script de sugestão e envio Telegram
+- [x] Criar bot Telegram para receber aprovações
+- [x] Criar scheduler Node.js (Seg-Qui 17h, Sex 17h, Sáb 11h30)
+- [x] Testar fluxo completo de aprovação
+
+## Dashboard Agenda Editável
+- [ ] Transformar /agenda em editável (drag & drop, adicionar, remover)
+- [ ] Adicionar botão "Salvar Alterações"
+- [ ] Integrar com API de atualização

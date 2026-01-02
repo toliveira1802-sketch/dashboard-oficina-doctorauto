@@ -1,0 +1,48 @@
+{
+  "data": "2026-01-06",
+  "sugestao": {
+    "Samuel": [
+      {
+        "horario": "08h00",
+        "placa": "RYI9C75",
+        "tipo": "Manuten\u00e7\u00e3o"
+      },
+      {
+        "horario": "09h00",
+        "placa": "BMW5i39",
+        "tipo": "Manuten\u00e7\u00e3o"
+      },
+      {
+        "horario": "10h00",
+        "placa": "BMW8E83",
+        "tipo": "Manuten\u00e7\u00e3o"
+      },
+      {
+        "horario": "11h00",
+        "placa": "FDN4J55",
+        "tipo": "Manuten\u00e7\u00e3o"
+      },
+      {
+        "horario": "13h30",
+        "placa": "FGY1941",
+        "tipo": "Manuten\u00e7\u00e3o"
+      },
+      {
+        "horario": "14h30",
+        "placa": "CCB0i88",
+        "tipo": "Manuten\u00e7\u00e3o"
+      },
+      {
+        "horario": "15h30",
+        "placa": "FZM5G52",
+        "tipo": "Manuten\u00e7\u00e3o"
+      }
+    ],
+    "Aldo": [],
+    "Tadeu": [],
+    "Wendel": [],
+    "JP": []
+  },
+  "criado_em": "2026-01-02T02:41:02.924644",
+  "aprovado": false
+}
