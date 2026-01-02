@@ -8,6 +8,7 @@ export default function Navigation() {
     { path: '/', label: 'Operacional', icon: LayoutDashboard },
     { path: '/financeiro', label: 'Financeiro', icon: DollarSign },
     { path: '/produtividade', label: 'Produtividade', icon: TrendingUp },
+    { path: '/agenda', label: 'Agenda', icon: LayoutDashboard },
   ];
 
   return (
