@@ -88,3 +88,8 @@
 - [x] Célula vazia: só "+" discreto
 - [x] Clica "+" → input inline aparece
 - [x] Digita placa + Enter → salva
+
+## Reverter Painel para Layout Antigo
+- [x] Voltar layout: Kanban + Gauge + Próximos (cima) | Mapa + Entregas (baixo)
+- [x] Remover gráficos de Status e SLA
+- [x] Restaurar mapa da oficina visual
