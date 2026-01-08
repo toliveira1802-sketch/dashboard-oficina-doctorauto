@@ -77,10 +77,10 @@
       "orcamento": "Orçamento",
       "aguardandoAprovacao": "Aguardando Aprovação",
       "aguardandoPecas": "Aguardando Peças",
-      "prontoParaIniciar": "Pronto pra Iniciar",
+      "prontoParaIniciar": "Pronto para Iniciar",
       "emExecucao": "Em Execução",
       "qualidade": "Qualidade",
-      "prontos": "🟬 Pronto / Aguardando Retirada",
+      "prontos": "🟡 Pronto / Aguardando Retirada",
       "entregue": "Entregue"
     },
     "customFields": {

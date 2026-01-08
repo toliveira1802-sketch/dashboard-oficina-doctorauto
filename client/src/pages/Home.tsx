@@ -30,6 +30,8 @@ interface Metrics {
   pronto_pra_iniciar: number;
   em_execucao: number;
   prontos: number;
+  retornos: number;
+  foraLoja: number;
 }
 
 interface Recurso {
@@ -56,7 +58,9 @@ export default function Home() {
     aguardando_pecas: 0,
     pronto_pra_iniciar: 0,
     em_execucao: 0,
-    prontos: 0
+    prontos: 0,
+    retornos: 0,
+    foraLoja: 0
   });
   const [recursos, setRecursos] = useState<Recurso[]>([]);
   const [allCards, setAllCards] = useState<TrelloCard[]>([]);
@@ -156,7 +160,9 @@ export default function Home() {
         aguardando_pecas: 0,
         pronto_pra_iniciar: 0,
         em_execucao: 0,
-        prontos: 0
+        prontos: 0,
+        retornos: 0,
+        foraLoja: 0
       };
 
       // Mapear recursos ocupados
@@ -166,16 +172,23 @@ export default function Home() {
         const listName = listMap[card.idList];
         
         // Contar apenas cards que estão "na oficina"
-        if (['Diagnóstico', 'Orçamento', 'Aguardando Aprovação', 'Aguardando Peças', 'Pronto pra Iniciar', 'Em Execução', 'Qualidade', '🟬 Pronto / Aguardando Retirada'].includes(listName)) {
+        if (['Diagnóstico', 'Orçamento', 'Aguardando Aprovação', 'Aguardando Peças', 'Pronto para Iniciar', 'Em Execução', 'Qualidade', '🟡 Pronto / Aguardando Retirada'].includes(listName)) {
           newMetrics.total++;
           
           if (listName === 'Diagnóstico') newMetrics.diagnostico++;
           else if (listName === 'Orçamento') newMetrics.orcamentos++;
           else if (listName === 'Aguardando Aprovação') newMetrics.aguardando_aprovacao++;
           else if (listName === 'Aguardando Peças') newMetrics.aguardando_pecas++;
-          else if (listName === 'Pronto pra Iniciar') newMetrics.pronto_pra_iniciar++;
+          else if (listName === 'Pronto para Iniciar') newMetrics.pronto_pra_iniciar++;
           else if (listName === 'Em Execução') newMetrics.em_execucao++;
-          else if (listName === 'Qualidade' || listName === '🟬 Pronto / Aguardando Retirada') newMetrics.prontos++;
+          else if (listName === 'Qualidade' || listName === '🟡 Pronto / Aguardando Retirada') newMetrics.prontos++;
+
+          // Contar labels especiais
+          const hasRetorno = card.labels.some(label => label.name.toUpperCase() === 'RETORNO');
+          const hasForaLoja = card.labels.some(label => label.name.toUpperCase() === 'FORA DA LOJA');
+          
+          if (hasRetorno) newMetrics.retornos++;
+          if (hasForaLoja) newMetrics.foraLoja++;
 
           // Extrair recurso da descrição
           const recurso = extractRecursoFromDesc(card.desc);
@@ -375,6 +388,33 @@ export default function Home() {
             <p className="text-xs text-orange-700 mb-1">Prontos</p>
             <p className="text-2xl font-bold text-orange-900">{metrics.prontos}</p>
             <p className="text-xs text-orange-600 mt-1">aguardando retirada</p>
+          </Card>
+        </div>
+
+        {/* Indicadores Especiais */}
+        <div className="grid grid-cols-2 gap-3 mb-6">
+          <Card className="p-4 bg-red-50 border-2 border-red-200 hover:shadow-lg transition-shadow">
+            <div className="flex items-center gap-3">
+              <div className="bg-red-600 text-white rounded-full w-10 h-10 flex items-center justify-center font-bold text-lg">
+                {metrics.retornos}
+              </div>
+              <div>
+                <p className="text-sm font-semibold text-red-900">🔴 RETORNO</p>
+                <p className="text-xs text-red-700">Veículos que retornaram</p>
+              </div>
+            </div>
+          </Card>
+          
+          <Card className="p-4 bg-blue-50 border-2 border-blue-200 hover:shadow-lg transition-shadow">
+            <div className="flex items-center gap-3">
+              <div className="bg-blue-600 text-white rounded-full w-10 h-10 flex items-center justify-center font-bold text-lg">
+                {metrics.foraLoja}
+              </div>
+              <div>
+                <p className="text-sm font-semibold text-blue-900">📍 FORA DA LOJA</p>
+                <p className="text-xs text-blue-700">Veículos fora da oficina</p>
+              </div>
+            </div>
           </Card>
         </div>
 

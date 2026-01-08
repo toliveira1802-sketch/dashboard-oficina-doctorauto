@@ -119,4 +119,16 @@
 - [x] Testar validação de configuração
 - [x] Criar INDEX.md com guia de navegação
 - [x] Revisar documentação final
-- [ ] Criar checkpoint final do template
+- [x] Criar checkpoint final do template
+
+## Correção Integração Trello
+- [x] Investigar erro de conexão com Trello board NkhINjF2
+- [x] Corrigir nome da lista "Pronto para Iniciar" (era "Pronto pra Iniciar")
+- [x] Corrigir emoji da lista "Prontos" (🟡 ao invés de 🟬)
+- [x] Testar exibição de dados no dashboard operacional
+
+## Indicadores de Labels
+- [x] Adicionar contador de carros com label "RETORNO"
+- [x] Adicionar contador de carros com label "FORA DA LOJA"
+- [x] Adicionar cards visuais destacados para essas métricas
+- [x] Testar exibição dos indicadores no dashboard
