@@ -684,25 +684,32 @@ export default function Home() {
       'prontos': '🟡 Pronto / Aguardando Retirada'
     };
 
+    let filtered: TrelloCard[] = [];
+
     if (modalCategory === 'retornos') {
-      return allCards.filter(card => 
+      filtered = allCards.filter(card => 
         card.labels.some(label => label.name.toUpperCase() === 'RETORNO')
       );
-    }
-
-    if (modalCategory === 'foraLoja') {
-      return allCards.filter(card => 
+    } else if (modalCategory === 'foraLoja') {
+      filtered = allCards.filter(card => 
         card.labels.some(label => label.name.toUpperCase() === 'FORA DA LOJA')
       );
+    } else {
+      const targetListName = listMap[modalCategory];
+      if (!targetListName) return [];
+
+      // Filtrar cards pela lista correta
+      filtered = allCards.filter(card => {
+        const cardListName = listIdMap[card.idList];
+        return cardListName === targetListName;
+      });
     }
 
-    const targetListName = listMap[modalCategory];
-    if (!targetListName) return [];
-
-    // Filtrar cards pela lista correta
-    return allCards.filter(card => {
-      const cardListName = listIdMap[card.idList];
-      return cardListName === targetListName;
+    // Ordenar por FIFO (mais antigos primeiro - dateLastActivity crescente)
+    return filtered.sort((a, b) => {
+      const dateA = new Date(a.dateLastActivity).getTime();
+      const dateB = new Date(b.dateLastActivity).getTime();
+      return dateA - dateB; // Crescente = mais antigos primeiro
     });
   }
 }

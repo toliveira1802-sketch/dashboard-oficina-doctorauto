@@ -139,3 +139,8 @@
 - [x] Filtrar e exibir veículos por categoria no modal
 - [x] Adicionar informações detalhadas (nome, labels)
 - [x] Testar abertura de modal para cada categoria
+
+## Ordenação FIFO no Modal
+- [x] Ordenar veículos no modal por data de última atividade (FIFO)
+- [x] Veículos mais antigos aparecem primeiro na lista
+- [x] Testar ordenação em todas as categorias
