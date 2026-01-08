@@ -164,3 +164,14 @@
 - [x] Identificar e destacar etapas com gargalos (badge vermelho com !)
 - [x] Adicionar comparação visual entre etapas
 - [x] Testar cálculos e exibição
+
+## Botões de Minimizar nos Widgets
+- [x] Adicionar estado de minimizado para cada widget
+- [x] Criar botão de minimizar/expandir no canto superior direito
+- [x] Implementar colapso condicional
+- [x] Salvar estado no localStorage
+- [x] Testar funcionalidade
+
+## Documentação
+- [x] Criar PDF com código de exemplo de botões
+- [x] Criar guia de apps e integrações necessárias

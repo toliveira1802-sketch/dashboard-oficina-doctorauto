@@ -4,7 +4,7 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Loader2, AlertCircle, CheckCircle, Clock, Search, X, RefreshCw } from "lucide-react";
+import { Loader2, AlertCircle, CheckCircle, Clock, Search, X, RefreshCw, ChevronUp, ChevronDown } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 
@@ -72,6 +72,29 @@ export default function Home() {
   const [modalOpen, setModalOpen] = useState(false);
   const [modalCategory, setModalCategory] = useState<string>('');  
   const [listIdMap, setListIdMap] = useState<{ [key: string]: string }>({});
+  
+  // Estados de minimização dos widgets
+  const [widgetsMinimized, setWidgetsMinimized] = useState<{ [key: string]: boolean }>({
+    metricas: false,
+    atrasados: false,
+    tempoMedio: false,
+    mapaOficina: false
+  });
+
+  // Carregar estados do localStorage
+  useEffect(() => {
+    const saved = localStorage.getItem('widgetsMinimized');
+    if (saved) {
+      setWidgetsMinimized(JSON.parse(saved));
+    }
+  }, []);
+
+  // Salvar estados no localStorage
+  const toggleWidget = (widget: string) => {
+    const newState = { ...widgetsMinimized, [widget]: !widgetsMinimized[widget] };
+    setWidgetsMinimized(newState);
+    localStorage.setItem('widgetsMinimized', JSON.stringify(newState));
+  };
 
   // Recursos base da oficina
   const recursosBase: Recurso[] = [
@@ -347,7 +370,20 @@ export default function Home() {
         </Card>
 
         {/* Métricas Principais */}
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-7 gap-3 mb-6">
+        <Card className="p-4 mb-6 bg-white">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="text-lg font-bold text-slate-900">Métricas Principais</h3>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => toggleWidget('metricas')}
+              className="h-8 w-8 p-0"
+            >
+              {widgetsMinimized.metricas ? <ChevronDown className="h-4 w-4" /> : <ChevronUp className="h-4 w-4" />}
+            </Button>
+          </div>
+          {!widgetsMinimized.metricas && (
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-7 gap-3">
           <Card className="p-3 bg-white hover:shadow-lg transition-shadow">
             <p className="text-xs text-slate-600 mb-1">Total na Oficina</p>
             <p className="text-2xl font-bold text-slate-900">{metrics.total}</p>
@@ -417,6 +453,8 @@ export default function Home() {
             <p className="text-xs text-orange-600 mt-1">aguardando retirada</p>
           </Card>
         </div>
+          )}
+        </Card>
 
         {/* Indicadores Especiais */}
         <div className="grid grid-cols-2 gap-3 mb-6">
@@ -452,11 +490,23 @@ export default function Home() {
         </div>
 
         {/* Botão Ver Atrasados */}
-        <Card 
-          className="p-4 mb-6 bg-orange-50 border-2 border-orange-300 hover:shadow-lg transition-shadow cursor-pointer hover:scale-105 transform duration-200" 
-          onClick={() => { setModalCategory('atrasados'); setModalOpen(true); }}
-        >
-          <div className="flex items-center justify-between">
+        <Card className="p-4 mb-6 bg-orange-50 border-2 border-orange-300">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="text-lg font-bold text-orange-900">⚠️ Veículos Atrasados</h3>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => toggleWidget('atrasados')}
+              className="h-8 w-8 p-0"
+            >
+              {widgetsMinimized.atrasados ? <ChevronDown className="h-4 w-4" /> : <ChevronUp className="h-4 w-4" />}
+            </Button>
+          </div>
+          {!widgetsMinimized.atrasados && (
+          <div 
+            className="flex items-center justify-between hover:shadow-lg transition-shadow cursor-pointer hover:scale-105 transform duration-200 p-2 rounded-lg" 
+            onClick={() => { setModalCategory('atrasados'); setModalOpen(true); }}
+          >
             <div className="flex items-center gap-3">
               <div className="bg-orange-600 text-white rounded-full w-12 h-12 flex items-center justify-center font-bold text-xl">
                 <Clock className="w-6 h-6" />
@@ -476,17 +526,29 @@ export default function Home() {
               <p className="text-xs text-orange-600">críticos</p>
             </div>
           </div>
+          )}
         </Card>
 
         {/* Dashboard de Tempo Médio por Etapa */}
         <Card className="p-6 mb-6 bg-gradient-to-br from-slate-50 to-slate-100 border-2 border-slate-200">
-          <div className="mb-4">
-            <h3 className="text-lg font-bold text-slate-900 flex items-center gap-2">
-              <Clock className="w-5 h-5" />
-              Tempo Médio de Permanência por Etapa
-            </h3>
-            <p className="text-sm text-slate-600 mt-1">Análise de gargalos operacionais</p>
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h3 className="text-lg font-bold text-slate-900 flex items-center gap-2">
+                <Clock className="w-5 h-5" />
+                Tempo Médio de Permanência por Etapa
+              </h3>
+              <p className="text-sm text-slate-600 mt-1">Análise de gargalos operacionais</p>
+            </div>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => toggleWidget('tempoMedio')}
+              className="h-8 w-8 p-0"
+            >
+              {widgetsMinimized.tempoMedio ? <ChevronDown className="h-4 w-4" /> : <ChevronUp className="h-4 w-4" />}
+            </Button>
           </div>
+          {!widgetsMinimized.tempoMedio && (<>
           
           <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3">
             {(() => {
@@ -549,6 +611,7 @@ export default function Home() {
               <span className="font-semibold">🚨 Gargalos identificados:</span> Etapas marcadas com <span className="inline-flex items-center justify-center bg-red-600 text-white rounded-full w-4 h-4 text-xs font-bold mx-1">!</span> estão acima do tempo médio geral e requerem atenção.
             </p>
           </div>
+          </>)}
         </Card>
 
         {/* Filtros e Busca */}
@@ -613,8 +676,18 @@ export default function Home() {
 
         {/* Mapa Visual da Oficina */}
         <Card className="p-6 bg-white">
-          <h2 className="text-xl font-bold text-slate-900 mb-4">Mapa da Oficina</h2>
-          
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-xl font-bold text-slate-900">Mapa da Oficina</h2>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => toggleWidget('mapaOficina')}
+              className="h-8 w-8 p-0"
+            >
+              {widgetsMinimized.mapaOficina ? <ChevronDown className="h-4 w-4" /> : <ChevronUp className="h-4 w-4" />}
+            </Button>
+          </div>
+          {!widgetsMinimized.mapaOficina && (<>
           {/* Boxes Especializados */}
           <div className="mb-6">
             <h3 className="text-base font-semibold text-slate-700 mb-3">Boxes Especializados</h3>
@@ -712,6 +785,7 @@ export default function Home() {
               </div>
             </div>
           </div>
+          </>)}
         </Card>
 
         {/* Footer Info */}
