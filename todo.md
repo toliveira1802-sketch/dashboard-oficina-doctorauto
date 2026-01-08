@@ -144,3 +144,9 @@
 - [x] Ordenar veículos no modal por data de última atividade (FIFO)
 - [x] Veículos mais antigos aparecem primeiro na lista
 - [x] Testar ordenação em todas as categorias
+
+## Indicador de Tempo de Permanência
+- [x] Calcular dias desde última atividade para cada veículo
+- [x] Adicionar badge "há X dias" no modal
+- [x] Usar cores diferentes para alertar atrasos (verde ≤ 2 dias, amarelo ≤ 5 dias, vermelho > 5 dias)
+- [x] Testar exibição em todas as categorias

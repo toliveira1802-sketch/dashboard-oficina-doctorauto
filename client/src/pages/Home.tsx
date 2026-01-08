@@ -642,25 +642,39 @@ export default function Home() {
           </DialogHeader>
           
           <div className="space-y-2 mt-4">
-            {getFilteredCards().map((card, index) => (
-              <Card key={card.id} className="p-4 hover:shadow-md transition-shadow">
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <p className="font-semibold text-slate-900">{card.name}</p>
-                    <div className="flex flex-wrap gap-2 mt-2">
-                      {card.labels.map((label, i) => (
-                        <Badge key={i} variant="outline" className="text-xs">
-                          {label.name}
+            {getFilteredCards().map((card, index) => {
+              const diasPermanencia = Math.floor((new Date().getTime() - new Date(card.dateLastActivity).getTime()) / (1000 * 60 * 60 * 24));
+              const getBadgeColor = (dias: number) => {
+                if (dias <= 2) return 'bg-green-100 text-green-800 border-green-300';
+                if (dias <= 5) return 'bg-yellow-100 text-yellow-800 border-yellow-300';
+                return 'bg-red-100 text-red-800 border-red-300';
+              };
+              
+              return (
+                <Card key={card.id} className="p-4 hover:shadow-md transition-shadow">
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-2">
+                        <p className="font-semibold text-slate-900">{card.name}</p>
+                        <Badge className={`text-xs font-semibold ${getBadgeColor(diasPermanencia)}`}>
+                          🕒 há {diasPermanencia} {diasPermanencia === 1 ? 'dia' : 'dias'}
                         </Badge>
-                      ))}
+                      </div>
+                      <div className="flex flex-wrap gap-2">
+                        {card.labels.map((label, i) => (
+                          <Badge key={i} variant="outline" className="text-xs">
+                            {label.name}
+                          </Badge>
+                        ))}
+                      </div>
+                    </div>
+                    <div className="text-right ml-4">
+                      <p className="text-sm font-medium text-slate-700">#{index + 1}</p>
                     </div>
                   </div>
-                  <div className="text-right ml-4">
-                    <p className="text-sm font-medium text-slate-700">#{index + 1}</p>
-                  </div>
-                </div>
-              </Card>
-            ))}
+                </Card>
+              );
+            })}
             
             {getFilteredCards().length === 0 && (
               <div className="text-center py-8 text-slate-500">
