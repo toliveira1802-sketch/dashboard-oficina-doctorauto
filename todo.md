@@ -150,3 +150,17 @@
 - [x] Adicionar badge "há X dias" no modal
 - [x] Usar cores diferentes para alertar atrasos (verde ≤ 2 dias, amarelo ≤ 5 dias, vermelho > 5 dias)
 - [x] Testar exibição em todas as categorias
+
+## Filtro de Veículos Atrasados
+- [x] Criar botão "Ver Atrasados" no dashboard
+- [x] Filtrar veículos com mais de 5 dias na mesma etapa
+- [x] Abrir modal com lista de veículos atrasados
+- [x] Destacar visualmente veículos críticos (badge vermelho)
+- [x] Testar filtro
+
+## Dashboard de Tempo Médio por Etapa
+- [x] Calcular tempo médio de permanência por etapa
+- [x] Criar card visual com KPIs de tempo médio
+- [x] Identificar e destacar etapas com gargalos (badge vermelho com !)
+- [x] Adicionar comparação visual entre etapas
+- [x] Testar cálculos e exibição

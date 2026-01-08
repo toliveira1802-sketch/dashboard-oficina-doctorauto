@@ -451,6 +451,106 @@ export default function Home() {
           </Card>
         </div>
 
+        {/* Botão Ver Atrasados */}
+        <Card 
+          className="p-4 mb-6 bg-orange-50 border-2 border-orange-300 hover:shadow-lg transition-shadow cursor-pointer hover:scale-105 transform duration-200" 
+          onClick={() => { setModalCategory('atrasados'); setModalOpen(true); }}
+        >
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="bg-orange-600 text-white rounded-full w-12 h-12 flex items-center justify-center font-bold text-xl">
+                <Clock className="w-6 h-6" />
+              </div>
+              <div>
+                <p className="text-lg font-bold text-orange-900">⚠️ VEÍCULOS ATRASADOS</p>
+                <p className="text-sm text-orange-700">Veículos com mais de 5 dias na mesma etapa</p>
+              </div>
+            </div>
+            <div className="text-right">
+              <p className="text-3xl font-bold text-orange-900">
+                {allCards.filter(card => {
+                  const dias = Math.floor((new Date().getTime() - new Date(card.dateLastActivity).getTime()) / (1000 * 60 * 60 * 24));
+                  return dias > 5;
+                }).length}
+              </p>
+              <p className="text-xs text-orange-600">críticos</p>
+            </div>
+          </div>
+        </Card>
+
+        {/* Dashboard de Tempo Médio por Etapa */}
+        <Card className="p-6 mb-6 bg-gradient-to-br from-slate-50 to-slate-100 border-2 border-slate-200">
+          <div className="mb-4">
+            <h3 className="text-lg font-bold text-slate-900 flex items-center gap-2">
+              <Clock className="w-5 h-5" />
+              Tempo Médio de Permanência por Etapa
+            </h3>
+            <p className="text-sm text-slate-600 mt-1">Análise de gargalos operacionais</p>
+          </div>
+          
+          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3">
+            {(() => {
+              const etapas = [
+                { key: 'diagnostico', nome: 'Diagnóstico', lista: 'Diagnóstico', cor: 'blue' },
+                { key: 'orcamentos', nome: 'Orçamentos', lista: 'Orçamento', cor: 'amber' },
+                { key: 'aguardando_aprovacao', nome: 'Aguard. Aprovação', lista: 'Aguardando Aprovação', cor: 'yellow' },
+                { key: 'aguardando_pecas', nome: 'Aguard. Peças', lista: 'Aguardando Peças', cor: 'purple' },
+                { key: 'pronto_pra_iniciar', nome: 'Pronto pra Iniciar', lista: 'Pronto para Iniciar', cor: 'cyan' },
+                { key: 'em_execucao', nome: 'Em Execução', lista: 'Em Execução', cor: 'green' },
+                { key: 'prontos', nome: 'Prontos', lista: '🟡 Pronto / Aguardando Retirada', cor: 'orange' }
+              ];
+
+              const temposPorEtapa = etapas.map(etapa => {
+                const cardsNaEtapa = allCards.filter(card => {
+                  const cardListName = listIdMap[card.idList];
+                  return cardListName === etapa.lista;
+                });
+
+                if (cardsNaEtapa.length === 0) {
+                  return { ...etapa, tempoMedio: 0, quantidade: 0 };
+                }
+
+                const somaDias = cardsNaEtapa.reduce((acc, card) => {
+                  const dias = Math.floor((new Date().getTime() - new Date(card.dateLastActivity).getTime()) / (1000 * 60 * 60 * 24));
+                  return acc + dias;
+                }, 0);
+
+                const tempoMedio = Math.round(somaDias / cardsNaEtapa.length * 10) / 10;
+                return { ...etapa, tempoMedio, quantidade: cardsNaEtapa.length };
+              });
+
+              const tempoMedioGeral = temposPorEtapa.reduce((acc, e) => acc + e.tempoMedio, 0) / temposPorEtapa.filter(e => e.quantidade > 0).length || 0;
+
+              return temposPorEtapa.map((etapa) => {
+                const isGargalo = etapa.tempoMedio > tempoMedioGeral && etapa.quantidade > 0;
+                const corBg = isGargalo ? 'bg-red-100 border-red-300' : `bg-${etapa.cor}-50 border-${etapa.cor}-200`;
+                const corTexto = isGargalo ? 'text-red-900' : `text-${etapa.cor}-900`;
+                const corSubtexto = isGargalo ? 'text-red-700' : `text-${etapa.cor}-700`;
+
+                return (
+                  <Card key={etapa.key} className={`p-3 ${corBg} border-2 relative`}>
+                    {isGargalo && (
+                      <div className="absolute -top-2 -right-2 bg-red-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold">
+                        !
+                      </div>
+                    )}
+                    <p className={`text-xs ${corSubtexto} font-semibold mb-1`}>{etapa.nome}</p>
+                    <p className={`text-2xl font-bold ${corTexto}`}>{etapa.tempoMedio.toFixed(1)}</p>
+                    <p className={`text-xs ${corSubtexto} mt-1`}>dias médio</p>
+                    <p className={`text-xs ${corSubtexto} mt-1`}>({etapa.quantidade} veículos)</p>
+                  </Card>
+                );
+              });
+            })()}
+          </div>
+          
+          <div className="mt-4 p-3 bg-white rounded-lg border border-slate-200">
+            <p className="text-sm text-slate-700">
+              <span className="font-semibold">🚨 Gargalos identificados:</span> Etapas marcadas com <span className="inline-flex items-center justify-center bg-red-600 text-white rounded-full w-4 h-4 text-xs font-bold mx-1">!</span> estão acima do tempo médio geral e requerem atenção.
+            </p>
+          </div>
+        </Card>
+
         {/* Filtros e Busca */}
         <Card className="p-4 mb-6 bg-white">
           <div className="flex flex-col md:flex-row gap-3">
@@ -635,6 +735,7 @@ export default function Home() {
               {modalCategory === 'prontos' && 'Prontos para Retirada'}
               {modalCategory === 'retornos' && '🔴 Veículos RETORNO'}
               {modalCategory === 'foraLoja' && '📍 Veículos FORA DA LOJA'}
+              {modalCategory === 'atrasados' && '⚠️ Veículos Atrasados (> 5 dias)'}
             </DialogTitle>
             <DialogDescription>
               Lista completa de veículos nesta categoria
@@ -700,7 +801,13 @@ export default function Home() {
 
     let filtered: TrelloCard[] = [];
 
-    if (modalCategory === 'retornos') {
+    if (modalCategory === 'atrasados') {
+      // Filtrar veículos com mais de 5 dias
+      filtered = allCards.filter(card => {
+        const dias = Math.floor((new Date().getTime() - new Date(card.dateLastActivity).getTime()) / (1000 * 60 * 60 * 24));
+        return dias > 5;
+      });
+    } else if (modalCategory === 'retornos') {
       filtered = allCards.filter(card => 
         card.labels.some(label => label.name.toUpperCase() === 'RETORNO')
       );
