@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Loader2, AlertCircle, CheckCircle, Clock, Search, X, RefreshCw } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 
 // Configuração do Trello
 const TRELLO_API_KEY = 'e327cf4891fd2fcb6020899e3718c45e';
@@ -68,6 +69,9 @@ export default function Home() {
   const [searchTerm, setSearchTerm] = useState('');
   const [responsavelFilter, setResponsavelFilter] = useState<string>('todos');
   const [filterCliente, setFilterCliente] = useState<string>('todos');
+  const [modalOpen, setModalOpen] = useState(false);
+  const [modalCategory, setModalCategory] = useState<string>('');  
+  const [listIdMap, setListIdMap] = useState<{ [key: string]: string }>({});
 
   // Recursos base da oficina
   const recursosBase: Recurso[] = [
@@ -150,6 +154,8 @@ export default function Home() {
         acc[list.id] = list.name;
         return acc;
       }, {});
+      
+      setListIdMap(listMap);
 
       // Calcular métricas
       const newMetrics = {
@@ -348,43 +354,64 @@ export default function Home() {
             <p className="text-xs text-slate-500 mt-1">/ 20 vagas</p>
           </Card>
           
-          <Card className="p-3 bg-blue-50 hover:shadow-lg transition-shadow">
+          <Card 
+            className="p-3 bg-blue-50 hover:shadow-lg transition-shadow cursor-pointer hover:scale-105 transform duration-200" 
+            onClick={() => { setModalCategory('diagnostico'); setModalOpen(true); }}
+          >
             <p className="text-xs text-blue-700 mb-1">Diagnóstico</p>
             <p className="text-2xl font-bold text-blue-900">{metrics.diagnostico}</p>
             <p className="text-xs text-blue-600 mt-1">em análise</p>
           </Card>
           
-          <Card className="p-3 bg-amber-50 hover:shadow-lg transition-shadow">
+          <Card 
+            className="p-3 bg-amber-50 hover:shadow-lg transition-shadow cursor-pointer hover:scale-105 transform duration-200" 
+            onClick={() => { setModalCategory('orcamentos'); setModalOpen(true); }}
+          >
             <p className="text-xs text-amber-700 mb-1">Orçamentos Pendentes</p>
             <p className="text-2xl font-bold text-amber-900">{metrics.orcamentos}</p>
             <p className="text-xs text-amber-600 mt-1">aguardando consultor</p>
           </Card>
           
-          <Card className="p-3 bg-yellow-50 hover:shadow-lg transition-shadow">
+          <Card 
+            className="p-3 bg-yellow-50 hover:shadow-lg transition-shadow cursor-pointer hover:scale-105 transform duration-200" 
+            onClick={() => { setModalCategory('aguardando_aprovacao'); setModalOpen(true); }}
+          >
             <p className="text-xs text-yellow-700 mb-1">Aguard. Aprovação</p>
             <p className="text-2xl font-bold text-yellow-900">{metrics.aguardando_aprovacao}</p>
             <p className="text-xs text-yellow-600 mt-1">pendente</p>
           </Card>
           
-          <Card className="p-3 bg-purple-50 hover:shadow-lg transition-shadow">
+          <Card 
+            className="p-3 bg-purple-50 hover:shadow-lg transition-shadow cursor-pointer hover:scale-105 transform duration-200" 
+            onClick={() => { setModalCategory('aguardando_pecas'); setModalOpen(true); }}
+          >
             <p className="text-xs text-purple-700 mb-1">Aguard. Peças</p>
             <p className="text-2xl font-bold text-purple-900">{metrics.aguardando_pecas}</p>
             <p className="text-xs text-purple-600 mt-1">esperando</p>
           </Card>
           
-          <Card className="p-3 bg-cyan-50 hover:shadow-lg transition-shadow">
+          <Card 
+            className="p-3 bg-cyan-50 hover:shadow-lg transition-shadow cursor-pointer hover:scale-105 transform duration-200" 
+            onClick={() => { setModalCategory('pronto_pra_iniciar'); setModalOpen(true); }}
+          >
             <p className="text-xs text-cyan-700 mb-1">Pronto pra Iniciar</p>
             <p className="text-2xl font-bold text-cyan-900">{metrics.pronto_pra_iniciar}</p>
             <p className="text-xs text-cyan-600 mt-1">aguardando</p>
           </Card>
           
-          <Card className="p-3 bg-green-50 hover:shadow-lg transition-shadow">
+          <Card 
+            className="p-3 bg-green-50 hover:shadow-lg transition-shadow cursor-pointer hover:scale-105 transform duration-200" 
+            onClick={() => { setModalCategory('em_execucao'); setModalOpen(true); }}
+          >
             <p className="text-xs text-green-700 mb-1">Em Execução</p>
             <p className="text-2xl font-bold text-green-900">{metrics.em_execucao}</p>
             <p className="text-xs text-green-600 mt-1">trabalhando</p>
           </Card>
           
-          <Card className="p-3 bg-orange-50 hover:shadow-lg transition-shadow">
+          <Card 
+            className="p-3 bg-orange-50 hover:shadow-lg transition-shadow cursor-pointer hover:scale-105 transform duration-200" 
+            onClick={() => { setModalCategory('prontos'); setModalOpen(true); }}
+          >
             <p className="text-xs text-orange-700 mb-1">Prontos</p>
             <p className="text-2xl font-bold text-orange-900">{metrics.prontos}</p>
             <p className="text-xs text-orange-600 mt-1">aguardando retirada</p>
@@ -393,7 +420,10 @@ export default function Home() {
 
         {/* Indicadores Especiais */}
         <div className="grid grid-cols-2 gap-3 mb-6">
-          <Card className="p-4 bg-red-50 border-2 border-red-200 hover:shadow-lg transition-shadow">
+          <Card 
+            className="p-4 bg-red-50 border-2 border-red-200 hover:shadow-lg transition-shadow cursor-pointer hover:scale-105 transform duration-200" 
+            onClick={() => { setModalCategory('retornos'); setModalOpen(true); }}
+          >
             <div className="flex items-center gap-3">
               <div className="bg-red-600 text-white rounded-full w-10 h-10 flex items-center justify-center font-bold text-lg">
                 {metrics.retornos}
@@ -405,7 +435,10 @@ export default function Home() {
             </div>
           </Card>
           
-          <Card className="p-4 bg-blue-50 border-2 border-blue-200 hover:shadow-lg transition-shadow">
+          <Card 
+            className="p-4 bg-blue-50 border-2 border-blue-200 hover:shadow-lg transition-shadow cursor-pointer hover:scale-105 transform duration-200" 
+            onClick={() => { setModalCategory('foraLoja'); setModalOpen(true); }}
+          >
             <div className="flex items-center gap-3">
               <div className="bg-blue-600 text-white rounded-full w-10 h-10 flex items-center justify-center font-bold text-lg">
                 {metrics.foraLoja}
@@ -587,6 +620,89 @@ export default function Home() {
           <p className="mt-1">Board Trello: {TRELLO_BOARD_ID} • {filteredRecursos.length} recursos exibidos</p>
         </div>
       </main>
+
+      {/* Modal de Detalhes */}
+      <Dialog open={modalOpen} onOpenChange={setModalOpen}>
+        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="text-xl font-bold">
+              {modalCategory === 'diagnostico' && 'Veículos em Diagnóstico'}
+              {modalCategory === 'orcamentos' && 'Orçamentos Pendentes'}
+              {modalCategory === 'aguardando_aprovacao' && 'Aguardando Aprovação'}
+              {modalCategory === 'aguardando_pecas' && 'Aguardando Peças'}
+              {modalCategory === 'pronto_pra_iniciar' && 'Pronto para Iniciar'}
+              {modalCategory === 'em_execucao' && 'Em Execução'}
+              {modalCategory === 'prontos' && 'Prontos para Retirada'}
+              {modalCategory === 'retornos' && '🔴 Veículos RETORNO'}
+              {modalCategory === 'foraLoja' && '📍 Veículos FORA DA LOJA'}
+            </DialogTitle>
+            <DialogDescription>
+              Lista completa de veículos nesta categoria
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-2 mt-4">
+            {getFilteredCards().map((card, index) => (
+              <Card key={card.id} className="p-4 hover:shadow-md transition-shadow">
+                <div className="flex items-start justify-between">
+                  <div className="flex-1">
+                    <p className="font-semibold text-slate-900">{card.name}</p>
+                    <div className="flex flex-wrap gap-2 mt-2">
+                      {card.labels.map((label, i) => (
+                        <Badge key={i} variant="outline" className="text-xs">
+                          {label.name}
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="text-right ml-4">
+                    <p className="text-sm font-medium text-slate-700">#{index + 1}</p>
+                  </div>
+                </div>
+              </Card>
+            ))}
+            
+            {getFilteredCards().length === 0 && (
+              <div className="text-center py-8 text-slate-500">
+                <p>Nenhum veículo nesta categoria</p>
+              </div>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
+
+  function getFilteredCards() {
+    const listMap: { [key: string]: string } = {
+      'diagnostico': 'Diagnóstico',
+      'orcamentos': 'Orçamento',
+      'aguardando_aprovacao': 'Aguardando Aprovação',
+      'aguardando_pecas': 'Aguardando Peças',
+      'pronto_pra_iniciar': 'Pronto para Iniciar',
+      'em_execucao': 'Em Execução',
+      'prontos': '🟡 Pronto / Aguardando Retirada'
+    };
+
+    if (modalCategory === 'retornos') {
+      return allCards.filter(card => 
+        card.labels.some(label => label.name.toUpperCase() === 'RETORNO')
+      );
+    }
+
+    if (modalCategory === 'foraLoja') {
+      return allCards.filter(card => 
+        card.labels.some(label => label.name.toUpperCase() === 'FORA DA LOJA')
+      );
+    }
+
+    const targetListName = listMap[modalCategory];
+    if (!targetListName) return [];
+
+    // Filtrar cards pela lista correta
+    return allCards.filter(card => {
+      const cardListName = listIdMap[card.idList];
+      return cardListName === targetListName;
+    });
+  }
 }

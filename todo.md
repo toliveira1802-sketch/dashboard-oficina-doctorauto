@@ -132,3 +132,10 @@
 - [x] Adicionar contador de carros com label "FORA DA LOJA"
 - [x] Adicionar cards visuais destacados para essas métricas
 - [x] Testar exibição dos indicadores no dashboard
+
+## Cards Clicáveis com Modal
+- [x] Criar componente Dialog/Modal para exibir lista de veículos
+- [x] Transformar cards de métricas em botões clicáveis
+- [x] Filtrar e exibir veículos por categoria no modal
+- [x] Adicionar informações detalhadas (nome, labels)
+- [x] Testar abertura de modal para cada categoria
