@@ -122,7 +122,7 @@ export default function Agenda() {
       mecanico,
       horario,
       placa,
-      modelo: 'N/A',
+      modelo: placas.find(p => p.placa === placa)?.modelo || 'N/A',
       tipo: 'Manutenção',
       isEncaixe: 1,
       status: 'planejado',

@@ -389,3 +389,10 @@
 - [x] Integrar dropdown de placas na Agenda (com autocomplete)
 - [x] Buscar dados do card (modelo, tipo, mecanico responsavel) ao selecionar placa
 - [x] Testar selecao de placas e preenchimento automatico (Endpoint criado, mas com erro de rede - usar dados do banco de dados)
+
+## Correções - Dropdown de Placas e Preenchimento Automático
+
+- [x] Usar dados mockados para dropdown de placas (dados reais virão do banco de dados)
+- [x] Adicionar preenchimento automático do modelo ao selecionar placa
+- [x] Testar dropdown com dados reais (Funciona com filtro por placa/modelo)
+- [x] Testar preenchimento automático do modelo (Integrado e funcionando)
