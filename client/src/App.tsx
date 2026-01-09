@@ -8,6 +8,7 @@ import Home from "./pages/Home";
 import Agenda from './pages/Agenda';
 import Historico from './pages/Historico';
 import Painel from './pages/Painel';
+import PainelMetas from './pages/PainelMetas';
 import Produtividade from "./pages/Produtividade";
 import Financeiro from "./pages/Financeiro";
 
@@ -19,6 +20,7 @@ function Router() {
         <Route path="/agenda" component={Agenda} />
         <Route path="/historico" component={Historico} />
         <Route path="/painel" component={Painel} />
+        <Route path="/painel-metas" component={PainelMetas} />
       <Route path={"/produtividade"} component={Produtividade} />
       <Route path={"/financeiro"} component={Financeiro} />
       <Route path={"/404"} component={NotFound} />

@@ -3,7 +3,7 @@ import Navigation from '@/components/Navigation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { RefreshCw, DollarSign, TrendingUp, Calendar, AlertCircle, Settings, Target } from 'lucide-react';
+import { RefreshCw, DollarSign, TrendingUp, Calendar, AlertCircle, Settings, Target, CheckCircle, Download, Monitor } from 'lucide-react';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -181,8 +181,68 @@ export default function Financeiro() {
     }
   };
 
+  const fetchMetas = async () => {
+    const mesAtual = new Date().getMonth() + 1;
+    const anoAtual = new Date().getFullYear();
+    try {
+      const response = await fetch(`/api/metas?mes=${mesAtual}&ano=${anoAtual}`);
+      if (response.ok) {
+        const data = await response.json();
+        setMetas(data);
+      }
+    } catch (error) {
+      console.error('Erro ao carregar metas:', error);
+    }
+  };
+
+  const validarSenha = () => {
+    if (senha === 'admin123') {
+      setSenhaValidada(true);
+      if (metas) {
+        setMetaMensal((metas.metaMensal / 100).toFixed(2));
+        setMetaPorServico(metas.metaPorServico ? (metas.metaPorServico / 100).toFixed(2) : '');
+        setMetaDiaria(metas.metaDiaria ? (metas.metaDiaria / 100).toFixed(2) : '');
+      }
+    } else {
+      alert('Senha incorreta!');
+    }
+  };
+
+  const salvarMetas = async () => {
+    const mesAtual = new Date().getMonth() + 1;
+    const anoAtual = new Date().getFullYear();
+    try {
+      const payload = {
+        mes: mesAtual,
+        ano: anoAtual,
+        metaMensal: Math.round(parseFloat(metaMensal) * 100),
+        metaPorServico: metaPorServico ? Math.round(parseFloat(metaPorServico) * 100) : null,
+        metaDiaria: metaDiaria ? Math.round(parseFloat(metaDiaria) * 100) : null,
+      };
+
+      const response = await fetch('/api/metas', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+
+      if (response.ok) {
+        alert('Metas salvas com sucesso!');
+        setModalOpen(false);
+        setSenhaValidada(false);
+        setSenha('');
+        fetchMetas();
+      } else {
+        throw new Error('Erro ao salvar');
+      }
+    } catch (error) {
+      alert('Erro ao salvar metas');
+    }
+  };
+
   useEffect(() => {
     fetchData();
+    fetchMetas();
     const interval = setInterval(fetchData, 30 * 60 * 1000); // 30 minutos
     return () => clearInterval(interval);
   }, []);
@@ -239,11 +299,85 @@ export default function Financeiro() {
                 <p className="text-sm text-slate-600">Última atualização</p>
                 <p className="text-lg font-semibold text-slate-900">{lastUpdate}</p>
               </div>
-              <Button 
-                onClick={fetchData} 
+              <Dialog open={modalOpen} onOpenChange={setModalOpen}>
+                <DialogTrigger asChild>
+                  <Button variant="outline" onClick={() => { setSenhaValidada(false); setSenha(''); }}>
+                    <Settings className="w-4 h-4 mr-2" />
+                    Configurar Metas
+                  </Button>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Configuração de Metas Financeiras</DialogTitle>
+                    <DialogDescription>
+                      {!senhaValidada ? 'Digite a senha para editar as metas' : 'Defina as metas para o mês atual'}
+                    </DialogDescription>
+                  </DialogHeader>
+
+                  {!senhaValidada ? (
+                    <div className="space-y-4">
+                      <div>
+                        <Label htmlFor="senha">Senha de Acesso</Label>
+                        <Input
+                          id="senha"
+                          type="password"
+                          value={senha}
+                          onChange={(e) => setSenha(e.target.value)}
+                          onKeyDown={(e) => e.key === 'Enter' && validarSenha()}
+                          placeholder="Digite a senha"
+                        />
+                      </div>
+                      <Button onClick={validarSenha} className="w-full">
+                        Validar
+                      </Button>
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      <div>
+                        <Label htmlFor="metaMensal">Meta Mensal (R$)</Label>
+                        <Input
+                          id="metaMensal"
+                          type="number"
+                          step="0.01"
+                          value={metaMensal}
+                          onChange={(e) => setMetaMensal(e.target.value)}
+                          placeholder="Ex: 150000.00"
+                        />
+                        <p className="text-xs text-slate-500 mt-1">Faturamento esperado para o mês</p>
+                      </div>
+                      <div>
+                        <Label htmlFor="diasUteis">Dias Úteis do Mês</Label>
+                        <Input
+                          id="diasUteis"
+                          type="number"
+                          value={metaPorServico}
+                          onChange={(e) => setMetaPorServico(e.target.value)}
+                          placeholder="Ex: 22"
+                        />
+                        <p className="text-xs text-slate-500 mt-1">Número de dias úteis de trabalho no mês</p>
+                      </div>
+                      <Button onClick={salvarMetas} className="w-full">
+                        Salvar Metas
+                      </Button>
+                    </div>
+                  )}
+                </DialogContent>
+              </Dialog>
+              <Button
+                onClick={() => window.open('/painel-metas', '_blank')}
+                size="sm"
+                variant="ghost"
+                className="text-white hover:bg-white/20 mr-2"
+                title="Abrir Painel de Metas para TV"
+              >
+                <Monitor className="h-4 w-4" />
+              </Button>
+              <Button
+                onClick={fetchData}
                 disabled={loading}
-                variant="outline"
-                size="icon"
+                size="sm"
+                variant="ghost"
+                className="text-white hover:bg-white/20"
               >
                 <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
               </Button>
@@ -337,6 +471,94 @@ export default function Financeiro() {
             </CardContent>
           </Card>
         </div>
+
+        {/* Cards de Metas e Acompanhamento */}
+        {metas && (
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
+            {/* Card: Meta do Mês */}
+            <Card className="bg-gradient-to-br from-indigo-500 to-indigo-600 text-white">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-sm font-medium flex items-center gap-2">
+                  <Target className="h-4 w-4" />
+                  Meta do Mês
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-3xl font-bold">{formatCurrency(metas.metaMensal)}</div>
+                <p className="text-indigo-100 text-sm mt-1">{metas.metaPorServico || 22} dias úteis</p>
+              </CardContent>
+            </Card>
+
+            {/* Card: Meta Diária */}
+            <Card className="bg-gradient-to-br from-cyan-500 to-cyan-600 text-white">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-sm font-medium flex items-center gap-2">
+                  <Calendar className="h-4 w-4" />
+                  Meta por Dia
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-3xl font-bold">
+                  {formatCurrency(Math.round(metas.metaMensal / (metas.metaPorServico || 22)))}
+                </div>
+                <p className="text-cyan-100 text-sm mt-1">Calculado automaticamente</p>
+              </CardContent>
+            </Card>
+
+            {/* Card: Meta até Hoje */}
+            <Card className="bg-gradient-to-br from-teal-500 to-teal-600 text-white">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-sm font-medium flex items-center gap-2">
+                  <TrendingUp className="h-4 w-4" />
+                  Meta até Hoje
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {(() => {
+                  const diasUteis = metas.metaPorServico || 22;
+                  const metaDiaria = metas.metaMensal / diasUteis;
+                  const diaAtual = new Date().getDate();
+                  const metaAteHoje = Math.round(metaDiaria * Math.min(diaAtual, diasUteis));
+                  return (
+                    <>
+                      <div className="text-3xl font-bold">{formatCurrency(metaAteHoje)}</div>
+                      <p className="text-teal-100 text-sm mt-1">Dia {diaAtual} de {diasUteis}</p>
+                    </>
+                  );
+                })()}
+              </CardContent>
+            </Card>
+
+            {/* Card: Realizado vs Meta */}
+            <Card className="bg-gradient-to-br from-emerald-500 to-emerald-600 text-white">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-sm font-medium flex items-center gap-2">
+                  <CheckCircle className="h-4 w-4" />
+                  Realizado vs Meta
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {(() => {
+                  const diasUteis = metas.metaPorServico || 22;
+                  const metaDiaria = metas.metaMensal / diasUteis;
+                  const diaAtual = new Date().getDate();
+                  const metaAteHoje = metaDiaria * Math.min(diaAtual, diasUteis);
+                  const realizado = filteredMetrics.valorTotalOficina;
+                  const percentual = Math.round((realizado / metaAteHoje) * 100);
+                  const cor = percentual >= 100 ? 'text-emerald-100' : percentual >= 70 ? 'text-yellow-100' : 'text-red-100';
+                  return (
+                    <>
+                      <div className="text-3xl font-bold">{percentual}%</div>
+                      <p className={`text-sm mt-1 ${cor}`}>
+                        {formatCurrency(realizado)} de {formatCurrency(Math.round(metaAteHoje))}
+                      </p>
+                    </>
+                  );
+                })()}
+              </CardContent>
+            </Card>
+          </div>
+        )}
 
         {/* Tabela de Carros */}
         <Card>

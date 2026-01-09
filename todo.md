@@ -246,10 +246,19 @@
 - [x] Criar tabela de metas no banco de dados
 - [x] Adicionar campos: meta mensal, meta por serviço, meta diária
 - [x] Criar API para salvar e buscar metas (GET /api/metas e POST /api/metas)
-- [ ] Criar modal de configuração na página Financeiro
-- [ ] Implementar proteção por senha no modal
-- [ ] Implementar dashboard financeiro com cards de acompanhamento
-- [ ] Mostrar meta até o momento vs realizado
-- [ ] Mostrar valor aprovado pendente de entrega
-- [ ] Calcular projeção de faturamento
-- [ ] Testar funcionalidades
+- [x] Criar modal de configuração na página Financeiro
+- [x] Implementar proteção por senha no modal (senha: admin123)
+- [x] Adicionar botão de configuração no header
+- [x] Implementar funções de carregar e salvar me- [x] Simplificar modal para apenas meta mensal e dias úteis
+- [x] Remover campos de meta por serviço e meta diária
+- [x] Criar página /painel-metas para TV
+- [x] Adicionar botão no Financeiro para abrir painel
+- [x] Implementar cards visuais grandes no painel
+- [x] Testar painel de metas)
+- [ ] Usar mesmo estilo visual do painel operacional
+- [ ] Card: Meta do mês com dias úteis
+- [ ] Card: Meta diária (calculada)
+- [ ] Card: Meta até hoje (proporcional)
+- [ ] Card: Realizado vs Meta (percentual grande)
+- [ ] Card: Projeção de faturamento
+- [ ] Testar exibição no painel
