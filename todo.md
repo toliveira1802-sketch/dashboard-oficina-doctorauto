@@ -375,3 +375,10 @@
 - [x] Adicionar fotos/avatares dos mecânicos (iniciais com cores)
 - [x] Integrar ranking ao painel de metas
 - [x] Testar ranking com dados reais (endpoint funcionando, aguardando dados)
+
+## Correções - Painel Gestão de Pátio e Agenda
+
+- [x] Verificar botões de alerta de peças no painel de gestão de pátio (NÃO devem estar lá - apenas na agenda para mecânicos)
+- [x] Verificar botão de pronto no painel de gestão de pátio (NÃO devem estar lá - apenas na agenda para mecânicos)
+- [x] Verificar se agenda está linkada com mecânico responsável (Sim! Busca do Trello e armazena cardId)
+- [x] Testar linkagem da agenda (Funciona corretamente - mecânico é escolhido manualmente ou automático via Trello)
