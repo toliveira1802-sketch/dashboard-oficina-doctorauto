@@ -230,3 +230,26 @@
 - [x] Excluir carros com label "FORA DA LOJA" da contagem
 - [x] Atualizar cálculo de porcentagem de ocupação
 - [x] Testar nova contagem
+
+## Sistema de Metas Financeiras
+- [ ] Criar tabela de metas no banco de dados
+- [ ] Criar tela de configuração de metas protegida por senha
+- [ ] Implementar campos editáveis (meta mensal, meta por serviço, meta diária)
+- [ ] Criar API para salvar e buscar metas
+- [ ] Implementar dashboard financeiro
+- [ ] Mostrar meta até o momento vs realizado
+- [ ] Mostrar valor aprovado pendente de entrega
+- [ ] Calcular projeção de faturamento
+- [ ] Testar funcionalidades
+
+## Sistema de Metas Financeiras
+- [x] Criar tabela de metas no banco de dados
+- [x] Adicionar campos: meta mensal, meta por serviço, meta diária
+- [x] Criar API para salvar e buscar metas (GET /api/metas e POST /api/metas)
+- [ ] Criar modal de configuração na página Financeiro
+- [ ] Implementar proteção por senha no modal
+- [ ] Implementar dashboard financeiro com cards de acompanhamento
+- [ ] Mostrar meta até o momento vs realizado
+- [ ] Mostrar valor aprovado pendente de entrega
+- [ ] Calcular projeção de faturamento
+- [ ] Testar funcionalidades

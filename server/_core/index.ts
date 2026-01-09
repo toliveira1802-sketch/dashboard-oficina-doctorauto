@@ -42,6 +42,9 @@ async function startServer() {
   // Export routes
   const exportRoutes = await import('../routes/export.js');
   app.use('/api/export', exportRoutes.default);
+  // Metas routes
+  const metasRoutes = await import('../routes/metas.js');
+  app.use('/api/metas', metasRoutes.default);
   // tRPC API
   app.use(
     "/api/trpc",

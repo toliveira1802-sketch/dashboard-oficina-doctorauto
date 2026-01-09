@@ -3,7 +3,11 @@ import Navigation from '@/components/Navigation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { RefreshCw, DollarSign, TrendingUp, Calendar, AlertCircle } from 'lucide-react';
+import { RefreshCw, DollarSign, TrendingUp, Calendar, AlertCircle, Settings, Target } from 'lucide-react';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+
 
 // Configuração do Trello
 const TRELLO_API_KEY = 'e327cf4891fd2fcb6020899e3718c45e';
@@ -26,6 +30,15 @@ interface FinancialMetrics {
   ticketMedio: number;
 }
 
+interface MetaFinanceira {
+  id: number;
+  mes: number;
+  ano: number;
+  metaMensal: number;
+  metaPorServico: number | null;
+  metaDiaria: number | null;
+}
+
 export default function Financeiro() {
   const [metrics, setMetrics] = useState<FinancialMetrics>({
     valorTotalOficina: 0,
@@ -38,6 +51,15 @@ export default function Financeiro() {
   const [loading, setLoading] = useState(true);
   const [lastUpdate, setLastUpdate] = useState<string>('');
   const [responsavelFilter, setResponsavelFilter] = useState<string>('todos');
+  
+  // Estados para metas
+  const [metas, setMetas] = useState<MetaFinanceira | null>(null);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [senha, setSenha] = useState('');
+  const [senhaValidada, setSenhaValidada] = useState(false);
+  const [metaMensal, setMetaMensal] = useState('');
+  const [metaPorServico, setMetaPorServico] = useState('');
+  const [metaDiaria, setMetaDiaria] = useState('');
 
   const fetchData = async () => {
     setLoading(true);

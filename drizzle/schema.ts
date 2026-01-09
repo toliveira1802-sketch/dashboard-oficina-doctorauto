@@ -207,3 +207,22 @@ export const mecanicoPerformance = mysqlTable("mecanicoPerformance", {
 
 export type MecanicoPerformance = typeof mecanicoPerformance.$inferSelect;
 export type InsertMecanicoPerformance = typeof mecanicoPerformance.$inferInsert;
+
+/**
+ * Metas financeiras configuráveis
+ * Armazena metas mensais, por serviço e diárias
+ */
+export const metasFinanceiras = mysqlTable("metasFinanceiras", {
+  id: int("id").autoincrement().primaryKey(),
+  mes: int("mes").notNull(), // 1-12
+  ano: int("ano").notNull(), // 2026, 2027, etc
+  metaMensal: int("metaMensal").notNull(), // Valor em centavos
+  metaPorServico: int("metaPorServico"), // Valor médio esperado por serviço em centavos
+  metaDiaria: int("metaDiaria"), // Meta de faturamento diário em centavos
+  senhaProtecao: varchar("senhaProtecao", { length: 255 }), // Hash da senha para edição
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type MetaFinanceira = typeof metasFinanceiras.$inferSelect;
+export type InsertMetaFinanceira = typeof metasFinanceiras.$inferInsert;
