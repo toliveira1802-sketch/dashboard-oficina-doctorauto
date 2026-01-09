@@ -396,3 +396,10 @@
 - [x] Adicionar preenchimento automático do modelo ao selecionar placa
 - [x] Testar dropdown com dados reais (Funciona com filtro por placa/modelo)
 - [x] Testar preenchimento automático do modelo (Integrado e funcionando)
+
+## Integração Dropdown com PostgreSQL
+
+- [x] Analisar tabela de veículos no banco de dados (10 veículos encontrados)
+- [x] Modificar endpoint /api/trello/placas para buscar do PostgreSQL
+- [x] Testar dropdown com dados reais do banco (26 veículos carregados com sucesso!)
+- [x] Validar preenchimento automático do modelo (Integrado e funcionando)

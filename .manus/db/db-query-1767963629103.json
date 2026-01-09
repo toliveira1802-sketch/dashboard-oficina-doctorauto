@@ -1,0 +1,70 @@
+{
+  "query": "SELECT placa, modelo, marca, ano FROM veiculos LIMIT 10;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3dWo49LZM7B1Gvy.root --database 7A2gwQ2A8kNLBRdn5ZJDvH --execute SELECT placa, modelo, marca, ano FROM veiculos LIMIT 10;",
+  "rows": [
+    {
+      "placa": "AEJ0815",
+      "modelo": "Fusca",
+      "marca": "NULL",
+      "ano": "NULL"
+    },
+    {
+      "placa": "QYO5G05",
+      "modelo": "TRACKER",
+      "marca": "NULL",
+      "ano": "NULL"
+    },
+    {
+      "placa": "FQW0H61",
+      "modelo": "PEUGEOT",
+      "marca": "NULL",
+      "ano": "NULL"
+    },
+    {
+      "placa": "QXA9A45",
+      "modelo": "RENEGADE",
+      "marca": "NULL",
+      "ano": "NULL"
+    },
+    {
+      "placa": "FDS1B47",
+      "modelo": "TRACKER",
+      "marca": "NULL",
+      "ano": "NULL"
+    },
+    {
+      "placa": "FXC1F03",
+      "modelo": "POLO",
+      "marca": "NULL",
+      "ano": "NULL"
+    },
+    {
+      "placa": "EZC5B81",
+      "modelo": "Mercedes",
+      "marca": "NULL",
+      "ano": "NULL"
+    },
+    {
+      "placa": "DZH5G39",
+      "modelo": "ONIX",
+      "marca": "NULL",
+      "ano": "NULL"
+    },
+    {
+      "placa": "TKB0G57",
+      "modelo": "Polo",
+      "marca": "NULL",
+      "ano": "NULL"
+    },
+    {
+      "placa": "GIS2695",
+      "modelo": "A4",
+      "marca": "NULL",
+      "ano": "NULL"
+    }
+  ],
+  "messages": [],
+  "stdout": "placa\tmodelo\tmarca\tano\nAEJ0815\tFusca\tNULL\tNULL\nQYO5G05\tTRACKER\tNULL\tNULL\nFQW0H61\tPEUGEOT\tNULL\tNULL\nQXA9A45\tRENEGADE\tNULL\tNULL\nFDS1B47\tTRACKER\tNULL\tNULL\nFXC1F03\tPOLO\tNULL\tNULL\nEZC5B81\tMercedes\tNULL\tNULL\nDZH5G39\tONIX\tNULL\tNULL\nTKB0G57\tPolo\tNULL\tNULL\nGIS2695\tA4\tNULL\tNULL\n",
+  "stderr": "",
+  "execution_time_ms": 57
+}

@@ -1,4 +1,6 @@
 import { Router } from 'express';
+import { getDb } from '../db.js';
+import { veiculos as veiculosTable } from '../../drizzle/schema.js';
 
 const router = Router();
 
@@ -387,19 +389,35 @@ router.get('/ranking-mecanicos', async (req, res) => {
 });
 
 
-// GET /api/trello/placas - Retorna lista de placas dos carros
+// GET /api/trello/placas - Retorna lista de placas dos carros do PostgreSQL
 router.get('/placas', async (req, res) => {
   try {
-    const placas = [
-      { id: '1', placa: 'ABC-1234', modelo: 'BMW X5', marca: 'BMW', ano: 2020 },
-      { id: '2', placa: 'XYZ-5678', modelo: 'Audi A4', marca: 'Audi', ano: 2021 },
-      { id: '3', placa: 'DEF-9012', modelo: 'Mercedes C-Class', marca: 'Mercedes', ano: 2022 },
-      { id: '4', placa: 'GHI-3456', modelo: 'Volkswagen Golf', marca: 'Volkswagen', ano: 2019 },
-      { id: '5', placa: 'JKL-7890', modelo: 'Ford Focus', marca: 'Ford', ano: 2020 }
-    ];
+    const db = await getDb();
+    if (!db) {
+      return res.status(500).json({ error: 'Banco de dados não disponível', placas: [] });
+    }
+    
+    // Buscar veículos do banco de dados PostgreSQL
+    const veiculos = await db.select({
+      id: veiculosTable.id,
+      placa: veiculosTable.placa,
+      modelo: veiculosTable.modelo,
+      marca: veiculosTable.marca,
+      ano: veiculosTable.ano
+    }).from(veiculosTable).limit(100);
+    
+    // Formatar resposta
+    const placas = veiculos.map((v: any) => ({
+      id: v.id?.toString() || '',
+      placa: v.placa || '',
+      modelo: v.modelo || '',
+      marca: v.marca || '',
+      ano: v.ano || 0
+    }));
+    
     res.json({ placas });
   } catch (error) {
-    console.error('Erro ao buscar placas:', error);
+    console.error('Erro ao buscar placas do banco de dados:', error);
     res.status(500).json({ error: 'Erro ao buscar placas', placas: [] });
   }
 });
