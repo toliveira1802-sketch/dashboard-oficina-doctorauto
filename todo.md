@@ -280,3 +280,11 @@
 - [x] Adicionar botão "✅ Carro Pronto" na agenda
 - [x] Botões visuais criados (ações serão implementadas depois)
 - [x] Testar funcionalidade dos botões
+
+## Ajustes Finais no Painel
+- [x] Transformar card do Tigrinho em botão clicável
+- [x] Ao clicar no Tigrinho, abrir painel de metas (/painel-metas)
+- [x] Remover botões grandes do header da agenda
+- [x] Adicionar botões 🚨 e ✅ em cada horário da agenda
+- [x] Vincular botões à placa do carro do horário
+- [x] Testar funcionalidade (Tigrinho abre painel de metas corretamente)

@@ -217,17 +217,7 @@ export default function Painel() {
         
         {/* METADE DE CIMA: Agenda dos Mecânicos (100% largura) */}
         <div className="bg-slate-800 rounded-lg p-4 shadow-xl">
-          <div className="flex items-center justify-between mb-3">
-            <h2 className="text-xl font-bold">Agenda dos Mecânicos</h2>
-            <div className="flex gap-2">
-              <button className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg font-bold flex items-center gap-2 transition-all hover:scale-105">
-                🚨 Peça Errada
-              </button>
-              <button className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-bold flex items-center gap-2 transition-all hover:scale-105">
-                ✅ Carro Pronto
-              </button>
-            </div>
-          </div>
+          <h2 className="text-xl font-bold mb-3">Agenda dos Mecânicos</h2>
           <div className="grid grid-cols-5 gap-2 h-full">
             {MECANICOS.map(mecanico => (
               <div key={mecanico} className="bg-blue-900/30 rounded-lg p-2">
@@ -242,7 +232,21 @@ export default function Painel() {
                       return (
                         <div key={horario} className={`text-xs p-2 rounded ${atendimento.encaixe ? 'bg-orange-500' : 'bg-blue-500'}`}>
                           <div className="font-bold">{horario}</div>
-                          <div className="font-semibold">{atendimento.placa}</div>
+                          <div className="font-semibold mb-1">{atendimento.placa}</div>
+                          <div className="flex gap-1">
+                            <button
+                              onClick={() => alert(`🚨 Peça Errada reportada para ${atendimento.placa}`)}
+                              className="bg-red-600 hover:bg-red-700 text-white px-1 py-0.5 rounded text-xs font-bold flex-1"
+                            >
+                              🚨
+                            </button>
+                            <button
+                              onClick={() => alert(`✅ Carro Pronto: ${atendimento.placa}`)}
+                              className="bg-green-600 hover:bg-green-700 text-white px-1 py-0.5 rounded text-xs font-bold flex-1"
+                            >
+                              ✅
+                            </button>
+                          </div>
                         </div>
                       );
                     }
@@ -315,13 +319,16 @@ export default function Painel() {
           
           {/* Coluna 3: Próximos a Entrar + Entregas */}
           <div className="space-y-4">
-            {/* Card do Tigrinho */}
-            <div className="bg-gradient-to-br from-yellow-500 to-orange-600 rounded-lg p-6 shadow-xl flex flex-col items-center justify-center">
+            {/* Card do Tigrinho - Botão para Painel de Metas */}
+            <button
+              onClick={() => window.open('/painel-metas', '_blank')}
+              className="bg-gradient-to-br from-yellow-500 to-orange-600 rounded-lg p-6 shadow-xl flex flex-col items-center justify-center hover:scale-105 transition-transform cursor-pointer"
+            >
               <img src="/tigrinho.png" alt="Tigrinho" className="w-32 h-32 mb-3" />
               <h2 className="text-2xl font-black text-white text-center drop-shadow-lg">
                 SOLTA A CARTA CARAI
               </h2>
-            </div>
+            </button>
             
             {/* Entregas Previstas Hoje */}
             <div className="bg-slate-800 rounded-lg p-4 shadow-xl">
