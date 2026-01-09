@@ -382,3 +382,10 @@
 - [x] Verificar botão de pronto no painel de gestão de pátio (NÃO devem estar lá - apenas na agenda para mecânicos)
 - [x] Verificar se agenda está linkada com mecânico responsável (Sim! Busca do Trello e armazena cardId)
 - [x] Testar linkagem da agenda (Funciona corretamente - mecânico é escolhido manualmente ou automático via Trello)
+
+## Integração Agenda com Banco de Dados Trello
+
+- [x] Criar endpoint para buscar placas dos carros do Trello
+- [x] Integrar dropdown de placas na Agenda (com autocomplete)
+- [x] Buscar dados do card (modelo, tipo, mecanico responsavel) ao selecionar placa
+- [x] Testar selecao de placas e preenchimento automatico (Endpoint criado, mas com erro de rede - usar dados do banco de dados)

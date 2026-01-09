@@ -386,4 +386,111 @@ router.get('/ranking-mecanicos', async (req, res) => {
   }
 });
 
+/**
+ * GET /api/trello/placas
+ * Retorna lista de placas dos carros na oficina com informacoes essenciais
+ */
+router.get('/placas', async (req, res) => {
+  try {
+    const CUSTOM_FIELD_MECANICO = '6956eb8ce868bb88f023a1c0';
+    const CUSTOM_FIELD_VALOR_APROVADO = '6956da5a9678ba405f675266';
+
+    // 1. Buscar todas as listas do board
+    const listsResponse = await fetch(
+      `https://api.trello.com/1/boards/${BOARD_ID}/lists?key=${TRELLO_API_KEY}&token=${TRELLO_TOKEN}`
+    );
+    
+    if (!listsResponse.ok) {
+      throw new Error(`Erro ao buscar listas: ${listsResponse.status}`);
+    }
+
+    const lists = await listsResponse.json();
+
+    // 2. Buscar custom fields para pegar nomes dos mecanicos
+    const customFieldsResponse = await fetch(
+      `https://api.trello.com/1/boards/${BOARD_ID}/customFields?key=${TRELLO_API_KEY}&token=${TRELLO_TOKEN}`
+    );
+
+    if (!customFieldsResponse.ok) {
+      throw new Error(`Erro ao buscar custom fields: ${customFieldsResponse.status}`);
+    }
+
+    const customFields = await customFieldsResponse.json();
+    const mecanicoField = customFields.find((field: any) => field.id === CUSTOM_FIELD_MECANICO);
+
+    // Criar mapa de ID -> Nome do mecanico
+    const mecanicoMap: { [key: string]: string } = {};
+    if (mecanicoField && mecanicoField.options) {
+      mecanicoField.options.forEach((option: any) => {
+        mecanicoMap[option.id] = option.value.text;
+      });
+    }
+
+    // 3. Buscar cards de todas as listas (exceto Prontos/Retirada)
+    const placas: any[] = [];
+    const listasProntos = lists.filter((list: any) => 
+      list.name.includes('Pronto') || list.name.includes('Retirada')
+    );
+    const listasProntosIds = listasProntos.map((l: any) => l.id);
+
+    for (const list of lists) {
+      // Pular listas de prontos/retirada
+      if (listasProntosIds.includes(list.id)) continue;
+      // Pular listas arquivadas
+      if (list.closed) continue;
+
+      const cardsResponse = await fetch(
+        `https://api.trello.com/1/lists/${list.id}/cards?key=${TRELLO_API_KEY}&token=${TRELLO_TOKEN}&customFieldItems=true`
+      );
+
+      if (!cardsResponse.ok) continue;
+
+      const cards = await cardsResponse.json();
+
+      cards.forEach((card: any) => {
+        // Verificar se tem label FORA DA LOJA (ignorar)
+        const foraLoja = card.labels?.some((l: any) => 
+          l.name.toUpperCase().includes('FORA DA LOJA')
+        );
+        if (foraLoja) return;
+
+        // Extrair placa do nome do card (formato: ABC-1234 - Modelo)
+        const placaMatch = card.name.match(/^([A-Z]{3}-?\d{4}|\d{3}[A-Z]{2}\d{2})/);
+        const placa = placaMatch ? placaMatch[1] : card.name.substring(0, 10);
+
+        // Extrair modelo (tudo apos o - )
+        const modeloMatch = card.name.match(/\s-\s(.+)$/);
+        const modelo = modeloMatch ? modeloMatch[1] : 'N/A';
+
+        // Buscar mecanico responsavel
+        const mecanicoItem = card.customFieldItems?.find(
+          (item: any) => item.idCustomField === CUSTOM_FIELD_MECANICO
+        );
+        const mecanico = mecanicoItem?.idValue ? mecanicoMap[mecanicoItem.idValue] : null;
+
+        // Buscar valor aprovado
+        const valorItem = card.customFieldItems?.find(
+          (item: any) => item.idCustomField === CUSTOM_FIELD_VALOR_APROVADO
+        );
+        const valor = valorItem?.value?.number ? parseFloat(valorItem.value.number) : 0;
+
+        placas.push({
+          id: card.id,
+          placa,
+          modelo,
+          mecanico,
+          valor,
+          lista: list.name,
+          cardName: card.name
+        });
+      });
+    }
+
+    res.json({ placas });
+  } catch (error) {
+    console.error('Erro ao buscar placas:', error);
+    res.status(500).json({ error: 'Erro ao buscar placas do Trello', placas: [] });
+  }
+});
+
 export default router;

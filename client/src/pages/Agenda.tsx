@@ -53,6 +53,42 @@ export default function Agenda() {
   const [localAgenda, setLocalAgenda] = useState<Record<string, Record<string, AgendaItem | null>>>({});
   const [editingCell, setEditingCell] = useState<{ mecanico: string; horario: string } | null>(null);
   const [inputValue, setInputValue] = useState('');
+  const [placas, setPlacas] = useState<any[]>([]);
+  const [placasLoading, setPlacasLoading] = useState(false);
+  const [filteredPlacas, setFilteredPlacas] = useState<any[]>([]);
+  const [showPlacasDropdown, setShowPlacasDropdown] = useState(false);
+  // Buscar placas do Trello
+  useEffect(() => {
+    const fetchPlacas = async () => {
+      setPlacasLoading(true);
+      try {
+        const response = await fetch('/api/trello/placas');
+        if (response.ok) {
+          const data = await response.json();
+          setPlacas(data.placas || []);
+        }
+      } catch (error) {
+        console.error('Erro ao buscar placas:', error);
+      } finally {
+        setPlacasLoading(false);
+      }
+    };
+    fetchPlacas();
+  }, []);
+
+  // Filtrar placas conforme usuario digita
+  useEffect(() => {
+    if (!inputValue.trim()) {
+      setFilteredPlacas([]);
+      return;
+    }
+    const filtered = placas.filter(p => 
+      p.placa.toUpperCase().includes(inputValue.toUpperCase()) ||
+      p.modelo.toUpperCase().includes(inputValue.toUpperCase())
+    );
+    setFilteredPlacas(filtered);
+  }, [inputValue, placas]);
+
   // Buscar agenda do dia
   const { data: agendaData, isLoading, refetch } = trpc.agenda.getByDate.useQuery({ date: selectedDate });
 
@@ -309,7 +345,8 @@ export default function Agenda() {
                             </div>
                           </>
                         ) : editingCell?.mecanico === mecanico && editingCell?.horario === hora ? (
-                          <input
+                          <div className="relative w-full h-full bg-white">
+                            <input
                             type="text"
                             value={inputValue}
                             onChange={(e) => setInputValue(e.target.value)}
@@ -330,7 +367,27 @@ export default function Agenda() {
                             autoFocus
                             placeholder="Placa..."
                             className="w-full h-full text-xs px-2 border-0 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 rounded"
-                          />
+                            />
+                            {showPlacasDropdown && filteredPlacas.length > 0 && (
+                              <div className="absolute top-full left-0 right-0 bg-white border border-blue-300 rounded shadow-lg z-50 max-h-48 overflow-y-auto">
+                                {filteredPlacas.map((placa: any) => (
+                                  <div
+                                    key={placa.id}
+                                    onClick={() => {
+                                      handleSelectPlaca(mecanico, hora, placa.placa);
+                                      setEditingCell(null);
+                                      setInputValue('');
+                                      setShowPlacasDropdown(false);
+                                    }}
+                                    className="px-2 py-1 text-xs hover:bg-blue-100 cursor-pointer border-b border-slate-200"
+                                  >
+                                    <div className="font-semibold">{placa.placa}</div>
+                                    <div className="text-slate-600 text-xs">{placa.modelo}</div>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                          </div>
                         ) : (
                           <div 
                             onClick={() => {
