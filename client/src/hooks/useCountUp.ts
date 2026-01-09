@@ -60,9 +60,10 @@ export function useCountUp({
   }, [end, start, duration, onComplete]);
 
   // Formatar número com decimais
+  const safeCount = isNaN(count) || !isFinite(count) ? 0 : count;
   const formattedCount = decimals > 0 
-    ? count.toFixed(decimals)
-    : Math.floor(count).toString();
+    ? safeCount.toFixed(decimals)
+    : Math.floor(safeCount).toString();
 
-  return { count, formattedCount };
+  return { count: safeCount, formattedCount };
 }

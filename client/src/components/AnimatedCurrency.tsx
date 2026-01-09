@@ -10,9 +10,12 @@ interface AnimatedCurrencyProps {
  * Componente que anima valores monetários
  */
 export function AnimatedCurrency({ value, className = '', duration = 2000 }: AnimatedCurrencyProps) {
+  // Garantir que value é um número válido
+  const safeValue = isNaN(value) || !isFinite(value) || value === null || value === undefined ? 0 : value;
+  
   const { count } = useCountUp({
     start: 0,
-    end: value,
+    end: safeValue,
     duration,
     decimals: 2
   });

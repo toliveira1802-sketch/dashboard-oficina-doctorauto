@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Target, TrendingUp, DollarSign, Calendar, Zap } from 'lucide-react';
 import { AnimatedCurrency } from '@/components/AnimatedCurrency';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Loader2 } from 'lucide-react';
 
 interface MetaFinanceira {
   id: number;
@@ -29,12 +31,18 @@ export default function PainelMetas() {
   }, []);
 
   useEffect(() => {
-    fetchMetas();
-    fetchValoresAprovados();
+    const loadData = async () => {
+      await Promise.all([fetchMetas(), fetchValoresAprovados()]);
+      setLoading(false);
+    };
+    
+    loadData();
+    
     const interval = setInterval(() => {
       fetchMetas();
       fetchValoresAprovados();
     }, 60000);
+    
     return () => clearInterval(interval);
   }, []);
 
@@ -54,26 +62,18 @@ export default function PainelMetas() {
 
   const fetchValoresAprovados = async () => {
     try {
-      // Buscar dados diretamente do Trello (usar valores mockados por enquanto)
-      // TODO: Implementar busca real quando custom field "Valor Aprovado" estiver configurado
+      const response = await fetch('/api/trello/valores-aprovados');
       
-      // Valores de exemplo baseados em dados reais
-      // Quando o custom field estiver pronto, substituir por busca real
-      const valorRealizadoMock = 45000; // Carros entregues
-      const valorNoPatioMock = 120000; // Carros aprovados mas ainda no pátio
-      
-      setValorRealizado(valorRealizadoMock);
-      setValorNoPatio(valorNoPatioMock);
-      
-      console.log('[PainelMetas] Valores atualizados (mock):', {
-        valorRealizado: valorRealizadoMock,
-        valorNoPatio: valorNoPatioMock
-      });
-      
-      setLoading(false);
+      if (response.ok) {
+        const data = await response.json();
+        setValorRealizado(data.valorRealizado || 0);
+        setValorNoPatio(data.valorNoPatio || 0);
+        console.log('[PainelMetas] Valores do Trello atualizados:', data);
+      } else {
+        console.error('[PainelMetas] Erro ao buscar valores:', response.status);
+      }
     } catch (error) {
-      console.error('Erro ao carregar valores aprovados:', error);
-      setLoading(false);
+      console.error('[PainelMetas] Erro de rede:', error);
     }
   };
 
@@ -114,6 +114,61 @@ export default function PainelMetas() {
   const potencialCalculado = calculos.reduce((acc, calc) => 
     acc + (calc.multiplicador ? calc.valor * calc.multiplicador : calc.valor), 0
   ) + (produtoIsca.valor * produtoIsca.multiplicador);
+
+  // Skeleton de loading
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 text-white p-6">
+        {/* Header */}
+        <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg p-6 mb-6 shadow-2xl">
+          <div className="flex items-center justify-between">
+            <div>
+              <Skeleton className="h-10 w-96 mb-2 bg-blue-400/20" />
+              <Skeleton className="h-6 w-64 bg-blue-400/20" />
+            </div>
+            <div className="text-right">
+              <Skeleton className="h-12 w-32 mb-2 bg-blue-400/20" />
+              <Skeleton className="h-6 w-48 bg-blue-400/20" />
+            </div>
+          </div>
+        </div>
+
+        {/* Loading Content */}
+        <div className="grid grid-cols-3 gap-6">
+          <div className="col-span-2 space-y-6">
+            <Card className="bg-gradient-to-br from-purple-900 to-blue-900 border-none shadow-2xl">
+              <CardContent className="pt-6">
+                <div className="flex items-center justify-center py-20">
+                  <div className="text-center">
+                    <Loader2 className="w-16 h-16 animate-spin mx-auto mb-4 text-blue-400" />
+                    <p className="text-xl text-blue-200">Carregando valores do Trello...</p>
+                    <p className="text-sm text-blue-300 mt-2">Buscando dados atualizados</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            
+            <Card className="bg-gradient-to-br from-teal-900 to-cyan-900 border-none shadow-2xl">
+              <CardContent className="pt-6">
+                <Skeleton className="h-16 w-full bg-teal-700/30" />
+              </CardContent>
+            </Card>
+          </div>
+
+          <div className="col-span-1">
+            <Card className="bg-gradient-to-br from-orange-600 to-red-600 border-none shadow-2xl h-full">
+              <CardContent className="pt-6 space-y-4">
+                <Skeleton className="h-12 w-full bg-orange-400/20" />
+                <Skeleton className="h-20 w-full bg-orange-400/20" />
+                <Skeleton className="h-20 w-full bg-orange-400/20" />
+                <Skeleton className="h-20 w-full bg-orange-400/20" />
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 text-white p-6">

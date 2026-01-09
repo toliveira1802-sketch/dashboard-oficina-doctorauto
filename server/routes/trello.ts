@@ -152,13 +152,22 @@ router.post('/move-to-prontos', async (req, res) => {
  */
 router.get('/valores-aprovados', async (req, res) => {
   try {
+    console.log('[valores-aprovados] Iniciando busca...');
+    console.log('[valores-aprovados] BOARD_ID:', BOARD_ID);
+    console.log('[valores-aprovados] API_KEY existe:', !!TRELLO_API_KEY);
+    console.log('[valores-aprovados] TOKEN existe:', !!TRELLO_TOKEN);
+    
     // Buscar todas as listas do board
-    const listsResponse = await fetch(
-      `https://api.trello.com/1/boards/${BOARD_ID}/lists?key=${TRELLO_API_KEY}&token=${TRELLO_TOKEN}`
-    );
+    const listsUrl = `https://api.trello.com/1/boards/${BOARD_ID}/lists?key=${TRELLO_API_KEY}&token=${TRELLO_TOKEN}`;
+    console.log('[valores-aprovados] Buscando listas...');
+    
+    const listsResponse = await fetch(listsUrl);
+    console.log('[valores-aprovados] Status da resposta:', listsResponse.status);
     
     if (!listsResponse.ok) {
-      throw new Error('Erro ao buscar listas do Trello');
+      const errorText = await listsResponse.text();
+      console.error('[valores-aprovados] Erro na resposta:', errorText);
+      throw new Error(`Erro ao buscar listas do Trello: ${listsResponse.status}`);
     }
 
     const lists = await listsResponse.json();
@@ -189,9 +198,9 @@ router.get('/valores-aprovados', async (req, res) => {
     }
 
     const customFields = await customFieldsResponse.json();
-    const valorAprovadoField = customFields.find((f: any) => 
-      f.name.toLowerCase().includes('valor') && f.name.toLowerCase().includes('aprovado')
-    );
+    // ID fixo do custom field "Valor Aprovado" (verificado via API)
+    const VALOR_APROVADO_FIELD_ID = '6956da5a9678ba405f675266';
+    const valorAprovadoField = customFields.find((f: any) => f.id === VALOR_APROVADO_FIELD_ID);
 
     let valorRealizado = 0;
     let valorNoPatio = 0;
@@ -208,13 +217,17 @@ router.get('/valores-aprovados', async (req, res) => {
       // Extrair valor aprovado do custom field
       let valorCard = 0;
       
-      if (valorAprovadoField && card.customFieldItems) {
+      if (card.customFieldItems) {
         const valorItem = card.customFieldItems.find(
-          (item: any) => item.idCustomField === valorAprovadoField.id
+          (item: any) => item.idCustomField === VALOR_APROVADO_FIELD_ID
         );
         
         if (valorItem?.value?.number) {
-          valorCard = valorItem.value.number;
+          // API retorna string, converter para número
+          const parsed = parseFloat(String(valorItem.value.number));
+          if (!isNaN(parsed)) {
+            valorCard = parsed;
+          }
         } else if (valorItem?.value?.text) {
           // Tentar parsear texto como número
           const parsed = parseFloat(valorItem.value.text.replace(/[^0-9.,]/g, '').replace(',', '.'));

@@ -308,3 +308,13 @@
 - [x] Implementar hook de animação de contagem (useCountUp)
 - [x] Adicionar animação nos valores: meta mensal, realizado, no pátio, potencial total
 - [x] Testar animações e valores reais no painel
+
+## Integração Real com Custom Field Valor Aprovado
+
+- [x] Verificar se custom field "Valor Aprovado" existe no Trello
+- [x] Ajustar endpoint /api/trello/valores-aprovados para buscar valores reais
+- [x] Remover valores mockados do frontend
+- [x] Conectar painel com endpoint real
+- [x] Adicionar skeleton de loading no painel de metas
+- [x] Mostrar spinner durante carregamento inicial
+- [x] Testar busca de valores reais do Trello
