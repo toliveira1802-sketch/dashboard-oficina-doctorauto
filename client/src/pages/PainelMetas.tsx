@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Target, TrendingUp, DollarSign, Calendar } from 'lucide-react';
+import { Target, TrendingUp, DollarSign, Calendar, Zap } from 'lucide-react';
 
 interface MetaFinanceira {
   id: number;
@@ -15,7 +15,8 @@ interface MetaFinanceira {
 
 export default function PainelMetas() {
   const [metas, setMetas] = useState<MetaFinanceira | null>(null);
-  const [valorRealizado, setValorRealizado] = useState(0);
+  const [valorRealizado, setValorRealizado] = useState(31100); // Mock - JÁ ENTREGUE
+  const [valorNoPatio, setValorNoPatio] = useState(45000); // Mock - AINDA NO PÁTIO (aprovado)
   const [currentTime, setCurrentTime] = useState(new Date());
 
   useEffect(() => {
@@ -27,11 +28,9 @@ export default function PainelMetas() {
 
   useEffect(() => {
     fetchMetas();
-    fetchValorRealizado();
     const interval = setInterval(() => {
       fetchMetas();
-      fetchValorRealizado();
-    }, 60000); // Atualiza a cada minuto
+    }, 60000);
     return () => clearInterval(interval);
   }, []);
 
@@ -49,145 +48,189 @@ export default function PainelMetas() {
     }
   };
 
-  const fetchValorRealizado = async () => {
-    // Aqui você pode buscar o valor real do Trello ou do banco
-    // Por enquanto vou usar um valor mockado
-    setValorRealizado(31100 * 100); // R$ 31.100,00 em centavos
-  };
-
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('pt-BR', {
       style: 'currency',
       currency: 'BRL'
-    }).format(value / 100);
+    }).format(value);
   };
 
-  const formatTime = () => {
-    return currentTime.toLocaleTimeString('pt-BR', {
+  const formatDateTime = (date: Date) => {
+    return new Intl.DateTimeFormat('pt-BR', {
       hour: '2-digit',
-      minute: '2-digit'
-    });
-  };
-
-  const formatDate = () => {
-    return currentTime.toLocaleDateString('pt-BR', {
+      minute: '2-digit',
       weekday: 'long',
       day: '2-digit',
       month: 'long'
-    });
+    }).format(date);
   };
 
-  if (!metas) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 to-slate-800 flex items-center justify-center">
-        <div className="text-white text-2xl">Carregando metas...</div>
-      </div>
-    );
-  }
+  const metaMensal = metas?.metaMensal || 150000;
+  const diasUteis = 24; // Pode vir do banco depois
+  const metaDiaria = metaMensal / diasUteis;
+  
+  const percentualRealizado = (valorRealizado / metaMensal) * 100;
+  const percentualNoPatio = ((valorRealizado + valorNoPatio) / metaMensal) * 100;
 
-  const diasUteis = metas.metaPorServico || 22;
-  const metaDiaria = metas.metaMensal / diasUteis;
-  const diaAtual = new Date().getDate();
-  const metaAteHoje = metaDiaria * Math.min(diaAtual, diasUteis);
-  const percentualRealizado = Math.round((valorRealizado / metaAteHoje) * 100);
-  const projecao = diasUteis > 0 ? Math.round((valorRealizado / diaAtual) * diasUteis) : 0;
+  // Cálculos motivacionais
+  const calculos = [
+    { descricao: '1 vaga → 1 motor BMW', valor: 25000, periodo: 'mês' },
+    { descricao: '1 vaga → 2 freios/dia', valor: 4000, multiplicador: 24 },
+    { descricao: '1 vaga → 1 revisão/dia', valor: 700, multiplicador: 24 },
+    { descricao: '1 vaga → Troca correia TSI 1.4', valor: 1200, multiplicador: 24 },
+  ];
+
+  const produtoIsca = { descricao: 'Remap UP (Produto Isca Dino)', valor: 800, multiplicador: 24 };
+  
+  const potencialCalculado = calculos.reduce((acc, calc) => 
+    acc + (calc.multiplicador ? calc.valor * calc.multiplicador : calc.valor), 0
+  ) + (produtoIsca.valor * produtoIsca.multiplicador);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 to-slate-800 p-8">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 text-white p-6">
       {/* Header */}
-      <div className="bg-gradient-to-r from-blue-600 to-blue-700 rounded-2xl p-8 mb-8 shadow-2xl">
+      <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg p-6 mb-6 shadow-2xl">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-4xl font-bold text-white mb-2">Doctor Auto - Metas Financeiras</h1>
-            <p className="text-blue-100 text-xl">Acompanhamento em Tempo Real</p>
+            <h1 className="text-4xl font-black mb-2">Doctor Auto - Metas Financeiras</h1>
+            <p className="text-blue-100 text-lg">Acompanhamento em Tempo Real</p>
           </div>
           <div className="text-right">
-            <div className="text-5xl font-bold text-white">{formatTime()}</div>
-            <div className="text-blue-100 text-lg mt-1">{formatDate()}</div>
+            <div className="text-5xl font-bold">{currentTime.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}</div>
+            <div className="text-blue-100 capitalize">{formatDateTime(currentTime)}</div>
           </div>
         </div>
       </div>
 
-      {/* Cards de Metas */}
-      <div className="grid grid-cols-2 gap-8 mb-8">
-        {/* Meta do Mês */}
-        <Card className="bg-gradient-to-br from-indigo-600 to-indigo-700 border-0 shadow-2xl">
-          <CardHeader className="pb-4">
-            <CardTitle className="text-2xl font-bold text-white flex items-center gap-3">
-              <Target className="h-8 w-8" />
-              Meta do Mês
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-6xl font-bold text-white mb-2">{formatCurrency(metas.metaMensal)}</div>
-            <p className="text-indigo-200 text-xl">{diasUteis} dias úteis</p>
-          </CardContent>
-        </Card>
+      {/* Layout Principal: Esquerda (Meta) + Direita (Motivação) */}
+      <div className="grid grid-cols-3 gap-6">
+        
+        {/* COLUNA ESQUERDA E CENTRAL: Metas (2/3) */}
+        <div className="col-span-2 space-y-6">
+          
+          {/* Meta do Mês com Barra de Progresso */}
+          <Card className="bg-gradient-to-br from-purple-900 to-blue-900 border-none shadow-2xl">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-3 text-3xl text-white">
+                <Target className="w-10 h-10" />
+                Meta do Mês
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-6xl font-black text-white mb-6">
+                {formatCurrency(metaMensal)}
+              </div>
+              
+              {/* Barra de Progresso Dupla */}
+              <div className="space-y-4">
+                <div className="relative h-16 bg-slate-800 rounded-full overflow-hidden">
+                  {/* No Pátio (opaco - amarelo) */}
+                  <div 
+                    className="absolute top-0 left-0 h-full bg-yellow-500/40 transition-all duration-1000"
+                    style={{ width: `${Math.min(percentualNoPatio, 100)}%` }}
+                  />
+                  {/* Realizado (sólido) */}
+                  <div 
+                    className="absolute top-0 left-0 h-full bg-green-500 transition-all duration-1000"
+                    style={{ width: `${Math.min(percentualRealizado, 100)}%` }}
+                  />
+                  {/* Texto centralizado */}
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <span className="text-2xl font-bold text-white drop-shadow-lg">
+                      {percentualRealizado.toFixed(1)}% Realizado
+                    </span>
+                  </div>
+                </div>
 
-        {/* Meta Diária */}
-        <Card className="bg-gradient-to-br from-cyan-600 to-cyan-700 border-0 shadow-2xl">
-          <CardHeader className="pb-4">
-            <CardTitle className="text-2xl font-bold text-white flex items-center gap-3">
-              <Calendar className="h-8 w-8" />
-              Meta por Dia
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-6xl font-bold text-white mb-2">{formatCurrency(Math.round(metaDiaria))}</div>
-            <p className="text-cyan-200 text-xl">Calculado automaticamente</p>
-          </CardContent>
-        </Card>
-      </div>
+                {/* Legenda */}
+                <div className="flex items-center justify-between text-lg">
+                  <div className="flex items-center gap-2">
+                    <div className="w-6 h-6 bg-green-500 rounded"></div>
+                    <span>Realizado: {formatCurrency(valorRealizado)}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-6 h-6 bg-yellow-500/40 rounded border-2 border-yellow-500"></div>
+                    <span>No Pátio: {formatCurrency(valorNoPatio)}</span>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
 
-      {/* Cards de Acompanhamento */}
-      <div className="grid grid-cols-3 gap-8">
-        {/* Meta até Hoje */}
-        <Card className="bg-gradient-to-br from-teal-600 to-teal-700 border-0 shadow-2xl">
-          <CardHeader className="pb-4">
-            <CardTitle className="text-2xl font-bold text-white flex items-center gap-3">
-              <TrendingUp className="h-8 w-8" />
-              Meta até Hoje
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-5xl font-bold text-white mb-2">{formatCurrency(Math.round(metaAteHoje))}</div>
-            <p className="text-teal-200 text-xl">Dia {diaAtual} de {diasUteis}</p>
-          </CardContent>
-        </Card>
+          {/* Meta Diária */}
+          <Card className="bg-gradient-to-br from-teal-900 to-cyan-900 border-none shadow-2xl">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-3 text-2xl text-white">
+                <Calendar className="w-8 h-8" />
+                Meta Diária Atualizada
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-5xl font-black text-white">
+                {formatCurrency(metaDiaria)}
+              </div>
+              <p className="text-cyan-200 text-xl mt-2">
+                Baseado em {diasUteis} dias úteis
+              </p>
+            </CardContent>
+          </Card>
+        </div>
 
-        {/* Realizado */}
-        <Card className={`bg-gradient-to-br border-0 shadow-2xl ${
-          percentualRealizado >= 100 ? 'from-emerald-600 to-emerald-700' : 
-          percentualRealizado >= 70 ? 'from-yellow-600 to-yellow-700' : 
-          'from-red-600 to-red-700'
-        }`}>
-          <CardHeader className="pb-4">
-            <CardTitle className="text-2xl font-bold text-white flex items-center gap-3">
-              <DollarSign className="h-8 w-8" />
-              Realizado
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-5xl font-bold text-white mb-2">{percentualRealizado}%</div>
-            <p className="text-white text-xl opacity-90">{formatCurrency(valorRealizado)}</p>
-          </CardContent>
-        </Card>
+        {/* COLUNA DIREITA: Card Motivacional (1/3) */}
+        <div className="col-span-1">
+          <Card className="bg-gradient-to-br from-orange-600 to-red-600 border-none shadow-2xl h-full">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-3 text-2xl text-white">
+                <Zap className="w-8 h-8" />
+                💰 FAÇA A CONTA
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4 text-white">
+              
+              {/* Cálculos principais */}
+              {calculos.map((calc, idx) => (
+                <div key={idx} className="bg-white/10 p-3 rounded-lg">
+                  <div className="text-sm font-semibold">{calc.descricao}</div>
+                  {calc.multiplicador ? (
+                    <div className="text-lg font-bold">
+                      R$ {calc.valor.toLocaleString()} x {calc.multiplicador} = {formatCurrency(calc.valor * calc.multiplicador)}
+                    </div>
+                  ) : (
+                    <div className="text-lg font-bold">{formatCurrency(calc.valor)}/{calc.periodo}</div>
+                  )}
+                </div>
+              ))}
 
-        {/* Projeção */}
-        <Card className="bg-gradient-to-br from-purple-600 to-purple-700 border-0 shadow-2xl">
-          <CardHeader className="pb-4">
-            <CardTitle className="text-2xl font-bold text-white flex items-center gap-3">
-              <TrendingUp className="h-8 w-8" />
-              Projeção do Mês
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-5xl font-bold text-white mb-2">{formatCurrency(projecao)}</div>
-            <p className="text-purple-200 text-xl">
-              {projecao >= metas.metaMensal ? '✓ Acima da meta' : '⚠ Abaixo da meta'}
-            </p>
-          </CardContent>
-        </Card>
+              {/* Produto Isca */}
+              <div className="bg-yellow-500/20 p-3 rounded-lg border-2 border-yellow-400">
+                <div className="text-sm font-semibold flex items-center gap-2">
+                  <Zap className="w-4 h-4" />
+                  {produtoIsca.descricao}
+                </div>
+                <div className="text-lg font-bold">
+                  R$ {produtoIsca.valor.toLocaleString()} x {produtoIsca.multiplicador} = {formatCurrency(produtoIsca.valor * produtoIsca.multiplicador)}
+                </div>
+              </div>
+
+              {/* Outros serviços */}
+              <div className="bg-white/10 p-3 rounded-lg">
+                <div className="text-sm font-semibold mb-2">Ainda temos:</div>
+                <div className="text-xs space-y-1">
+                  <div>• B.Os, VCDS, Câmbio</div>
+                  <div>• Alternador, Suspensão</div>
+                  <div className="font-bold text-yellow-300">+ 19 VAGAS para trabalhar TODOS OS DIAS!</div>
+                </div>
+              </div>
+
+              {/* Potencial Total */}
+              <div className="bg-gradient-to-r from-green-500 to-emerald-600 p-4 rounded-lg text-center">
+                <div className="text-sm font-semibold">POTENCIAL TOTAL</div>
+                <div className="text-3xl font-black">{formatCurrency(potencialCalculado)}</div>
+                <div className="text-xs mt-1">Apenas com os serviços listados!</div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
       </div>
     </div>
   );

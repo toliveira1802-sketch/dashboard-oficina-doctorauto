@@ -288,3 +288,12 @@
 - [x] Adicionar botões 🚨 e ✅ em cada horário da agenda
 - [x] Vincular botões à placa do carro do horário
 - [x] Testar funcionalidade (Tigrinho abre painel de metas corretamente)
+
+## Redesign Painel de Metas
+- [x] Criar layout com parte de cima (meta) e lado direito (motivação)
+- [x] Adicionar barra de progresso com 2 cores (verde=entregue, amarelo=no pátio)
+- [x] Mostrar meta diária atualizada
+- [x] Criar card motivacional com cálculos de potencial
+- [x] Adicionar todos os serviços e cálculos mencionados
+- [x] Calcular e mostrar potencial total
+- [x] Testar visualização
