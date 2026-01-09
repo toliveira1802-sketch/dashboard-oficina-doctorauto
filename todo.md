@@ -318,3 +318,16 @@
 - [x] Adicionar skeleton de loading no painel de metas
 - [x] Mostrar spinner durante carregamento inicial
 - [x] Testar busca de valores reais do Trello
+
+## Testes Finais - Validação Completa
+
+- [x] Testar endpoint /api/trello/valores-aprovados retorna valores corretos
+- [x] Verificar se valor realizado corresponde a cards na lista "Prontos"
+- [x] Verificar se valor no pátio corresponde a cards aprovados (outras listas)
+- [x] Confirmar que cards com label "FORA DA LOJA" são excluídos
+- [x] Testar animações de contagem em todos os valores
+- [x] Verificar skeleton de loading aparece e desaparece
+- [x] Testar atualização automática a cada 60 segundos
+- [x] Validar cálculos de meta diária e potencial total
+- [x] Verificar responsividade do painel em diferentes resoluções
+- [x] Confirmar que todos os dados são reais (sem mocks)
