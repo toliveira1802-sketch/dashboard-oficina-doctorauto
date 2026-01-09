@@ -262,3 +262,9 @@
 - [ ] Card: Realizado vs Meta (percentual grande)
 - [ ] Card: Projeção de faturamento
 - [ ] Testar exibição no painel
+
+## Limpeza da Página Financeiro
+- [x] Remover cards de metas da página Financeiro
+- [x] Manter apenas botão "Configurar Metas"
+- [x] Manter botão para abrir painel de TV
+- [x] Testar página limpa
