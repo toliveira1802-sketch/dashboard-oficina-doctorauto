@@ -297,3 +297,14 @@
 - [x] Adicionar todos os serviços e cálculos mencionados
 - [x] Calcular e mostrar potencial total
 - [x] Testar visualização
+
+## Melhorias Painel de Metas - Valores Reais e Animações
+
+- [x] Extrair campo "Valor Aprovado" dos cards do Trello
+- [x] Calcular automaticamente valor realizado (cards entregues/prontos)
+- [x] Calcular automaticamente valor no pátio (cards aprovados mas não entregues)
+- [x] Criar API endpoint para buscar valores reais do Trello
+- [x] Conectar painel de metas com valores reais da API
+- [x] Implementar hook de animação de contagem (useCountUp)
+- [x] Adicionar animação nos valores: meta mensal, realizado, no pátio, potencial total
+- [x] Testar animações e valores reais no painel

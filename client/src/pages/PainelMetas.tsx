@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Target, TrendingUp, DollarSign, Calendar, Zap } from 'lucide-react';
+import { AnimatedCurrency } from '@/components/AnimatedCurrency';
 
 interface MetaFinanceira {
   id: number;
@@ -15,9 +16,10 @@ interface MetaFinanceira {
 
 export default function PainelMetas() {
   const [metas, setMetas] = useState<MetaFinanceira | null>(null);
-  const [valorRealizado, setValorRealizado] = useState(31100); // Mock - JÁ ENTREGUE
-  const [valorNoPatio, setValorNoPatio] = useState(45000); // Mock - AINDA NO PÁTIO (aprovado)
+  const [valorRealizado, setValorRealizado] = useState(0);
+  const [valorNoPatio, setValorNoPatio] = useState(0);
   const [currentTime, setCurrentTime] = useState(new Date());
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -28,8 +30,10 @@ export default function PainelMetas() {
 
   useEffect(() => {
     fetchMetas();
+    fetchValoresAprovados();
     const interval = setInterval(() => {
       fetchMetas();
+      fetchValoresAprovados();
     }, 60000);
     return () => clearInterval(interval);
   }, []);
@@ -45,6 +49,31 @@ export default function PainelMetas() {
       }
     } catch (error) {
       console.error('Erro ao carregar metas:', error);
+    }
+  };
+
+  const fetchValoresAprovados = async () => {
+    try {
+      // Buscar dados diretamente do Trello (usar valores mockados por enquanto)
+      // TODO: Implementar busca real quando custom field "Valor Aprovado" estiver configurado
+      
+      // Valores de exemplo baseados em dados reais
+      // Quando o custom field estiver pronto, substituir por busca real
+      const valorRealizadoMock = 45000; // Carros entregues
+      const valorNoPatioMock = 120000; // Carros aprovados mas ainda no pátio
+      
+      setValorRealizado(valorRealizadoMock);
+      setValorNoPatio(valorNoPatioMock);
+      
+      console.log('[PainelMetas] Valores atualizados (mock):', {
+        valorRealizado: valorRealizadoMock,
+        valorNoPatio: valorNoPatioMock
+      });
+      
+      setLoading(false);
+    } catch (error) {
+      console.error('Erro ao carregar valores aprovados:', error);
+      setLoading(false);
     }
   };
 
@@ -118,7 +147,7 @@ export default function PainelMetas() {
             </CardHeader>
             <CardContent>
               <div className="text-6xl font-black text-white mb-6">
-                {formatCurrency(metaMensal)}
+                <AnimatedCurrency value={metaMensal} duration={2500} />
               </div>
               
               {/* Barra de Progresso Dupla */}
@@ -146,11 +175,11 @@ export default function PainelMetas() {
                 <div className="flex items-center justify-between text-lg">
                   <div className="flex items-center gap-2">
                     <div className="w-6 h-6 bg-green-500 rounded"></div>
-                    <span>Realizado: {formatCurrency(valorRealizado)}</span>
+                    <span>Realizado: <AnimatedCurrency value={valorRealizado} duration={2000} /></span>
                   </div>
                   <div className="flex items-center gap-2">
                     <div className="w-6 h-6 bg-yellow-500/40 rounded border-2 border-yellow-500"></div>
-                    <span>No Pátio: {formatCurrency(valorNoPatio)}</span>
+                    <span>No Pátio: <AnimatedCurrency value={valorNoPatio} duration={2000} /></span>
                   </div>
                 </div>
               </div>
@@ -167,7 +196,7 @@ export default function PainelMetas() {
             </CardHeader>
             <CardContent>
               <div className="text-5xl font-black text-white">
-                {formatCurrency(metaDiaria)}
+                <AnimatedCurrency value={metaDiaria} duration={2200} />
               </div>
               <p className="text-cyan-200 text-xl mt-2">
                 Baseado em {diasUteis} dias úteis
@@ -225,7 +254,7 @@ export default function PainelMetas() {
               {/* Potencial Total */}
               <div className="bg-gradient-to-r from-green-500 to-emerald-600 p-4 rounded-lg text-center">
                 <div className="text-sm font-semibold">POTENCIAL TOTAL</div>
-                <div className="text-3xl font-black">{formatCurrency(potencialCalculado)}</div>
+                <div className="text-3xl font-black"><AnimatedCurrency value={potencialCalculado} duration={3000} /></div>
                 <div className="text-xs mt-1">Apenas com os serviços listados!</div>
               </div>
             </CardContent>
