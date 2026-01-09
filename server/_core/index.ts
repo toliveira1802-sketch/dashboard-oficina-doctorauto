@@ -39,6 +39,9 @@ async function startServer() {
   // Trello API routes (must be before tRPC to avoid conflicts)
   const trelloRoutes = await import('../routes/trello.js');
   app.use('/api/trello', trelloRoutes.default);
+  // Export routes
+  const exportRoutes = await import('../routes/export.js');
+  app.use('/api/export', exportRoutes.default);
   // tRPC API
   app.use(
     "/api/trpc",

@@ -4,7 +4,7 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Loader2, AlertCircle, CheckCircle, Clock, Search, X, RefreshCw, ChevronUp, ChevronDown } from "lucide-react";
+import { Loader2, AlertCircle, CheckCircle, Clock, Search, X, RefreshCw, ChevronUp, ChevronDown, Download } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 
@@ -200,9 +200,24 @@ export default function Home() {
       cards.forEach(card => {
         const listName = listMap[card.idList];
         
+        // Verificar labels especiais
+        const hasRetorno = card.labels.some(label => label.name.toUpperCase() === 'RETORNO');
+        const hasForaLoja = card.labels.some(label => label.name.toUpperCase() === 'FORA DA LOJA');
+        
+        // Contar labels especiais (independente da lista)
+        if (hasRetorno) newMetrics.retornos++;
+        if (hasForaLoja) newMetrics.foraLoja++;
+        
         // Contar apenas cards que estão "na oficina"
+        // EXCLUIR: carros prontos OU com label "FORA DA LOJA"
+        const isPronto = listName === 'Qualidade' || listName === '🟡 Pronto / Aguardando Retirada';
+        const contarNaOcupacao = !isPronto && !hasForaLoja;
+        
         if (['Diagnóstico', 'Orçamento', 'Aguardando Aprovação', 'Aguardando Peças', 'Pronto para Iniciar', 'Em Execução', 'Qualidade', '🟡 Pronto / Aguardando Retirada'].includes(listName)) {
-          newMetrics.total++;
+          // Contar no total apenas se não for pronto e não estiver fora da loja
+          if (contarNaOcupacao) {
+            newMetrics.total++;
+          }
           
           if (listName === 'Diagnóstico') newMetrics.diagnostico++;
           else if (listName === 'Orçamento') newMetrics.orcamentos++;
@@ -210,14 +225,7 @@ export default function Home() {
           else if (listName === 'Aguardando Peças') newMetrics.aguardando_pecas++;
           else if (listName === 'Pronto para Iniciar') newMetrics.pronto_pra_iniciar++;
           else if (listName === 'Em Execução') newMetrics.em_execucao++;
-          else if (listName === 'Qualidade' || listName === '🟡 Pronto / Aguardando Retirada') newMetrics.prontos++;
-
-          // Contar labels especiais
-          const hasRetorno = card.labels.some(label => label.name.toUpperCase() === 'RETORNO');
-          const hasForaLoja = card.labels.some(label => label.name.toUpperCase() === 'FORA DA LOJA');
-          
-          if (hasRetorno) newMetrics.retornos++;
-          if (hasForaLoja) newMetrics.foraLoja++;
+          else if (isPronto) newMetrics.prontos++;
 
           // Extrair recurso da descrição
           const recurso = extractRecursoFromDesc(card.desc);
@@ -342,6 +350,18 @@ export default function Home() {
                 <p className="text-xs text-slate-500">Última atualização</p>
                 <p className="text-slate-700 font-medium text-sm">{lastUpdate.toLocaleTimeString('pt-BR')}</p>
               </div>
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => {
+                  const mes = new Date().getMonth() + 1;
+                  const ano = new Date().getFullYear();
+                  window.open(`/api/export/historico?mes=${mes}&ano=${ano}`, '_blank');
+                }}
+                title="Baixar histórico do mês"
+              >
+                <Download className="w-4 h-4" />
+              </Button>
               <Button 
                 variant="outline" 
                 size="sm"

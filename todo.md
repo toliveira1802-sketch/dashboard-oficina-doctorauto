@@ -217,3 +217,16 @@
 - [x] Verificar dados salvos no banco
 - [x] Confirmar 34 cards processados do Trello
 - [x] Confirmar veículos e histórico salvos no PostgreSQL
+
+## Exportação de Histórico Mensal
+- [x] Criar API para exportar histórico em CSV
+- [x] Implementar filtro por mês/ano
+- [x] Adicionar botão de download no dashboard
+- [x] Incluir dados de veículos, movimentações e tempo por etapa
+- [x] Testar download do arquivo
+
+## Correção de Contagem de Ocupação
+- [x] Excluir carros "Prontos" da contagem de ocupação
+- [x] Excluir carros com label "FORA DA LOJA" da contagem
+- [x] Atualizar cálculo de porcentagem de ocupação
+- [x] Testar nova contagem
