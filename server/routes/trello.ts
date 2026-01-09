@@ -258,4 +258,132 @@ router.get('/valores-aprovados', async (req, res) => {
   }
 });
 
+/**
+ * GET /api/trello/ranking-mecanicos
+ * Retorna ranking dos top 3 mecânicos por valor entregue na semana
+ */
+router.get('/ranking-mecanicos', async (req, res) => {
+  try {
+    const CUSTOM_FIELD_MECANICO = '6956eb8ce868bb88f023a1c0';
+    const CUSTOM_FIELD_VALOR_APROVADO = '6956da5a9678ba405f675266';
+
+    console.log('[ranking-mecanicos] Iniciando busca de ranking...');
+
+    // 1. Buscar todas as listas do board
+    const listsResponse = await fetch(
+      `https://api.trello.com/1/boards/${BOARD_ID}/lists?key=${TRELLO_API_KEY}&token=${TRELLO_TOKEN}`
+    );
+    
+    if (!listsResponse.ok) {
+      throw new Error(`Erro ao buscar listas: ${listsResponse.status}`);
+    }
+
+    const lists = await listsResponse.json();
+    const listaProntos = lists.find((list: any) => 
+      list.name.includes('Pronto') || list.name.includes('Aguardando Retirada')
+    );
+
+    if (!listaProntos) {
+      console.log('[ranking-mecanicos] Lista "Prontos" não encontrada');
+      return res.json({ ranking: [] });
+    }
+
+    console.log('[ranking-mecanicos] Lista Prontos encontrada:', listaProntos.id);
+
+    // 2. Buscar todos os cards da lista "Prontos" com custom fields
+    const cardsResponse = await fetch(
+      `https://api.trello.com/1/lists/${listaProntos.id}/cards?key=${TRELLO_API_KEY}&token=${TRELLO_TOKEN}&customFieldItems=true`
+    );
+
+    if (!cardsResponse.ok) {
+      throw new Error(`Erro ao buscar cards: ${cardsResponse.status}`);
+    }
+
+    const cards = await cardsResponse.json();
+    console.log('[ranking-mecanicos] Cards encontrados:', cards.length);
+
+    // 3. Buscar custom fields para pegar nomes dos mecânicos
+    const customFieldsResponse = await fetch(
+      `https://api.trello.com/1/boards/${BOARD_ID}/customFields?key=${TRELLO_API_KEY}&token=${TRELLO_TOKEN}`
+    );
+
+    if (!customFieldsResponse.ok) {
+      throw new Error(`Erro ao buscar custom fields: ${customFieldsResponse.status}`);
+    }
+
+    const customFields = await customFieldsResponse.json();
+    const mecanicoField = customFields.find((field: any) => field.id === CUSTOM_FIELD_MECANICO);
+
+    // Criar mapa de ID -> Nome do mecânico
+    const mecanicoMap: { [key: string]: string } = {};
+    if (mecanicoField && mecanicoField.options) {
+      mecanicoField.options.forEach((option: any) => {
+        mecanicoMap[option.id] = option.value.text;
+      });
+    }
+
+    console.log('[ranking-mecanicos] Mecânicos cadastrados:', mecanicoMap);
+
+    // 4. Filtrar cards da última semana e agrupar por mecânico
+    const umaSemanaAtras = new Date();
+    umaSemanaAtras.setDate(umaSemanaAtras.getDate() - 7);
+
+    const rankingMap: { [key: string]: { nome: string; valor: number; carros: number } } = {};
+
+    cards.forEach((card: any) => {
+      // Verificar se o card foi atualizado na última semana
+      const dataAtualizacao = new Date(card.dateLastActivity);
+      if (dataAtualizacao < umaSemanaAtras) {
+        return; // Ignorar cards antigos
+      }
+
+      // Buscar mecânico responsável
+      const mecanicoItem = card.customFieldItems?.find(
+        (item: any) => item.idCustomField === CUSTOM_FIELD_MECANICO
+      );
+
+      if (!mecanicoItem || !mecanicoItem.idValue) {
+        return; // Ignorar cards sem mecânico
+      }
+
+      const mecanicoId = mecanicoItem.idValue;
+      const mecanicoNome = mecanicoMap[mecanicoId] || 'Desconhecido';
+
+      // Buscar valor aprovado
+      const valorItem = card.customFieldItems?.find(
+        (item: any) => item.idCustomField === CUSTOM_FIELD_VALOR_APROVADO
+      );
+
+      const valor = valorItem?.value?.number ? parseFloat(valorItem.value.number) : 0;
+
+      // Agrupar por mecânico
+      if (!rankingMap[mecanicoNome]) {
+        rankingMap[mecanicoNome] = { nome: mecanicoNome, valor: 0, carros: 0 };
+      }
+
+      rankingMap[mecanicoNome].valor += valor;
+      rankingMap[mecanicoNome].carros += 1;
+    });
+
+    // 5. Ordenar por valor e pegar top 3
+    const ranking = Object.values(rankingMap)
+      .sort((a, b) => b.valor - a.valor)
+      .slice(0, 3)
+      .map((item, index) => ({
+        posicao: index + 1,
+        nome: item.nome,
+        valor: item.valor,
+        carros: item.carros,
+        medalha: index === 0 ? '🥇' : index === 1 ? '🥈' : '🥉'
+      }));
+
+    console.log('[ranking-mecanicos] Ranking calculado:', ranking);
+
+    return res.json({ ranking });
+  } catch (error) {
+    console.error('[ranking-mecanicos] Erro:', error);
+    return res.status(500).json({ error: 'Erro ao buscar ranking de mecânicos', ranking: [] });
+  }
+});
+
 export default router;

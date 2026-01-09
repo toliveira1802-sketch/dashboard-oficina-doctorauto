@@ -4,6 +4,7 @@ import { Target, TrendingUp, DollarSign, Calendar, Zap, Award, Flame, Trophy, Sp
 import { AnimatedCurrency } from '@/components/AnimatedCurrency';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Loader2 } from 'lucide-react';
+import { RankingMecanicos } from '@/components/RankingMecanicos';
 
 interface MetaFinanceira {
   id: number;
@@ -323,9 +324,15 @@ export default function PainelMetas() {
           </div>
         </div>
 
-        {/* Linha 3: Motivação */}
+        {/* Linha 3: Ranking + Motivação */}
         <div className="grid grid-cols-12 gap-8">
-          <div className="col-span-12">
+          {/* Ranking de Mecânicos */}
+          <div className="col-span-4">
+            <RankingMecanicos className="h-full" />
+          </div>
+
+          {/* Motivação */}
+          <div className="col-span-8">
             <Card className="bg-gradient-to-r from-indigo-900 via-purple-900 to-pink-900 border-none shadow-2xl">
               <CardHeader>
                 <CardTitle className="flex items-center gap-3 text-3xl text-white">

@@ -365,3 +365,13 @@
 - [x] Aumentar ainda mais os valores principais
 - [x] Adicionar mensagens motivacionais dinâmicas
 - [x] Criar animações de entrada impactantes
+
+## Ranking Semanal de Mecânicos
+
+- [x] Analisar estrutura de dados do Trello (campo mecânico)
+- [x] Criar endpoint /api/trello/ranking-mecanicos
+- [x] Calcular top 3 mecânicos por valor entregue na semana
+- [x] Criar componente RankingMecanicos com medalhas 🥇🥈🥉
+- [x] Adicionar fotos/avatares dos mecânicos (iniciais com cores)
+- [x] Integrar ranking ao painel de metas
+- [x] Testar ranking com dados reais (endpoint funcionando, aguardando dados)
