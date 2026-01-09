@@ -268,3 +268,15 @@
 - [x] Manter apenas botão "Configurar Metas"
 - [x] Manter botão para abrir painel de TV
 - [x] Testar página limpa
+
+## Modificações no Painel Principal
+- [x] Remover seção "Próximos a Entrar"
+- [x] Gerar imagem do tigrinho
+- [x] Criar card do Tigrinho com texto "SOLTA A CARTA CARAI"
+- [x] Testar visualização no painel
+
+## Botões de Alerta na Agenda
+- [x] Adicionar botão "🚨 Peça Errada" na agenda
+- [x] Adicionar botão "✅ Carro Pronto" na agenda
+- [x] Botões visuais criados (ações serão implementadas depois)
+- [x] Testar funcionalidade dos botões

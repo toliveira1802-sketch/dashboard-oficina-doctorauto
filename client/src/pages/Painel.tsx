@@ -217,7 +217,17 @@ export default function Painel() {
         
         {/* METADE DE CIMA: Agenda dos Mecânicos (100% largura) */}
         <div className="bg-slate-800 rounded-lg p-4 shadow-xl">
-          <h2 className="text-xl font-bold mb-3">Agenda dos Mecânicos</h2>
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="text-xl font-bold">Agenda dos Mecânicos</h2>
+            <div className="flex gap-2">
+              <button className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg font-bold flex items-center gap-2 transition-all hover:scale-105">
+                🚨 Peça Errada
+              </button>
+              <button className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-bold flex items-center gap-2 transition-all hover:scale-105">
+                ✅ Carro Pronto
+              </button>
+            </div>
+          </div>
           <div className="grid grid-cols-5 gap-2 h-full">
             {MECANICOS.map(mecanico => (
               <div key={mecanico} className="bg-blue-900/30 rounded-lg p-2">
@@ -305,23 +315,12 @@ export default function Painel() {
           
           {/* Coluna 3: Próximos a Entrar + Entregas */}
           <div className="space-y-4">
-            {/* Próximos a Entrar */}
-            <div className="bg-slate-800 rounded-lg p-4 shadow-xl">
-              <h2 className="text-lg font-bold mb-2">Próximos a Entrar</h2>
-              {proximosEntrar.length > 0 ? (
-                <div className="space-y-1">
-                  {proximosEntrar.map((placa, idx) => (
-                    <div key={idx} className="bg-cyan-600 rounded px-2 py-1 text-sm font-semibold">
-                      {placa}
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="flex flex-col items-center justify-center py-4">
-                  <img src="/logo-doctorauto.jpeg" alt="Logo" className="w-16 h-16 opacity-50 mb-2" />
-                  <p className="text-slate-400 text-sm">Nenhum carro aguardando</p>
-                </div>
-              )}
+            {/* Card do Tigrinho */}
+            <div className="bg-gradient-to-br from-yellow-500 to-orange-600 rounded-lg p-6 shadow-xl flex flex-col items-center justify-center">
+              <img src="/tigrinho.png" alt="Tigrinho" className="w-32 h-32 mb-3" />
+              <h2 className="text-2xl font-black text-white text-center drop-shadow-lg">
+                SOLTA A CARTA CARAI
+              </h2>
             </div>
             
             {/* Entregas Previstas Hoje */}
