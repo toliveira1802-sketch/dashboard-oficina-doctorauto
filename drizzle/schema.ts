@@ -83,3 +83,127 @@ export const sugestoes = mysqlTable("sugestoes", {
 
 export type Sugestao = typeof sugestoes.$inferSelect;
 export type InsertSugestao = typeof sugestoes.$inferInsert;
+/**
+ * Veículos cadastrados no sistema
+ * Armazena informações básicas de cada veículo que passa pela oficina
+ */
+export const veiculos = mysqlTable("veiculos", {
+  id: int("id").autoincrement().primaryKey(),
+  placa: varchar("placa", { length: 10 }).notNull().unique(),
+  modelo: varchar("modelo", { length: 100 }),
+  marca: varchar("marca", { length: 50 }),
+  ano: int("ano"),
+  cliente: varchar("cliente", { length: 100 }),
+  telefone: varchar("telefone", { length: 20 }),
+  trelloCardId: varchar("trelloCardId", { length: 64 }), // ID do card atual no Trello
+  dataEntrada: timestamp("dataEntrada").defaultNow().notNull(),
+  dataSaida: timestamp("dataSaida"),
+  status: mysqlEnum("status", ["ativo", "concluido", "cancelado"]).default("ativo").notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type Veiculo = typeof veiculos.$inferSelect;
+export type InsertVeiculo = typeof veiculos.$inferInsert;
+
+/**
+ * Histórico de movimentações dos veículos entre etapas
+ * Registra cada mudança de lista/etapa no Trello
+ */
+export const historicoMovimentacoes = mysqlTable("historicoMovimentacoes", {
+  id: int("id").autoincrement().primaryKey(),
+  veiculoId: int("veiculoId").notNull(),
+  trelloCardId: varchar("trelloCardId", { length: 64 }),
+  etapaAnterior: varchar("etapaAnterior", { length: 50 }),
+  etapaNova: varchar("etapaNova", { length: 50 }).notNull(),
+  dataMovimentacao: timestamp("dataMovimentacao").defaultNow().notNull(),
+  diasNaEtapaAnterior: int("diasNaEtapaAnterior"),
+  mecanicoResponsavel: varchar("mecanicoResponsavel", { length: 100 }),
+  observacoes: text("observacoes"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type HistoricoMovimentacao = typeof historicoMovimentacoes.$inferSelect;
+export type InsertHistoricoMovimentacao = typeof historicoMovimentacoes.$inferInsert;
+
+/**
+ * Tipos de serviço disponíveis na oficina
+ * Catálogo de serviços para classificação
+ */
+export const tiposServico = mysqlTable("tiposServico", {
+  id: int("id").autoincrement().primaryKey(),
+  nome: varchar("nome", { length: 100 }).notNull().unique(),
+  categoria: varchar("categoria", { length: 50 }), // Mecânica, Elétrica, Funilaria, etc
+  tempoMedioHoras: int("tempoMedioHoras"), // Tempo médio estimado em horas
+  valorMedio: int("valorMedio"), // Valor médio em centavos
+  ativo: int("ativo").default(1).notNull(), // 1 = ativo, 0 = inativo
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type TipoServico = typeof tiposServico.$inferSelect;
+export type InsertTipoServico = typeof tiposServico.$inferInsert;
+
+/**
+ * Serviços realizados em cada veículo
+ * Registra detalhes de cada serviço executado
+ */
+export const servicos = mysqlTable("servicos", {
+  id: int("id").autoincrement().primaryKey(),
+  veiculoId: int("veiculoId").notNull(),
+  tipoServicoId: int("tipoServicoId"),
+  descricao: text("descricao").notNull(),
+  mecanicoResponsavel: varchar("mecanicoResponsavel", { length: 100 }),
+  dataInicio: timestamp("dataInicio"),
+  dataFim: timestamp("dataFim"),
+  tempoExecucaoHoras: int("tempoExecucaoHoras"), // Tempo real em horas (calculado)
+  valor: int("valor"), // Valor em centavos
+  status: mysqlEnum("status", ["planejado", "em_andamento", "concluido", "cancelado"]).default("planejado").notNull(),
+  foiRetorno: int("foiRetorno").default(0).notNull(), // 1 = veículo voltou por problema no serviço
+  observacoes: text("observacoes"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type Servico = typeof servicos.$inferSelect;
+export type InsertServico = typeof servicos.$inferInsert;
+
+/**
+ * Cadastro de mecânicos
+ * Informações dos profissionais da oficina
+ */
+export const mecanicos = mysqlTable("mecanicos", {
+  id: int("id").autoincrement().primaryKey(),
+  nome: varchar("nome", { length: 100 }).notNull().unique(),
+  especialidade: varchar("especialidade", { length: 100 }), // Motor, Suspensão, Elétrica, etc
+  telefone: varchar("telefone", { length: 20 }),
+  email: varchar("email", { length: 320 }),
+  dataAdmissao: timestamp("dataAdmissao"),
+  ativo: int("ativo").default(1).notNull(), // 1 = ativo, 0 = inativo
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type Mecanico = typeof mecanicos.$inferSelect;
+export type InsertMecanico = typeof mecanicos.$inferInsert;
+
+/**
+ * Métricas de performance dos mecânicos
+ * Dados agregados para ranking e análise
+ */
+export const mecanicoPerformance = mysqlTable("mecanicoPerformance", {
+  id: int("id").autoincrement().primaryKey(),
+  mecanicoNome: varchar("mecanicoNome", { length: 100 }).notNull(),
+  data: varchar("data", { length: 10 }).notNull(), // Formato: YYYY-MM-DD
+  veiculosConcluidos: int("veiculosConcluidos").default(0).notNull(),
+  servicosConcluidos: int("servicosConcluidos").default(0).notNull(),
+  tempoMedioServicoHoras: int("tempoMedioServicoHoras"), // Tempo médio em horas
+  taxaRetorno: int("taxaRetorno"), // Taxa de retorno em % (multiplicado por 100)
+  pontuacaoQualidade: int("pontuacaoQualidade"), // Nota de 0 a 100
+  horasTrabalhadas: int("horasTrabalhadas"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type MecanicoPerformance = typeof mecanicoPerformance.$inferSelect;
+export type InsertMecanicoPerformance = typeof mecanicoPerformance.$inferInsert;

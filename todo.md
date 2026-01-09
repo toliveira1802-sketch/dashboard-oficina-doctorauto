@@ -175,3 +175,28 @@
 ## Documentação
 - [x] Criar PDF com código de exemplo de botões
 - [x] Criar guia de apps e integrações necessárias
+
+## Banco de Dados - Persistência
+- [x] Criar tabela de veículos
+- [x] Criar tabela de histórico de movimentações
+- [x] Criar tabela de serviços realizados
+- [x] Criar tabela de tipos de serviço
+- [x] Criar tabela de mecânicos
+- [x] Criar tabela de performance de mecânicos
+- [x] Aplicar migrações no banco
+- [ ] Testar criação das tabelas
+
+## Sistema de Sincronização
+- [x] Criar job de sincronização com Trello
+- [x] Detectar movimentações de cards
+- [x] Salvar histórico de mudanças de etapa
+- [x] Calcular tempo em cada etapa
+- [ ] Integrar sincronização no servidor
+- [ ] Testar sincronização automática
+
+## APIs de Serviços
+- [ ] Criar endpoint para registrar serviço
+- [ ] Criar endpoint para listar serviços
+- [ ] Criar endpoint para atualizar serviço
+- [ ] Validar dados de entrada
+- [ ] Testar APIs
