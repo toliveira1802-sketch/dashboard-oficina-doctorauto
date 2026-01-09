@@ -331,3 +331,11 @@
 - [x] Validar cálculos de meta diária e potencial total
 - [x] Verificar responsividade do painel em diferentes resoluções
 - [x] Confirmar que todos os dados são reais (sem mocks)
+
+## Correções Urgentes - Botões Faltando
+
+- [x] Restaurar botão "Configurar Metas" na página Financeiro
+- [x] Restaurar botão "Abrir Painel de Metas" na página Financeiro
+- [x] Restaurar botões 🚨 (B.O Peça) e ✅ (Carro Pronto) em cada horário da agenda
+- [x] Verificar se botões estão funcionando corretamente
+- [x] Testar navegação para painel de metas

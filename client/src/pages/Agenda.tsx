@@ -272,21 +272,39 @@ export default function Agenda() {
                                 </div>
                               )}
 
-                              <div className="flex gap-1 pt-2 border-t border-slate-200">
-                                <button
-                                  onClick={() => handleFinalizado(item)}
-                                  className="flex-1 text-xs bg-green-100 hover:bg-green-200 text-green-700 px-2 py-1 rounded flex items-center justify-center gap-1"
-                                >
-                                  <CheckCircle className="h-3 w-3" />
-                                  Teste
-                                </button>
-                                <button
-                                  onClick={() => handleLiberado(item)}
-                                  className="flex-1 text-xs bg-blue-100 hover:bg-blue-200 text-blue-700 px-2 py-1 rounded flex items-center justify-center gap-1"
-                                >
-                                  <Truck className="h-3 w-3" />
-                                  Entrega
-                                </button>
+                              <div className="space-y-1 pt-2 border-t border-slate-200">
+                                <div className="flex gap-1">
+                                  <button
+                                    onClick={() => toast.info(`🚨 B.O de Peça registrado para ${item.placa}`)}
+                                    className="flex-1 text-xs bg-red-100 hover:bg-red-200 text-red-700 px-2 py-1 rounded flex items-center justify-center gap-1"
+                                    title="Reportar problema com peça"
+                                  >
+                                    🚨 B.O Peça
+                                  </button>
+                                  <button
+                                    onClick={() => toast.success(`✅ ${item.placa} marcado como pronto`)}
+                                    className="flex-1 text-xs bg-green-100 hover:bg-green-200 text-green-700 px-2 py-1 rounded flex items-center justify-center gap-1"
+                                    title="Marcar carro como pronto"
+                                  >
+                                    ✅ Pronto
+                                  </button>
+                                </div>
+                                <div className="flex gap-1">
+                                  <button
+                                    onClick={() => handleFinalizado(item)}
+                                    className="flex-1 text-xs bg-teal-100 hover:bg-teal-200 text-teal-700 px-2 py-1 rounded flex items-center justify-center gap-1"
+                                  >
+                                    <CheckCircle className="h-3 w-3" />
+                                    Teste
+                                  </button>
+                                  <button
+                                    onClick={() => handleLiberado(item)}
+                                    className="flex-1 text-xs bg-blue-100 hover:bg-blue-200 text-blue-700 px-2 py-1 rounded flex items-center justify-center gap-1"
+                                  >
+                                    <Truck className="h-3 w-3" />
+                                    Entrega
+                                  </button>
+                                </div>
                               </div>
                             </div>
                           </>
