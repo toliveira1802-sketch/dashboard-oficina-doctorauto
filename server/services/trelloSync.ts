@@ -5,7 +5,7 @@ import { eq } from 'drizzle-orm';
 // Configuração do Trello (deve vir de variáveis de ambiente)
 const TRELLO_API_KEY = process.env.TRELLO_API_KEY || '';
 const TRELLO_TOKEN = process.env.TRELLO_TOKEN || '';
-const TRELLO_BOARD_ID = process.env.TRELLO_BOARD_ID || 'NkhINjF2';
+const TRELLO_BOARD_ID = process.env.TRELLO_BOARD_ID || '69562921bad93c92c7922d0a';
 
 interface TrelloCard {
   id: string;
@@ -215,7 +215,12 @@ export async function syncTrelloData(): Promise<void> {
  * Inicia sincronização periódica (a cada 5 minutos)
  */
 export function startTrelloSync(): void {
-  console.log('[TrelloSync] Iniciando sincronização periódica (5 minutos)');
+  console.log('\n========================================');
+  console.log('[TrelloSync] 🚀 Iniciando sincronização periódica (5 minutos)');
+  console.log('[TrelloSync] Board ID:', TRELLO_BOARD_ID);
+  console.log('[TrelloSync] API Key:', TRELLO_API_KEY ? '✅ Configurada' : '❌ Não configurada');
+  console.log('[TrelloSync] Token:', TRELLO_TOKEN ? '✅ Configurado' : '❌ Não configurado');
+  console.log('========================================\n');
 
   // Executa imediatamente
   syncTrelloData().catch((error) => {

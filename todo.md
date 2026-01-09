@@ -200,3 +200,20 @@
 - [ ] Criar endpoint para atualizar serviço
 - [ ] Validar dados de entrada
 - [ ] Testar APIs
+
+## Página de Histórico
+- [ ] Criar componente da página Histórico
+- [ ] Implementar timeline de veículos com histórico de movimentações
+- [ ] Criar visualização de feedback diário de mecânicos
+- [ ] Adicionar filtros por data e mecânico
+- [ ] Criar APIs para buscar dados históricos
+- [ ] Testar funcionalidades
+
+## Ativação de Sincronização Automática
+- [x] Integrar startTrelloSync() no servidor principal
+- [x] Configurar variáveis de ambiente do Trello
+- [x] Testar conexão com API do Trello
+- [x] Reiniciar servidor para ativar sincronização
+- [x] Verificar dados salvos no banco
+- [x] Confirmar 34 cards processados do Trello
+- [x] Confirmar veículos e histórico salvos no PostgreSQL

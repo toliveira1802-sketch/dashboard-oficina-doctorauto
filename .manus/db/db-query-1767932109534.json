@@ -1,0 +1,70 @@
+{
+  "query": "SELECT placa, modelo, status, dataEntrada FROM veiculos LIMIT 10;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3dWo49LZM7B1Gvy.root --database 7A2gwQ2A8kNLBRdn5ZJDvH --execute SELECT placa, modelo, status, dataEntrada FROM veiculos LIMIT 10;",
+  "rows": [
+    {
+      "placa": "AEJ0815",
+      "modelo": "Fusca",
+      "status": "ativo",
+      "dataEntrada": "2026-01-09 04:14:16"
+    },
+    {
+      "placa": "QYO5G05",
+      "modelo": "TRACKER",
+      "status": "ativo",
+      "dataEntrada": "2026-01-09 04:14:16"
+    },
+    {
+      "placa": "FQW0H61",
+      "modelo": "PEUGEOT",
+      "status": "ativo",
+      "dataEntrada": "2026-01-09 04:14:16"
+    },
+    {
+      "placa": "QXA9A45",
+      "modelo": "RENEGADE",
+      "status": "ativo",
+      "dataEntrada": "2026-01-09 04:14:16"
+    },
+    {
+      "placa": "FDS1B47",
+      "modelo": "TRACKER",
+      "status": "ativo",
+      "dataEntrada": "2026-01-09 04:14:16"
+    },
+    {
+      "placa": "FXC1F03",
+      "modelo": "POLO",
+      "status": "ativo",
+      "dataEntrada": "2026-01-09 04:14:16"
+    },
+    {
+      "placa": "EZC5B81",
+      "modelo": "Mercedes",
+      "status": "ativo",
+      "dataEntrada": "2026-01-09 04:14:16"
+    },
+    {
+      "placa": "DZH5G39",
+      "modelo": "ONIX",
+      "status": "ativo",
+      "dataEntrada": "2026-01-09 04:14:16"
+    },
+    {
+      "placa": "TKB0G57",
+      "modelo": "Polo",
+      "status": "ativo",
+      "dataEntrada": "2026-01-09 04:14:16"
+    },
+    {
+      "placa": "GIS2695",
+      "modelo": "A4",
+      "status": "ativo",
+      "dataEntrada": "2026-01-09 04:14:16"
+    }
+  ],
+  "messages": [],
+  "stdout": "placa\tmodelo\tstatus\tdataEntrada\nAEJ0815\tFusca\tativo\t2026-01-09 04:14:16\nQYO5G05\tTRACKER\tativo\t2026-01-09 04:14:16\nFQW0H61\tPEUGEOT\tativo\t2026-01-09 04:14:16\nQXA9A45\tRENEGADE\tativo\t2026-01-09 04:14:16\nFDS1B47\tTRACKER\tativo\t2026-01-09 04:14:16\nFXC1F03\tPOLO\tativo\t2026-01-09 04:14:16\nEZC5B81\tMercedes\tativo\t2026-01-09 04:14:16\nDZH5G39\tONIX\tativo\t2026-01-09 04:14:16\nTKB0G57\tPolo\tativo\t2026-01-09 04:14:16\nGIS2695\tA4\tativo\t2026-01-09 04:14:16\n",
+  "stderr": "",
+  "execution_time_ms": 57
+}
