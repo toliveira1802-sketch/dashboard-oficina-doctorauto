@@ -575,3 +575,55 @@
 - [x] Aplicar tema premium vermelho/preto consistente
 - [x] Integrar com API do Trello para valores reais
 - [x] Testar cálculos e exibição
+
+
+## Robôs de Report - Telegram/WhatsApp
+
+- [ ] Definir plataforma (Telegram, WhatsApp ou ambos)
+- [ ] Configurar credenciais do bot Telegram
+- [ ] Configurar API do WhatsApp (Twilio/Evolution API)
+- [ ] Criar serviço de envio de mensagens
+- [ ] Implementar robô: Alerta de Novo Agendamento (Kommo)
+- [ ] Implementar robô: Confirmação de Entrega (Trello → Prontos)
+- [ ] Implementar robô: Alerta de Atraso (previsão vencida)
+- [ ] Implementar robô: Report Diário (18h)
+- [ ] Implementar robô: Report Semanal (segunda 9h)
+- [ ] Criar scheduler para reports programados
+- [ ] Testar envio de mensagens
+- [ ] Documentar configuração
+
+
+## Integração Kommo → Trello - Criação Automática de Cards
+
+- [x] Implementar lógica de criação de card no webhook Kommo
+- [x] Extrair dados do lead (nome, telefone, email)
+- [x] Criar card no Trello na lista AGENDADOS
+- [x] Adicionar informações do lead na descrição do card
+- [x] Testar com payload de exemplo
+- [ ] **PENDENTE:** Obter API Key e Token válidos do Trello com permissão de escrita
+- [ ] **PENDENTE:** Validar criação do card no Trello após configurar credenciais
+
+
+## Migração Dashboard: Trello → Supabase
+
+- [ ] Executar schema SQL no Supabase (supabase-schema.sql)
+- [ ] Atualizar webhook Kommo para salvar leads no Supabase
+- [ ] Atualizar webhook Trello para sincronizar cards no Supabase
+- [ ] Criar API endpoint `/api/supabase-data` para buscar dados
+- [ ] Atualizar Dashboard Operacional para ler do Supabase
+- [ ] Atualizar Dashboard Financeiro para ler do Supabase
+- [ ] Testar sincronização Kommo → Supabase
+- [ ] Testar sincronização Trello → Supabase
+- [ ] Validar dados no dashboard
+
+
+## Site Interativo: Setup Supabase
+
+- [x] Criar página `/setup-supabase` com interface visual
+- [x] Adicionar botões para copiar SQL de cada parte
+- [x] Implementar checklist de progresso (3 etapas)
+- [ ] Criar API `/api/supabase/execute-sql` para executar SQL (não necessário - usuário executa manualmente)
+- [x] Criar API `/api/supabase/validate-tables` para verificar tabelas
+- [x] Adicionar logs em tempo real da execução
+- [x] Aplicar tema premium vermelho/preto
+- [x] Testar execução completa das 3 partes

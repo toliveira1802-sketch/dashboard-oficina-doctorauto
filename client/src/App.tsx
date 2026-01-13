@@ -11,6 +11,7 @@ import Painel from './pages/Painel';
 import PainelMetas from './pages/PainelMetas';
 import Produtividade from "./pages/Produtividade";
 import Financeiro from "./pages/Financeiro";
+import SetupSupabase from "./pages/SetupSupabase";
 
 function Router() {
   // make sure to consider if you need authentication for certain routes
@@ -23,6 +24,7 @@ function Router() {
         <Route path="/painel-metas" component={PainelMetas} />
       <Route path={"/produtividade"} component={Produtividade} />
       <Route path={"/financeiro"} component={Financeiro} />
+      <Route path={"/setup-supabase"} component={SetupSupabase} />
       <Route path={"/404"} component={NotFound} />
       {/* Final fallback route */}
       <Route component={NotFound} />
