@@ -1,0 +1,1 @@
+ALTER TABLE `metasFinanceiras` ADD `diasUteis` int;

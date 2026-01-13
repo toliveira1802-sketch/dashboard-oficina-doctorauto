@@ -49,7 +49,7 @@ router.get('/', async (req, res) => {
  */
 router.post('/', async (req, res) => {
   try {
-    const { mes, ano, metaMensal, metaPorServico, metaDiaria } = req.body;
+    const { mes, ano, metaMensal, metaPorServico, metaDiaria, diasUteis } = req.body;
 
     if (!mes || !ano || !metaMensal) {
       return res.status(400).json({ error: 'Campos mes, ano e metaMensal são obrigatórios' });
@@ -78,6 +78,7 @@ router.post('/', async (req, res) => {
           metaMensal,
           metaPorServico,
           metaDiaria,
+          diasUteis,
           updatedAt: new Date(),
         })
         .where(eq(metasFinanceiras.id, existing[0].id));
@@ -91,6 +92,7 @@ router.post('/', async (req, res) => {
         metaMensal,
         metaPorServico,
         metaDiaria,
+        diasUteis,
       });
 
       res.json({ success: true, message: 'Metas criadas' });

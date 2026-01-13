@@ -811,3 +811,17 @@
 - [x] Remover cores "de cassino" (verde/vermelho vibrantes)
 - [x] Aplicar padrão visual do Operacional (cores neutras e profissionais)
 - [x] Testar página ajustada
+
+
+## Barra de Progresso - Meta vs Realizado
+
+- [x] Implementar cálculo de percentual atingido (realizado / meta)
+- [x] Calcular projeção de fechamento baseado no ritmo atual
+- [x] Criar componente visual da barra de progresso
+- [x] Exibir meta mensal, valor realizado e percentual
+- [x] Adicionar indicador visual de status (verde/amarelo/vermelho)
+- [x] Testar com diferentes cenários
+- [x] Adicionar campo diasUteis ao schema do banco
+- [x] Corrigir rota POST /api/metas para salvar diasUteis
+- [x] Corrigir rota GET /api/metas para enviar mes/ano
+- [x] Testar barra de progresso funcionando completamente

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import Navigation from '@/components/Navigation';
 import { Button } from '@/components/ui/button';
-import { RefreshCw, DollarSign, TrendingUp, Calendar, AlertCircle, Settings, Monitor, Package, Clock, CheckCircle } from 'lucide-react';
+import { RefreshCw, DollarSign, TrendingUp, Calendar, AlertCircle, Settings, Monitor, Package, Clock, CheckCircle, Target } from 'lucide-react';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
@@ -184,7 +184,10 @@ export default function Financeiro() {
 
   const carregarMetas = async () => {
     try {
-      const response = await fetch('/api/metas');
+      const hoje = new Date();
+      const mes = hoje.getMonth() + 1; // getMonth() retorna 0-11
+      const ano = hoje.getFullYear();
+      const response = await fetch(`/api/metas?mes=${mes}&ano=${ano}`);
       if (response.ok) {
         const data = await response.json();
         setMetas(data);
@@ -202,6 +205,9 @@ export default function Financeiro() {
     if (!senhaValidada) return;
     
     try {
+      const hoje = new Date();
+      const mes = hoje.getMonth() + 1;
+      const ano = hoje.getFullYear();
       const metaMensalNum = parseFloat(metaMensal) * 100;
       const diasUteisNum = parseInt(diasUteis);
       
@@ -209,6 +215,8 @@ export default function Financeiro() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
+          mes,
+          ano,
           metaMensal: metaMensalNum,
           diasUteis: diasUteisNum
         })
@@ -356,6 +364,101 @@ export default function Financeiro() {
             </Button>
           </div>
         </div>
+
+        {/* Barra de Progresso - Meta vs Realizado */}
+        {metas && periodoFiltro === 'mes' && (
+          <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-3">
+                <div className="p-3 bg-indigo-100 rounded-lg">
+                  <Target className="h-6 w-6 text-indigo-600" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-slate-900">Meta Mensal</h3>
+                  <p className="text-sm text-slate-600">Acompanhamento do faturamento</p>
+                </div>
+              </div>
+              <div className="text-right">
+                <p className="text-2xl font-bold text-slate-900">
+                  {((metrics.valorFaturado / (metas.metaMensal / 100)) * 100).toFixed(1)}%
+                </p>
+                <p className="text-sm text-slate-600">da meta atingida</p>
+              </div>
+            </div>
+            
+            {/* Barra de Progresso */}
+            <div className="relative w-full h-8 bg-slate-100 rounded-full overflow-hidden mb-4">
+              <div 
+                className={`h-full transition-all duration-500 ${
+                  (metrics.valorFaturado / (metas.metaMensal / 100)) >= 1 
+                    ? 'bg-gradient-to-r from-green-500 to-green-600' 
+                    : (metrics.valorFaturado / (metas.metaMensal / 100)) >= 0.7
+                    ? 'bg-gradient-to-r from-blue-500 to-blue-600'
+                    : (metrics.valorFaturado / (metas.metaMensal / 100)) >= 0.4
+                    ? 'bg-gradient-to-r from-amber-500 to-amber-600'
+                    : 'bg-gradient-to-r from-orange-500 to-orange-600'
+                }`}
+                style={{ width: `${Math.min(((metrics.valorFaturado / (metas.metaMensal / 100)) * 100), 100)}%` }}
+              >
+                <div className="h-full flex items-center justify-end pr-3">
+                  {(metrics.valorFaturado / (metas.metaMensal / 100)) >= 0.1 && (
+                    <span className="text-xs font-semibold text-white">
+                      {formatCurrency(metrics.valorFaturado)}
+                    </span>
+                  )}
+                </div>
+              </div>
+            </div>
+            
+            {/* Informações Detalhadas */}
+            <div className="grid grid-cols-3 gap-4">
+              <div className="text-center p-3 bg-slate-50 rounded-lg">
+                <p className="text-xs text-slate-600 mb-1">Meta Mensal</p>
+                <p className="text-lg font-bold text-slate-900">{formatCurrency(metas.metaMensal / 100)}</p>
+              </div>
+              <div className="text-center p-3 bg-slate-50 rounded-lg">
+                <p className="text-xs text-slate-600 mb-1">Realizado</p>
+                <p className="text-lg font-bold text-slate-900">{formatCurrency(metrics.valorFaturado)}</p>
+              </div>
+              <div className="text-center p-3 bg-slate-50 rounded-lg">
+                <p className="text-xs text-slate-600 mb-1">Falta Atingir</p>
+                <p className="text-lg font-bold text-slate-900">
+                  {formatCurrency(Math.max((metas.metaMensal / 100) - metrics.valorFaturado, 0))}
+                </p>
+              </div>
+            </div>
+            
+            {/* Projeção */}
+            {(() => {
+              const hoje = new Date();
+              const diaAtual = hoje.getDate();
+              const diasDecorridos = diaAtual;
+              const diasRestantes = metas.diasUteis - diasDecorridos;
+              const mediaDiaria = diasDecorridos > 0 ? metrics.valorFaturado / diasDecorridos : 0;
+              const projecao = metrics.valorFaturado + (mediaDiaria * diasRestantes);
+              const percentualProjecao = ((projecao / (metas.metaMensal / 100)) * 100);
+              
+              return diasRestantes > 0 ? (
+                <div className="mt-4 p-4 bg-indigo-50 rounded-lg border border-indigo-200">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-semibold text-indigo-900">Projeção de Fechamento</p>
+                      <p className="text-xs text-indigo-700">Baseado no ritmo atual ({formatCurrency(mediaDiaria)}/dia)</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-xl font-bold text-indigo-900">{formatCurrency(projecao)}</p>
+                      <p className={`text-sm font-semibold ${
+                        percentualProjecao >= 100 ? 'text-green-600' : 'text-orange-600'
+                      }`}>
+                        {percentualProjecao.toFixed(1)}% da meta
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              ) : null;
+            })()}
+          </div>
+        )}
 
         {/* Cards Financeiros - Linha 1 */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
