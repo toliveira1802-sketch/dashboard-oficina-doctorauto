@@ -835,3 +835,10 @@
 - [x] Revisar cálculo da projeção de fechamento (agora usa dias restantes corretos)
 - [x] Conferir todas as contas dos cards financeiros
 - [x] Testar todos os cálculos com dados reais (todos corretos!)
+
+
+## Ajustes Finais Barra de Progresso
+
+- [x] Adicionar valor fantasma visível na barra (mostrar R$ do aprovado no pátio)
+- [x] Adicionar texto na porcentagem: "Se tudo aprovado saísse: XX%"
+- [x] Testar visualização (PERFEITO! Valor fantasma e texto de potencial funcionando!)

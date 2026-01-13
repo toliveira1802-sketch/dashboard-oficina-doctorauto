@@ -400,6 +400,9 @@ export default function Financeiro() {
                     {((metrics.valorFaturado / (metas.metaMensal / 100)) * 100).toFixed(1)}%
                   </p>
                   <p className="text-sm text-slate-600">da meta atingida</p>
+                  <p className="text-xs text-slate-500 mt-1">
+                    Se tudo aprovado saísse: {(((metrics.valorFaturado + metrics.valorPreso) / (metas.metaMensal / 100)) * 100).toFixed(1)}%
+                  </p>
                 </div>
                 <button
                   onClick={() => setBarraMinimizada(!barraMinimizada)}
@@ -418,7 +421,15 @@ export default function Financeiro() {
                   <div 
                     className="absolute h-full bg-gradient-to-r from-slate-300/50 to-slate-400/50 transition-all duration-500"
                     style={{ width: `${Math.min((((metrics.valorFaturado + metrics.valorPreso) / (metas.metaMensal / 100)) * 100), 100)}%` }}
-                  />
+                  >
+                    <div className="h-full flex items-center justify-end pr-3">
+                      {((metrics.valorFaturado + metrics.valorPreso) / (metas.metaMensal / 100)) >= 0.15 && (
+                        <span className="text-xs font-semibold text-slate-600">
+                          {formatCurrency(metrics.valorPreso)}
+                        </span>
+                      )}
+                    </div>
+                  </div>
                   
                   {/* Barra Principal (Faturado) */}
                   <div 
