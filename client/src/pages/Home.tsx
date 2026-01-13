@@ -511,12 +511,20 @@ export default function Home() {
                         .map(card => {
                           const placaField = card.customFieldItems?.find(item => item.idCustomField === customFieldsMap['Placa']?.id);
                           const placa = placaField?.value?.text || 'Sem placa';
-                          return placa;
+                          return { card, placa };
                         })
-                        .filter(placa => placa !== 'Sem placa')
-                        .map((placa, idx) => (
-                          <span key={idx} className="text-xs bg-slate-700 text-white px-2 py-0.5 rounded font-mono">
-                            {placa}
+                        .filter(item => item.placa !== 'Sem placa')
+                        .map((item, idx) => (
+                          <span 
+                            key={idx} 
+                            className="text-xs bg-slate-700 text-white px-2 py-0.5 rounded font-mono cursor-pointer hover:bg-slate-900 hover:scale-110 transition-all"
+                            onClick={() => {
+                              setSearchTerm(item.placa);
+                              setModalCategory('todos');
+                              setModalOpen(true);
+                            }}
+                          >
+                            {item.placa}
                           </span>
                         ))
                       }
@@ -1055,6 +1063,7 @@ export default function Home() {
               {modalCategory === 'foraLoja' && '📍 Veículos FORA DA LOJA'}
               {modalCategory === 'atrasados' && '⚠️ Veículos Atrasados (Previsão Ultrapassada)'}
               {modalCategory === 'agendados' && '📅 Agendados Hoje'}
+              {modalCategory === 'todos' && `🚗 Veículo: ${searchTerm}`}
             </DialogTitle>
             <DialogDescription>
               Lista completa de veículos nesta categoria
@@ -1200,6 +1209,9 @@ export default function Home() {
         const listName = listIdMap[card.idList];
         return listName?.includes('AGENDADOS');
       });
+    } else if (modalCategory === 'todos') {
+      // Mostrar todos os cards (usado quando clica em placa)
+      filtered = allCards;
     } else {
       const targetListName = listMap[modalCategory];
       if (!targetListName) return [];

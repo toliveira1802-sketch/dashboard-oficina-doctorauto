@@ -933,3 +933,10 @@
 - [x] Adicionar lista de placas no card de Lotação do Pátio
 - [x] Reorganizar Status Pátio: 4 cards em cima e 4 cards em baixo
 - [x] Testar layout e visualização
+
+
+## Placas Clicáveis - Dashboard Operacional
+
+- [x] Tornar placas no card de Lotação clicáveis
+- [x] Ao clicar, abrir modal com detalhes do veículo
+- [x] Testar funcionalidade
