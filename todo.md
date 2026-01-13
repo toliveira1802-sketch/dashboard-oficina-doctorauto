@@ -486,3 +486,15 @@
 - [ ] Executar SQL no Supabase manualmente (supabase-schema.sql)
 - [ ] Testar sincronização completa quando sandbox resolver rede
 - [ ] Atualizar frontend para usar API Supabase (opcional - pode manter Trello direto)
+
+
+## Refatoração Dashboard Financeiro
+
+- [x] Reorganizar cards: Valor Faturado, Ticket Médio Real, Carros Entregues, Saída Hoje, Valor Atrasado, Valor Preso na Oficina
+- [x] Corrigir Ticket Médio: calcular baseado em carros entregues (Valor Faturado ÷ Qtd Entregues)
+- [x] Adicionar card "Valor Faturado": soma de todos os carros na lista Entregue
+- [x] Adicionar card "Valor Preso na Oficina": soma de carros aprovados que ainda não saíram (dentro do prazo)
+- [x] Adicionar filtro de Categoria (buscar custom field Categoria do Trello)
+- [x] Adicionar card "Por Tipo de Serviço": breakdown por categoria com Valor Total, Quantidade e Ticket Médio
+- [x] Destacar análise de Promoções para medir upsell
+- [x] Testar métricas com dados reais

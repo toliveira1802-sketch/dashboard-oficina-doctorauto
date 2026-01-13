@@ -1,18 +1,17 @@
-import { useEffect, useState } from 'react';
+import { useState, useEffect } from 'react';
 import Navigation from '@/components/Navigation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { RefreshCw, DollarSign, TrendingUp, Calendar, AlertCircle, Settings, Target, CheckCircle, Download, Monitor } from 'lucide-react';
+import { RefreshCw, DollarSign, TrendingUp, Calendar, AlertCircle, Settings, CheckCircle, Monitor, Package } from 'lucide-react';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 
-
 // Configuração do Trello
 const TRELLO_API_KEY = 'e327cf4891fd2fcb6020899e3718c45e';
 const TRELLO_TOKEN = 'ATTAa37008bfb8c135e0815e9a964d5c7f2e0b2ed2530c6bfdd202061e53ae1a6c18F1F6F8C7';
-const TRELLO_BOARD_ID = '69562921bad93c92c7922d0a'; // NkhINjF2
+const TRELLO_BOARD_ID = '69562921bad93c92c7922d0a';
 
 interface TrelloCard {
   id: string;
@@ -23,10 +22,18 @@ interface TrelloCard {
 }
 
 interface FinancialMetrics {
-  valorTotalOficina: number;
+  valorFaturado: number;
+  carrosEntregues: number;
+  ticketMedioReal: number;
   valorSaidaHoje: number;
   valorAtrasado: number;
-  carrosComValor: number;
+  valorPresoOficina: number;
+}
+
+interface ServiceBreakdown {
+  categoria: string;
+  valorTotal: number;
+  quantidade: number;
   ticketMedio: number;
 }
 
@@ -41,16 +48,21 @@ interface MetaFinanceira {
 
 export default function Financeiro() {
   const [metrics, setMetrics] = useState<FinancialMetrics>({
-    valorTotalOficina: 0,
+    valorFaturado: 0,
+    carrosEntregues: 0,
+    ticketMedioReal: 0,
     valorSaidaHoje: 0,
     valorAtrasado: 0,
-    carrosComValor: 0,
-    ticketMedio: 0
+    valorPresoOficina: 0
   });
   const [cards, setCards] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [lastUpdate, setLastUpdate] = useState<string>('');
   const [responsavelFilter, setResponsavelFilter] = useState<string>('todos');
+  const [categoriaFilter, setCategoriaFilter] = useState<string>('todas');
+  const [categorias, setCategorias] = useState<string[]>([]);
+  const [responsaveis, setResponsaveis] = useState<string[]>([]);
+  const [serviceBreakdown, setServiceBreakdown] = useState<ServiceBreakdown[]>([]);
   
   // Estados para metas
   const [metas, setMetas] = useState<MetaFinanceira | null>(null);
@@ -83,6 +95,19 @@ export default function Financeiro() {
       const valorAprovadoField = customFields.find((f: any) => f.name === 'Valor Aprovado');
       const previsaoEntregaField = customFields.find((f: any) => f.name === 'Previsão de Entrega');
       const responsavelField = customFields.find((f: any) => f.name === 'Responsável Técnico');
+      const categoriaField = customFields.find((f: any) => f.name === 'Categoria');
+      
+      // Extrair categorias únicas
+      if (categoriaField?.options) {
+        const cats = categoriaField.options.map((opt: any) => opt.value.text);
+        setCategorias(cats);
+      }
+      
+      // Extrair responsáveis únicos
+      if (responsavelField?.options) {
+        const resps = responsavelField.options.map((opt: any) => opt.value.text);
+        setResponsaveis(resps);
+      }
 
       // Buscar cards
       const cardsResponse = await fetch(
@@ -94,83 +119,141 @@ export default function Financeiro() {
       const hoje = new Date();
       hoje.setHours(0, 0, 0, 0);
 
-      let totalOficina = 0;
+      // Métricas
+      let valorFaturado = 0;
+      let carrosEntregues = 0;
       let saidaHoje = 0;
       let atrasado = 0;
-      let countComValor = 0;
+      let valorPresoOficina = 0;
+      
+      // Para breakdown por serviço
+      const serviceMap = new Map<string, { total: number; count: number }>();
 
-      const processedCards = allCards
-        .filter((card: TrelloCard) => {
-          const listName = listMap[card.idList];
-          // Apenas cards que estão na oficina (não entregues)
-          return !listName.includes('Entregue') && !listName.includes('AGENDADOS');
-        })
-        .map((card: TrelloCard) => {
-          const listName = listMap[card.idList];
-          
-          // Extrair valor aprovado
-          let valorAprovado = 0;
-          const valorField = card.customFieldItems?.find((item: any) => 
-            item.idCustomField === valorAprovadoField?.id
+      const processedCards = allCards.map((card: TrelloCard) => {
+        const listName = listMap[card.idList];
+        
+        // Extrair valor aprovado
+        let valorAprovado = 0;
+        const valorField = card.customFieldItems?.find((item: any) => 
+          item.idCustomField === valorAprovadoField?.id
+        );
+        if (valorField?.value?.number) {
+          valorAprovado = parseFloat(valorField.value.number);
+        }
+
+        // Extrair previsão de entrega
+        let previsaoEntrega = null;
+        const previsaoField = card.customFieldItems?.find((item: any) => 
+          item.idCustomField === previsaoEntregaField?.id
+        );
+        if (previsaoField?.value?.date) {
+          previsaoEntrega = new Date(previsaoField.value.date);
+        }
+
+        // Extrair responsável técnico
+        let responsavel = 'Não definido';
+        const responsavelFieldItem = card.customFieldItems?.find((item: any) => 
+          item.idCustomField === responsavelField?.id
+        );
+        if (responsavelFieldItem?.idValue) {
+          const option = responsavelField?.options?.find((opt: any) => 
+            opt.id === responsavelFieldItem.idValue
           );
-          if (valorField?.value?.number) {
-            valorAprovado = parseFloat(valorField.value.number);
-            totalOficina += valorAprovado;
-            countComValor++;
+          if (option) {
+            responsavel = option.value.text;
           }
-
-          // Extrair previsão de entrega
-          let previsaoEntrega = null;
-          const previsaoField = card.customFieldItems?.find((item: any) => 
-            item.idCustomField === previsaoEntregaField?.id
+        }
+        
+        // Extrair categoria
+        let categoria = 'Sem categoria';
+        const categoriaFieldItem = card.customFieldItems?.find((item: any) => 
+          item.idCustomField === categoriaField?.id
+        );
+        if (categoriaFieldItem?.idValue) {
+          const option = categoriaField?.options?.find((opt: any) => 
+            opt.id === categoriaFieldItem.idValue
           );
-          if (previsaoField?.value?.date) {
-            previsaoEntrega = new Date(previsaoField.value.date);
-            
-            // Verificar se sai hoje
-            const previsaoDate = new Date(previsaoEntrega);
-            previsaoDate.setHours(0, 0, 0, 0);
-            if (previsaoDate.getTime() === hoje.getTime() && valorAprovado > 0) {
-              saidaHoje += valorAprovado;
-            }
-
-            // Verificar se está atrasado
-            if (previsaoDate < hoje && valorAprovado > 0 && !listName.includes('Pronto')) {
-              atrasado += valorAprovado;
-            }
+          if (option) {
+            categoria = option.value.text;
           }
+        }
 
-          // Extrair responsável técnico
-          let responsavel = 'Não definido';
-          const responsavelFieldItem = card.customFieldItems?.find((item: any) => 
-            item.idCustomField === responsavelField?.id
-          );
-          if (responsavelFieldItem?.idValue) {
-            const option = responsavelField?.options?.find((opt: any) => 
-              opt.id === responsavelFieldItem.idValue
-            );
-            if (option) {
-              responsavel = option.value.text;
-            }
+        // Calcular métricas
+        
+        // 1. Valor Faturado (carros entregues)
+        if (listName.includes('entregue') && valorAprovado > 0) {
+          valorFaturado += valorAprovado;
+          carrosEntregues++;
+        }
+        
+        // 2. Saída Hoje
+        if (previsaoEntrega && valorAprovado > 0) {
+          const previsaoDate = new Date(previsaoEntrega);
+          previsaoDate.setHours(0, 0, 0, 0);
+          if (previsaoDate.getTime() === hoje.getTime()) {
+            saidaHoje += valorAprovado;
           }
+        }
+        
+        // 3. Valor Atrasado
+        if (previsaoEntrega && valorAprovado > 0 && !listName.includes('entregue')) {
+          const previsaoDate = new Date(previsaoEntrega);
+          previsaoDate.setHours(0, 0, 0, 0);
+          if (previsaoDate < hoje) {
+            atrasado += valorAprovado;
+          }
+        }
+        
+        // 4. Valor Preso na Oficina (aprovado mas não entregue, dentro do prazo)
+        if (valorAprovado > 0 && !listName.includes('entregue') && !listName.includes('AGENDADOS')) {
+          const dentroDoPrazo = !previsaoEntrega || (previsaoEntrega && new Date(previsaoEntrega) >= hoje);
+          if (dentroDoPrazo) {
+            valorPresoOficina += valorAprovado;
+          }
+        }
+        
+        // Breakdown por serviço (apenas entregues)
+        if (listName.includes('entregue') && valorAprovado > 0) {
+          if (!serviceMap.has(categoria)) {
+            serviceMap.set(categoria, { total: 0, count: 0 });
+          }
+          const current = serviceMap.get(categoria)!;
+          current.total += valorAprovado;
+          current.count++;
+        }
 
-          return {
-            id: card.id,
-            name: card.name,
-            listName,
-            valorAprovado,
-            previsaoEntrega,
-            responsavel
-          };
+        return {
+          id: card.id,
+          name: card.name,
+          listName,
+          valorAprovado,
+          previsaoEntrega,
+          responsavel,
+          categoria
+        };
+      });
+
+      // Calcular breakdown por serviço
+      const breakdown: ServiceBreakdown[] = [];
+      serviceMap.forEach((value, key) => {
+        breakdown.push({
+          categoria: key,
+          valorTotal: value.total,
+          quantidade: value.count,
+          ticketMedio: value.count > 0 ? value.total / value.count : 0
         });
+      });
+      breakdown.sort((a, b) => b.valorTotal - a.valorTotal);
+      setServiceBreakdown(breakdown);
 
       setCards(processedCards);
       setMetrics({
-        valorTotalOficina: totalOficina,
+        valorFaturado,
+        carrosEntregues,
+        ticketMedioReal: carrosEntregues > 0 ? valorFaturado / carrosEntregues : 0,
         valorSaidaHoje: saidaHoje,
         valorAtrasado: atrasado,
-        carrosComValor: countComValor,
-        ticketMedio: countComValor > 0 ? totalOficina / countComValor : 0
+        valorPresoOficina
       });
 
       setLastUpdate(new Date().toLocaleTimeString('pt-BR'));
@@ -247,34 +330,19 @@ export default function Financeiro() {
     return () => clearInterval(interval);
   }, []);
 
+  // Filtrar cards
   const filteredCards = cards.filter(card => {
-    if (responsavelFilter === 'todos') return true;
-    return card.responsavel === responsavelFilter;
+    if (responsavelFilter !== 'todos' && card.responsavel !== responsavelFilter) return false;
+    if (categoriaFilter !== 'todas' && card.categoria !== categoriaFilter) return false;
+    // Não mostrar entregues na tabela
+    if (card.listName.includes('entregue')) return false;
+    return true;
   });
-
-  const filteredMetrics = responsavelFilter === 'todos' ? metrics : {
-    valorTotalOficina: filteredCards.reduce((sum, c) => sum + c.valorAprovado, 0),
-    valorSaidaHoje: filteredCards.filter(c => {
-      if (!c.previsaoEntrega) return false;
-      const hoje = new Date();
-      hoje.setHours(0, 0, 0, 0);
-      const previsao = new Date(c.previsaoEntrega);
-      previsao.setHours(0, 0, 0, 0);
-      return previsao.getTime() === hoje.getTime();
-    }).reduce((sum, c) => sum + c.valorAprovado, 0),
-    valorAtrasado: filteredCards.filter(c => {
-      if (!c.previsaoEntrega) return false;
-      const hoje = new Date();
-      hoje.setHours(0, 0, 0, 0);
-      const previsao = new Date(c.previsaoEntrega);
-      previsao.setHours(0, 0, 0, 0);
-      return previsao < hoje && !c.listName.includes('Pronto');
-    }).reduce((sum, c) => sum + c.valorAprovado, 0),
-    carrosComValor: filteredCards.filter(c => c.valorAprovado > 0).length,
-    ticketMedio: filteredCards.filter(c => c.valorAprovado > 0).length > 0 
-      ? filteredCards.reduce((sum, c) => sum + c.valorAprovado, 0) / filteredCards.filter(c => c.valorAprovado > 0).length 
-      : 0
-  };
+  
+  // Filtrar breakdown
+  const filteredBreakdown = categoriaFilter === 'todas' 
+    ? serviceBreakdown 
+    : serviceBreakdown.filter(s => s.categoria === categoriaFilter);
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('pt-BR', {
@@ -387,36 +455,81 @@ export default function Financeiro() {
       </div>
 
       <div className="container py-8">
-        {/* Filtro por Responsável */}
-        <div className="mb-6">
-          <label className="text-sm font-medium text-slate-700 mb-2 block">
-            Filtrar por Responsável Técnico
-          </label>
-          <Select value={responsavelFilter} onValueChange={setResponsavelFilter}>
-            <SelectTrigger className="w-64 bg-white">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="todos">Todos</SelectItem>
-              <SelectItem value="Pedro">Pedro</SelectItem>
-              <SelectItem value="João">João</SelectItem>
-              <SelectItem value="Não definido">Não definido</SelectItem>
-            </SelectContent>
-          </Select>
+        {/* Filtros */}
+        <div className="mb-6 flex gap-4">
+          <div>
+            <label className="text-sm font-medium text-slate-700 mb-2 block">
+              Filtrar por Responsável Técnico
+            </label>
+            <Select value={responsavelFilter} onValueChange={setResponsavelFilter}>
+              <SelectTrigger className="w-64 bg-white">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="todos">Todos</SelectItem>
+                {responsaveis.map(resp => (
+                  <SelectItem key={resp} value={resp}>{resp}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          
+          <div>
+            <label className="text-sm font-medium text-slate-700 mb-2 block">
+              Filtrar por Categoria
+            </label>
+            <Select value={categoriaFilter} onValueChange={setCategoriaFilter}>
+              <SelectTrigger className="w-64 bg-white">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="todas">Todas</SelectItem>
+                {categorias.map(cat => (
+                  <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
         </div>
 
         {/* Cards de Métricas */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
-          <Card className="bg-gradient-to-br from-blue-500 to-blue-600 text-white">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-6 mb-8">
+          <Card className="bg-gradient-to-br from-emerald-500 to-emerald-600 text-white">
             <CardHeader className="pb-3">
               <CardTitle className="text-sm font-medium flex items-center gap-2">
                 <DollarSign className="h-4 w-4" />
-                Valor Total na Oficina
+                Valor Faturado
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold">{formatCurrency(filteredMetrics.valorTotalOficina)}</div>
-              <p className="text-blue-100 text-sm mt-1">{filteredMetrics.carrosComValor} carros com valor</p>
+              <div className="text-3xl font-bold">{formatCurrency(metrics.valorFaturado)}</div>
+              <p className="text-emerald-100 text-sm mt-1">Carros entregues no mês</p>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-gradient-to-br from-blue-500 to-blue-600 text-white">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm font-medium flex items-center gap-2">
+                <CheckCircle className="h-4 w-4" />
+                Carros Entregues
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold">{metrics.carrosEntregues}</div>
+              <p className="text-blue-100 text-sm mt-1">Quantidade no mês</p>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-gradient-to-br from-purple-500 to-purple-600 text-white">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm font-medium flex items-center gap-2">
+                <TrendingUp className="h-4 w-4" />
+                Ticket Médio Real
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold">{formatCurrency(metrics.ticketMedioReal)}</div>
+              <p className="text-purple-100 text-sm mt-1">Por veículo entregue</p>
             </CardContent>
           </Card>
 
@@ -428,7 +541,7 @@ export default function Financeiro() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold">{formatCurrency(filteredMetrics.valorSaidaHoje)}</div>
+              <div className="text-3xl font-bold">{formatCurrency(metrics.valorSaidaHoje)}</div>
               <p className="text-green-100 text-sm mt-1">Previsão de entrega</p>
             </CardContent>
           </Card>
@@ -441,36 +554,57 @@ export default function Financeiro() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold">{formatCurrency(filteredMetrics.valorAtrasado)}</div>
+              <div className="text-3xl font-bold">{formatCurrency(metrics.valorAtrasado)}</div>
               <p className="text-red-100 text-sm mt-1">Passou da previsão</p>
             </CardContent>
           </Card>
 
-          <Card className="bg-gradient-to-br from-purple-500 to-purple-600 text-white">
+          <Card className="bg-gradient-to-br from-amber-500 to-amber-600 text-white">
             <CardHeader className="pb-3">
               <CardTitle className="text-sm font-medium flex items-center gap-2">
-                <TrendingUp className="h-4 w-4" />
-                Ticket Médio
+                <Package className="h-4 w-4" />
+                Valor Preso
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold">{formatCurrency(filteredMetrics.ticketMedio)}</div>
-              <p className="text-purple-100 text-sm mt-1">Por veículo</p>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-gradient-to-br from-orange-500 to-orange-600 text-white">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium">
-                Carros com Valor
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold">{filteredMetrics.carrosComValor}</div>
-              <p className="text-orange-100 text-sm mt-1">De {filteredCards.length} total</p>
+              <div className="text-3xl font-bold">{formatCurrency(metrics.valorPresoOficina)}</div>
+              <p className="text-amber-100 text-sm mt-1">Aprovado na oficina</p>
             </CardContent>
           </Card>
         </div>
+
+        {/* Breakdown por Tipo de Serviço */}
+        <Card className="mb-8">
+          <CardHeader>
+            <CardTitle>Análise por Tipo de Serviço</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {filteredBreakdown.map(service => (
+                <div key={service.categoria} className="p-4 bg-slate-50 rounded-lg border border-slate-200">
+                  <h3 className="font-semibold text-slate-900 mb-2">{service.categoria}</h3>
+                  <div className="space-y-1 text-sm">
+                    <div className="flex justify-between">
+                      <span className="text-slate-600">Valor Total:</span>
+                      <span className="font-semibold text-slate-900">{formatCurrency(service.valorTotal)}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-slate-600">Quantidade:</span>
+                      <span className="font-semibold text-slate-900">{service.quantidade} carros</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-slate-600">Ticket Médio:</span>
+                      <span className="font-semibold text-slate-900">{formatCurrency(service.ticketMedio)}</span>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+            {filteredBreakdown.length === 0 && (
+              <p className="text-center text-slate-500 py-8">Nenhum serviço encontrado</p>
+            )}
+          </CardContent>
+        </Card>
 
         {/* Tabela de Carros */}
         <Card>
@@ -485,6 +619,7 @@ export default function Financeiro() {
                     <th className="text-left p-3 font-medium text-slate-700">Veículo</th>
                     <th className="text-left p-3 font-medium text-slate-700">Etapa</th>
                     <th className="text-left p-3 font-medium text-slate-700">Responsável</th>
+                    <th className="text-left p-3 font-medium text-slate-700">Categoria</th>
                     <th className="text-right p-3 font-medium text-slate-700">Valor Aprovado</th>
                     <th className="text-left p-3 font-medium text-slate-700">Previsão Entrega</th>
                     <th className="text-left p-3 font-medium text-slate-700">Status</th>
@@ -504,7 +639,7 @@ export default function Financeiro() {
                       if (previsao.getTime() === hoje.getTime()) {
                         statusColor = 'text-green-600 font-semibold';
                         statusText = 'Sai hoje';
-                      } else if (previsao < hoje && !card.listName.includes('Pronto')) {
+                      } else if (previsao < hoje) {
                         statusColor = 'text-red-600 font-semibold';
                         statusText = 'Atrasado';
                       }
@@ -519,6 +654,7 @@ export default function Financeiro() {
                           </span>
                         </td>
                         <td className="p-3">{card.responsavel}</td>
+                        <td className="p-3">{card.categoria}</td>
                         <td className="p-3 text-right font-semibold">
                           {card.valorAprovado > 0 ? formatCurrency(card.valorAprovado) : '-'}
                         </td>
