@@ -4,7 +4,7 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Loader2, AlertCircle, CheckCircle, Clock, Search, X, RefreshCw, ChevronUp, ChevronDown, Download } from "lucide-react";
+import { Loader2, AlertCircle, CheckCircle, Clock, Search, X, RefreshCw, ChevronUp, ChevronDown, Download, ExternalLink } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 
@@ -141,19 +141,63 @@ export default function Home() {
     return () => clearInterval(interval);
   }, [responsavelFilter]);
 
-  function extractRecursoFromDesc(desc: string | undefined): string | null {
-    if (!desc) return null;
-    const match = desc.match(/Recurso[:\s]+([^\n]+)/i);
+  function extractRecursoFromCard(card: TrelloCard): string | null {
+    // Tentar buscar do custom field "Recurso" (tipo dropdown)
+    const recursoField = customFieldsMap['Recurso'];
+    if (recursoField && card.customFieldItems) {
+      const recursoItem = card.customFieldItems.find((item: any) => item.idCustomField === recursoField.id);
+      
+      if (recursoItem) {
+        // Se for dropdown (tipo list), usar idValue para buscar nas opções
+        if (recursoItem.idValue && recursoField.options) {
+          const option = recursoField.options.find((opt: any) => opt.id === recursoItem.idValue);
+          if (option && option.value && option.value.text) {
+            return option.value.text;
+          }
+        }
+        // Se for texto direto
+        if (recursoItem.value && recursoItem.value.text) {
+          return recursoItem.value.text;
+        }
+      }
+    }
+    
+    // Fallback: tentar extrair da descrição
+    if (card.description) {
+      const match = card.description.match(/Recurso[:\s]+([^\n]+)/i);
+      if (match) return match[1].trim();
+    }
+    
+    return null;
+  }
+
+  function extractPlacaFromCard(card: TrelloCard): string | null {
+    // Buscar do custom field "Placa"
+    const placaField = customFieldsMap['Placa'];
+    if (placaField && card.customFieldItems) {
+      const placaItem = card.customFieldItems.find((item: any) => item.idCustomField === placaField.id);
+      if (placaItem && placaItem.value && placaItem.value.text) {
+        return placaItem.value.text;
+      }
+    }
+    
+    // Fallback: tentar extrair do nome do card
+    const match = card.name.match(/^([A-Z0-9-]+)\s*-/);
     return match ? match[1].trim() : null;
   }
 
-  function extractPlacaFromName(name: string): string | null {
-    const match = name.match(/^([A-Z0-9-]+)\s*-/);
-    return match ? match[1].trim() : null;
-  }
-
-  function extractModeloFromName(name: string): string | null {
-    const parts = name.split(' - ');
+  function extractModeloFromCard(card: TrelloCard): string | null {
+    // Buscar do custom field "Modelo" se existir
+    const modeloField = customFieldsMap['Modelo'];
+    if (modeloField && card.customFieldItems) {
+      const modeloItem = card.customFieldItems.find((item: any) => item.idCustomField === modeloField.id);
+      if (modeloItem && modeloItem.value && modeloItem.value.text) {
+        return modeloItem.value.text;
+      }
+    }
+    
+    // Fallback: extrair do nome do card
+    const parts = card.name.split(' - ');
     return parts.length > 1 ? parts[1].trim() : null;
   }
 
@@ -286,8 +330,8 @@ export default function Home() {
           else if (listName === '🛠️🔩Em Execução') newMetrics.em_execucao++;
           else if (isPronto) newMetrics.prontos++;
 
-          // Extrair recurso da descrição
-          const recurso = extractRecursoFromDesc(card.description);
+          // Extrair recurso do custom field
+          const recurso = extractRecursoFromCard(card);
           if (recurso) {
             recursosOcupados.set(recurso, card);
           }
@@ -306,8 +350,8 @@ export default function Home() {
             ...recurso,
             status: status as 'livre' | 'ocupado' | 'atrasado',
             card: {
-              placa: extractPlacaFromName(card.name) || 'N/A',
-              modelo: extractModeloFromName(card.name) || 'N/A',
+              placa: extractPlacaFromCard(card) || 'N/A',
+              modelo: extractModeloFromCard(card) || 'N/A',
               dias
             }
           };
@@ -702,13 +746,13 @@ export default function Home() {
           <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3">
             {(() => {
               const etapas = [
-                { key: 'diagnostico', nome: 'Diagnóstico', lista: 'Diagnóstico', cor: 'blue' },
-                { key: 'orcamentos', nome: 'Orçamentos', lista: 'Orçamento', cor: 'amber' },
-                { key: 'aguardando_aprovacao', nome: 'Aguard. Aprovação', lista: 'Aguardando Aprovação', cor: 'yellow' },
-                { key: 'aguardando_pecas', nome: 'Aguard. Peças', lista: 'Aguardando Peças', cor: 'purple' },
-                { key: 'pronto_pra_iniciar', nome: 'Pronto pra Iniciar', lista: 'Pronto para Iniciar', cor: 'cyan' },
-                { key: 'em_execucao', nome: 'Em Execução', lista: 'Em Execução', cor: 'green' },
-                { key: 'prontos', nome: 'Prontos', lista: '🟡 Pronto / Aguardando Retirada', cor: 'orange' }
+                { key: 'diagnostico', nome: 'Diagnóstico', lista: '🧠Diagnóstico', cor: 'blue' },
+                { key: 'orcamentos', nome: 'Orçamentos', lista: '📝Orçamento', cor: 'amber' },
+                { key: 'aguardando_aprovacao', nome: 'Aguard. Aprovação', lista: '🤔Aguardando Aprovação', cor: 'yellow' },
+                { key: 'aguardando_pecas', nome: 'Aguard. Peças', lista: '😤Aguardando Peças', cor: 'purple' },
+                { key: 'pronto_pra_iniciar', nome: 'Pronto pra Iniciar', lista: '🫵Pronto para Iniciar', cor: 'cyan' },
+                { key: 'em_execucao', nome: 'Em Execução', lista: '🛠️🔩Em Execução', cor: 'green' },
+                { key: 'prontos', nome: 'Prontos', lista: '💰Pronto / Aguardando Retirada', cor: 'orange' }
               ];
 
               const temposPorEtapa = etapas.map(etapa => {
@@ -1029,8 +1073,17 @@ export default function Home() {
                         ))}
                       </div>
                     </div>
-                    <div className="text-right ml-4">
+                    <div className="flex flex-col items-end gap-2 ml-4">
                       <p className="text-sm font-medium text-slate-700">#{index + 1}</p>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="h-8 px-3 text-xs"
+                        onClick={() => window.open(`https://trello.com/c/${card.id}`, '_blank')}
+                      >
+                        <ExternalLink className="h-3 w-3 mr-1" />
+                        Ver no Trello
+                      </Button>
                     </div>
                   </div>
                 </Card>

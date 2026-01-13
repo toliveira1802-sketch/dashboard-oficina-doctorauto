@@ -785,3 +785,13 @@
 - [x] Corrigir mapeamento de listas com emojis corretos do Trello
 - [x] Corrigir extração de placa para usar custom field "Placa"
 - [x] Testar com diferentes categorias (Diagnóstico, Em Execução, etc)
+
+
+## Correções - Tempo Médio e Mapa da Oficina
+
+- [x] Investigar por que tempo médio está mostrando 0.0 dias
+- [x] Corrigir cálculo de tempo médio por etapa (problema: nomes das listas sem emojis)
+- [x] Investigar por que mapa da oficina não mostra placas
+- [x] Corrigir mapa para exibir placas dos veículos (extração de custom fields)
+- [x] Adicionar botão "Ver no Trello" no modal de veículos
+- [x] Testar todas as correções
