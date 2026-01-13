@@ -761,3 +761,10 @@
 
 - [x] Modificar cálculo de metrics.total para excluir lista "🙏🏻Entregue"
 - [x] Testar capacidade atualizada (SUCESSO! 19/20 ao invés de 35/20)
+
+
+## Implementar Alertas de Gargalo por Etapa
+
+- [x] Definir thresholds de alerta (Diagnóstico>6, Orçamentos>3, Aguard.Aprovação>4, Aguard.Peças>5, Pronto>3, Execução>10)
+- [x] Adicionar indicador visual (badge "⚠️ GARGALO", borda vermelha pulsante)
+- [x] Testar alertas com dados reais (nenhum gargalo detectado no momento)

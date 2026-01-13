@@ -518,55 +518,85 @@ export default function Home() {
           {!widgetsMinimized.metricas && (
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
           <Card 
-            className="p-3 bg-blue-50 hover:shadow-lg transition-shadow cursor-pointer hover:scale-105 transform duration-200" 
+            className={`p-3 bg-blue-50 hover:shadow-lg transition-shadow cursor-pointer hover:scale-105 transform duration-200 ${
+              metrics.diagnostico > 6 ? 'border-2 border-red-500 animate-pulse' : ''
+            }`}
             onClick={() => { setModalCategory('diagnostico'); setModalOpen(true); }}
           >
-            <p className="text-xs text-blue-700 mb-1">Diagnóstico</p>
+            <div className="flex items-center justify-between mb-1">
+              <p className="text-xs text-blue-700">Diagnóstico</p>
+              {metrics.diagnostico > 6 && <span className="text-xs bg-red-500 text-white px-2 py-0.5 rounded-full font-bold">⚠️ GARGALO</span>}
+            </div>
             <p className="text-2xl font-bold text-blue-900">{metrics.diagnostico}</p>
             <p className="text-xs text-blue-600 mt-1">em análise</p>
           </Card>
           
           <Card 
-            className="p-3 bg-amber-50 hover:shadow-lg transition-shadow cursor-pointer hover:scale-105 transform duration-200" 
+            className={`p-3 bg-amber-50 hover:shadow-lg transition-shadow cursor-pointer hover:scale-105 transform duration-200 ${
+              metrics.orcamentos > 3 ? 'border-2 border-red-500 animate-pulse' : ''
+            }`}
             onClick={() => { setModalCategory('orcamentos'); setModalOpen(true); }}
           >
-            <p className="text-xs text-amber-700 mb-1">Orçamentos Pendentes</p>
+            <div className="flex items-center justify-between mb-1">
+              <p className="text-xs text-amber-700">Orçamentos Pendentes</p>
+              {metrics.orcamentos > 3 && <span className="text-xs bg-red-500 text-white px-2 py-0.5 rounded-full font-bold">⚠️ GARGALO</span>}
+            </div>
             <p className="text-2xl font-bold text-amber-900">{metrics.orcamentos}</p>
             <p className="text-xs text-amber-600 mt-1">aguardando consultor</p>
           </Card>
           
           <Card 
-            className="p-3 bg-yellow-50 hover:shadow-lg transition-shadow cursor-pointer hover:scale-105 transform duration-200" 
+            className={`p-3 bg-yellow-50 hover:shadow-lg transition-shadow cursor-pointer hover:scale-105 transform duration-200 ${
+              metrics.aguardando_aprovacao > 4 ? 'border-2 border-red-500 animate-pulse' : ''
+            }`}
             onClick={() => { setModalCategory('aguardando_aprovacao'); setModalOpen(true); }}
           >
-            <p className="text-xs text-yellow-700 mb-1">Aguard. Aprovação</p>
+            <div className="flex items-center justify-between mb-1">
+              <p className="text-xs text-yellow-700">Aguard. Aprovação</p>
+              {metrics.aguardando_aprovacao > 4 && <span className="text-xs bg-red-500 text-white px-2 py-0.5 rounded-full font-bold">⚠️ GARGALO</span>}
+            </div>
             <p className="text-2xl font-bold text-yellow-900">{metrics.aguardando_aprovacao}</p>
             <p className="text-xs text-yellow-600 mt-1">pendente</p>
           </Card>
           
           <Card 
-            className="p-3 bg-purple-50 hover:shadow-lg transition-shadow cursor-pointer hover:scale-105 transform duration-200" 
+            className={`p-3 bg-purple-50 hover:shadow-lg transition-shadow cursor-pointer hover:scale-105 transform duration-200 ${
+              metrics.aguardando_pecas > 5 ? 'border-2 border-red-500 animate-pulse' : ''
+            }`}
             onClick={() => { setModalCategory('aguardando_pecas'); setModalOpen(true); }}
           >
-            <p className="text-xs text-purple-700 mb-1">Aguard. Peças</p>
+            <div className="flex items-center justify-between mb-1">
+              <p className="text-xs text-purple-700">Aguard. Peças</p>
+              {metrics.aguardando_pecas > 5 && <span className="text-xs bg-red-500 text-white px-2 py-0.5 rounded-full font-bold">⚠️ GARGALO</span>}
+            </div>
             <p className="text-2xl font-bold text-purple-900">{metrics.aguardando_pecas}</p>
             <p className="text-xs text-purple-600 mt-1">esperando</p>
           </Card>
           
           <Card 
-            className="p-3 bg-cyan-50 hover:shadow-lg transition-shadow cursor-pointer hover:scale-105 transform duration-200" 
+            className={`p-3 bg-cyan-50 hover:shadow-lg transition-shadow cursor-pointer hover:scale-105 transform duration-200 ${
+              metrics.pronto_pra_iniciar > 3 ? 'border-2 border-red-500 animate-pulse' : ''
+            }`}
             onClick={() => { setModalCategory('pronto_pra_iniciar'); setModalOpen(true); }}
           >
-            <p className="text-xs text-cyan-700 mb-1">Pronto pra Iniciar</p>
+            <div className="flex items-center justify-between mb-1">
+              <p className="text-xs text-cyan-700">Pronto pra Iniciar</p>
+              {metrics.pronto_pra_iniciar > 3 && <span className="text-xs bg-red-500 text-white px-2 py-0.5 rounded-full font-bold">⚠️ GARGALO</span>}
+            </div>
             <p className="text-2xl font-bold text-cyan-900">{metrics.pronto_pra_iniciar}</p>
             <p className="text-xs text-cyan-600 mt-1">aguardando</p>
           </Card>
           
           <Card 
-            className="p-3 bg-green-50 hover:shadow-lg transition-shadow cursor-pointer hover:scale-105 transform duration-200" 
+            className={`p-3 bg-green-50 hover:shadow-lg transition-shadow cursor-pointer hover:scale-105 transform duration-200 ${
+              metrics.em_execucao > 10 ? 'border-2 border-red-500 animate-pulse' : ''
+            }`}
             onClick={() => { setModalCategory('em_execucao'); setModalOpen(true); }}
           >
-            <p className="text-xs text-green-700 mb-1">Em Execução</p>
+            <div className="flex items-center justify-between mb-1">
+              <p className="text-xs text-green-700">Em Execução</p>
+              {metrics.em_execucao > 10 && <span className="text-xs bg-red-500 text-white px-2 py-0.5 rounded-full font-bold">⚠️ GARGALO</span>}
+            </div>
             <p className="text-2xl font-bold text-green-900">{metrics.em_execucao}</p>
             <p className="text-xs text-green-600 mt-1">trabalhando</p>
           </Card>
