@@ -16,6 +16,8 @@ interface TrelloCard {
   idList: string;
   customFieldItems?: any[];
   actions?: any[];
+  dateLastActivity: string;
+  labels?: any[];
 }
 
 interface MecanicoStats {
@@ -52,6 +54,9 @@ export default function Produtividade() {
   const [filtroCategoria, setFiltroCategoria] = useState<string>('todos');
   const [filtroSemana, setFiltroSemana] = useState<string>('total'); // 'semana1', 'semana2', 'semana3', 'semana4', 'total'
   const [ultimaAtualizacao, setUltimaAtualizacao] = useState<string>('');
+  const [allCards, setAllCards] = useState<TrelloCard[]>([]);
+  const [customFieldsMap, setCustomFieldsMap] = useState<Record<string, any>>({});
+  const [listIdMap, setListIdMap] = useState<Record<string, string>>({});
 
   const fetchData = async () => {
     setLoading(true);
@@ -76,10 +81,21 @@ export default function Produtividade() {
       const cardsResponse = await fetch(
         `https://api.trello.com/1/boards/${TRELLO_BOARD_ID}/cards?customFieldItems=true&actions=updateCard:idList&key=${TRELLO_API_KEY}&token=${TRELLO_TOKEN}`
       );
-      const allCards: TrelloCard[] = await cardsResponse.json();
+      const cards: TrelloCard[] = await cardsResponse.json();
+
+      // Criar mapa de custom fields
+      const fieldsMap: Record<string, any> = {};
+      customFields.forEach((field: any) => {
+        fieldsMap[field.name] = field;
+      });
+
+      // Armazenar nos states
+      setAllCards(cards);
+      setCustomFieldsMap(fieldsMap);
+      setListIdMap(listMap);
 
       // Processar dados
-      processarDados(allCards, customFields, listMap);
+      processarDados(cards, customFields, listMap);
       
       setUltimaAtualizacao(new Date().toLocaleTimeString('pt-BR'));
     } catch (error) {
@@ -501,15 +517,7 @@ export default function Produtividade() {
                   </span>
                   <span className="font-bold">{mecanico.carros_total}</span>
                 </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-slate-600 flex items-center gap-1">
-                    <AlertTriangle className="h-4 w-4" />
-                    Retornos
-                  </span>
-                  <span className={`font-bold ${mecanico.retornos > 0 ? 'text-red-600' : 'text-green-600'}`}>
-                    {mecanico.retornos}
-                  </span>
-                </div>
+
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-slate-600 flex items-center gap-1">
                     <DollarSign className="h-4 w-4" />
@@ -553,104 +561,89 @@ export default function Produtividade() {
         </div>
       </div>
 
-      {/* Ranking de Eficiência */}
-      <div className="mb-6">
-        <h2 className="text-xl font-bold text-slate-900 mb-4 flex items-center gap-2">
-          <TrendingUp className="h-6 w-6 text-blue-500" />
-          Ranking de Eficiência (Valor por Dia)
-        </h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Eficiência de Mecânicos */}
-          <div>
-            <h3 className="text-lg font-semibold text-slate-800 mb-3">Mecânicos</h3>
-            <div className="bg-white rounded-lg shadow overflow-hidden">
-              <table className="w-full">
-                <thead className="bg-blue-50">
-                  <tr>
-                    <th className="px-4 py-3 text-left text-sm font-semibold text-slate-700">Mecânico</th>
-                    <th className="px-4 py-3 text-right text-sm font-semibold text-slate-700">R$/Dia</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-200">
-                  {[...mecanicos].sort((a, b) => b.eficiencia - a.eficiencia).map((mecanico, index) => (
-                    <tr key={mecanico.nome} className={`hover:bg-slate-50 ${index === 0 ? 'bg-yellow-50' : ''}`}>
-                      <td className="px-4 py-3 font-medium flex items-center gap-2">
-                        {index === 0 && <Trophy className="h-4 w-4 text-yellow-500" />}
-                        <span>{MECANICO_EMOJIS[mecanico.nome] || ''}</span>
-                        {mecanico.nome}
-                      </td>
-                      <td className="px-4 py-3 text-right font-bold text-blue-600">
-                        R$ {mecanico.eficiencia.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-
-          {/* Eficiência de Elevadores */}
-          <div>
-            <h3 className="text-lg font-semibold text-slate-800 mb-3">Elevadores/Boxes</h3>
-            <div className="bg-white rounded-lg shadow overflow-hidden">
-              <table className="w-full">
-                <thead className="bg-blue-50">
-                  <tr>
-                    <th className="px-4 py-3 text-left text-sm font-semibold text-slate-700">Recurso</th>
-                    <th className="px-4 py-3 text-right text-sm font-semibold text-slate-700">R$/Dia</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-200">
-                  {[...elevadores].sort((a, b) => b.eficiencia - a.eficiencia).map((elevador, index) => (
-                    <tr key={elevador.nome} className={`hover:bg-slate-50 ${index === 0 ? 'bg-yellow-50' : ''}`}>
-                      <td className="px-4 py-3 font-medium flex items-center gap-2">
-                        {index === 0 && <Trophy className="h-4 w-4 text-yellow-500" />}
-                        {elevador.nome}
-                      </td>
-                      <td className="px-4 py-3 text-right font-bold text-blue-600">
-                        R$ {elevador.eficiencia.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Produtividade por Elevador */}
-      <div>
-        <h2 className="text-xl font-bold text-slate-900 mb-4">Produtividade por Elevador/Box</h2>
+      {/* Lista de Carros no Pátio */}
+      <div className="mt-8">
+        <h2 className="text-2xl font-bold text-slate-900 mb-4">🚗 Carros no Pátio</h2>
         <div className="bg-white rounded-lg shadow overflow-hidden">
           <table className="w-full">
             <thead className="bg-slate-100">
               <tr>
-                <th className="px-4 py-3 text-left text-sm font-semibold text-slate-700">Recurso</th>
-                <th className="px-4 py-3 text-right text-sm font-semibold text-slate-700">Carros Atendidos</th>
-                <th className="px-4 py-3 text-right text-sm font-semibold text-slate-700">Tempo de Uso (dias)</th>
-                <th className="px-4 py-3 text-right text-sm font-semibold text-slate-700">Valor Produzido</th>
-                <th className="px-4 py-3 text-right text-sm font-semibold text-slate-700">Valor Médio</th>
+                <th className="px-4 py-3 text-left text-sm font-semibold text-slate-700">Placa</th>
+                <th className="px-4 py-3 text-left text-sm font-semibold text-slate-700">Modelo</th>
+                <th className="px-4 py-3 text-left text-sm font-semibold text-slate-700">Status</th>
+                <th className="px-4 py-3 text-center text-sm font-semibold text-slate-700">Dias no Pátio</th>
+                <th className="px-4 py-3 text-left text-sm font-semibold text-slate-700">Previsão de Entrega</th>
+                <th className="px-4 py-3 text-right text-sm font-semibold text-slate-700">Valor Estimado</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-200">
-              {elevadoresFiltrados.map((elevador) => (
-                <tr key={elevador.nome} className="hover:bg-slate-50">
-                  <td className="px-4 py-3 font-medium">{elevador.nome}</td>
-                  <td className="px-4 py-3 text-right">{elevador.carros_atendidos}</td>
-                  <td className="px-4 py-3 text-right">{elevador.tempo_uso.toFixed(1)}</td>
-                  <td className="px-4 py-3 text-right text-green-600 font-semibold">
-                    R$ {elevador.valor_produzido.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                  </td>
-                  <td className="px-4 py-3 text-right">
-                    R$ {(elevador.valor_produzido / elevador.carros_atendidos || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                  </td>
-                </tr>
-              ))}
+              {allCards
+                .filter(card => {
+                  const listName = listIdMap[card.idList] || '';
+                  const hasForaLojaLabel = card.labels?.some((l: any) => l.name === 'FORA DA LOJA');
+                  return !listName.includes('🙏🏻Entregue') && 
+                         !listName.includes('AGENDADOS') && 
+                         !hasForaLojaLabel;
+                })
+                .sort((a, b) => new Date(a.dateLastActivity).getTime() - new Date(b.dateLastActivity).getTime()) // FIFO
+                .map((card) => {
+                  const placaField = card.customFieldItems?.find(item => item.idCustomField === customFieldsMap['Placa']?.id);
+                  const placa = placaField?.value?.text || 'Sem placa';
+                  
+                  const modeloField = card.customFieldItems?.find(item => item.idCustomField === customFieldsMap['Modelo']?.id);
+                  const modelo = modeloField?.value?.text || card.name;
+                  
+                  const valorField = card.customFieldItems?.find(item => item.idCustomField === customFieldsMap['Valor']?.id);
+                  const valor = valorField?.value?.number || 0;
+                  
+                  const previsaoField = card.customFieldItems?.find(item => item.idCustomField === customFieldsMap['Previsão de Entrega']?.id);
+                  const previsaoEntrega = previsaoField?.value?.date || null;
+                  
+                  const listName = listIdMap[card.idList] || 'Desconhecido';
+                  const status = listName.replace(/👨‍🔧/g, '').replace(/🔧/g, '').trim();
+                  
+                  const diasPermanencia = Math.floor((new Date().getTime() - new Date(card.dateLastActivity).getTime()) / (1000 * 60 * 60 * 24));
+                  
+                  // Verificar se sai hoje
+                  const hoje = new Date();
+                  hoje.setHours(0, 0, 0, 0);
+                  const previsaoDate = previsaoEntrega ? new Date(previsaoEntrega) : null;
+                  if (previsaoDate) previsaoDate.setHours(0, 0, 0, 0);
+                  const saiHoje = previsaoDate && previsaoDate.getTime() === hoje.getTime();
+                  
+                  return (
+                    <tr key={card.id} className={`hover:bg-slate-50 ${saiHoje ? 'bg-green-50 font-semibold' : ''}`}>
+                      <td className="px-4 py-3">
+                        {saiHoje && <span className="mr-2">💰</span>}
+                        <span className="font-mono font-semibold">{placa}</span>
+                      </td>
+                      <td className="px-4 py-3">{modelo}</td>
+                      <td className="px-4 py-3">
+                        <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">{status}</span>
+                      </td>
+                      <td className="px-4 py-3 text-center">
+                        <span className={`font-semibold ${
+                          diasPermanencia <= 2 ? 'text-green-600' :
+                          diasPermanencia <= 5 ? 'text-yellow-600' :
+                          'text-red-600'
+                        }`}>
+                          {diasPermanencia}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3">
+                        {previsaoEntrega ? new Date(previsaoEntrega).toLocaleDateString('pt-BR') : '-'}
+                      </td>
+                      <td className="px-4 py-3 text-right font-semibold text-green-600">
+                        R$ {valor.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                      </td>
+                    </tr>
+                  );
+                })}
             </tbody>
           </table>
         </div>
       </div>
+
       </div>
     </div>
   );

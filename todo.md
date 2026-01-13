@@ -948,3 +948,13 @@
 - [x] Tornar o card de Lotação clicável
 - [x] Ao clicar no card, abrir modal com lista de placas
 - [x] Testar funcionalidade
+
+
+## Simplificar Dashboard de Produtividade
+
+- [x] Remover seção "Produtividade por Elevador"
+- [x] Remover seção "Ranking de Eficiência"
+- [x] Remover campo "Retornos" dos cards dos mecânicos
+- [x] Adicionar lista de carros no pátio com informações chave
+- [x] Destacar linha com emoji 💰 quando carro tem previsão de saída no dia
+- [x] Testar funcionalidade
