@@ -529,3 +529,15 @@
 - [x] Destacar card visualmente (cor diferenciada)
 - [x] Implementar modal clicável com lista de placas dos agendados
 - [x] Testar funcionalidade de clique e modal
+
+
+## Integração Kommo → Supabase → Trello
+
+- [x] Criar schema SQL completo no Supabase (tabelas, triggers, functions)
+- [x] Implementar endpoint `/api/webhook/kommo` para receber leads
+- [x] Implementar endpoint `/api/webhook/trello` para sincronização em tempo real
+- [x] Configurar triggers SQL para sincronização bidirecional
+- [x] Criar função SQL para criar cards no Trello automaticamente
+- [ ] Testar webhook Kommo com lead de teste
+- [ ] Testar webhook Trello com atualização de card
+- [x] Documentar configuração dos webhooks (URLs, secrets, payloads)

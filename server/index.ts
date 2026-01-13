@@ -26,6 +26,13 @@ async function startServer() {
   // Import and use Supabase data routes
   const supabaseRoutes = await import('./routes/supabase-data.js');
   app.use('/api/supabase', supabaseRoutes.default);
+  
+  // Import and use Webhook routes (Kommo e Trello)
+  const kommoWebhookRoutes = await import('./routes/webhook/kommo.js');
+  app.use('/api/webhook/kommo', kommoWebhookRoutes.default);
+  
+  const trelloWebhookRoutes = await import('./routes/webhook/trello.js');
+  app.use('/api/webhook/trello', trelloWebhookRoutes.default);
 
   // Serve static files from dist/public in production
   const staticPath =
