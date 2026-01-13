@@ -204,12 +204,13 @@ export default function Home() {
         const hasRetorno = card.labels.some(label => label.name.toUpperCase() === 'RETORNO');
         const hasForaLoja = card.labels.some(label => label.name.toUpperCase() === 'FORA DA LOJA');
         
-        // Verificar se o carro já foi entregue (lista Prontos)
+        // Verificar se o carro já foi entregue (lista Prontos ou Entregue)
         const isPronto = listName === 'Qualidade' || listName === '🟡 Pronto / Aguardando Retirada';
+        const isEntregue = listName === '🙏🏻entregue' || listName === 'Entregue' || listName?.toLowerCase().includes('entregue');
         
-        // Contar labels especiais APENAS se NÃO estiver na lista de prontos
-        if (hasRetorno && !isPronto) newMetrics.retornos++;
-        if (hasForaLoja && !isPronto) newMetrics.foraLoja++;
+        // Contar labels especiais APENAS se NÃO estiver na lista de prontos OU entregue
+        if (hasRetorno && !isPronto && !isEntregue) newMetrics.retornos++;
+        if (hasForaLoja && !isPronto && !isEntregue) newMetrics.foraLoja++;
         
         // Contar apenas cards que estão "na oficina"
         // EXCLUIR: carros prontos OU com label "FORA DA LOJA"
@@ -395,20 +396,39 @@ export default function Home() {
               </div>
               
               {/* Indicador RETORNO */}
-              <div className="px-3 py-2 rounded-lg border-2 bg-red-50 border-red-300 flex items-center gap-2 cursor-pointer hover:shadow-md transition-shadow" onClick={() => { setModalCategory('retornos'); setModalOpen(true); }}>
-                <div className="bg-red-600 text-white rounded-full w-6 h-6 flex items-center justify-center font-bold text-xs">
+              <div className="px-4 py-2 rounded-lg border-2 bg-red-50 border-red-300 flex items-center gap-2 cursor-pointer hover:shadow-md transition-shadow" onClick={() => { setModalCategory('retornos'); setModalOpen(true); }}>
+                <div className="bg-red-600 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold text-sm">
                   {metrics.retornos}
                 </div>
-                <p className="text-xs font-bold text-red-900">🔴 RETORNO</p>
+                <div>
+                  <p className="text-sm font-bold text-red-900">🔴 RETORNO</p>
+                  <p className="text-xs text-slate-600">Na oficina</p>
+                </div>
               </div>
               
               {/* Indicador FORA DA LOJA */}
-              <div className="px-3 py-2 rounded-lg border-2 bg-blue-50 border-blue-300 flex items-center gap-2 cursor-pointer hover:shadow-md transition-shadow" onClick={() => { setModalCategory('foraLoja'); setModalOpen(true); }}>
-                <div className="bg-blue-600 text-white rounded-full w-6 h-6 flex items-center justify-center font-bold text-xs">
+              <div className="px-4 py-2 rounded-lg border-2 bg-blue-50 border-blue-300 flex items-center gap-2 cursor-pointer hover:shadow-md transition-shadow" onClick={() => { setModalCategory('foraLoja'); setModalOpen(true); }}>
+                <div className="bg-blue-600 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold text-sm">
                   {metrics.foraLoja}
                 </div>
-                <p className="text-xs font-bold text-blue-900">📍 FORA DA LOJA</p>
+                <div>
+                  <p className="text-sm font-bold text-blue-900">📍 FORA DA LOJA</p>
+                  <p className="text-xs text-slate-600">Externos</p>
+                </div>
               </div>
+              
+              {/* Filtro de Consultor */}
+              <Select value={responsavelFilter} onValueChange={setResponsavelFilter}>
+                <SelectTrigger className="w-[180px]">
+                  <SelectValue placeholder="Consultor" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="todos">Todos Consultores</SelectItem>
+                  <SelectItem value="João">João</SelectItem>
+                  <SelectItem value="Pedro">Pedro</SelectItem>
+                  <SelectItem value="Outros">Outros</SelectItem>
+                </SelectContent>
+              </Select>
               <div className="text-right">
                 <p className="text-xs text-slate-500">Última atualização</p>
                 <p className="text-slate-700 font-medium text-sm">{lastUpdate.toLocaleTimeString('pt-BR')}</p>
@@ -922,20 +942,22 @@ export default function Home() {
         return dias > 5;
       });
     } else if (modalCategory === 'retornos') {
-      // Filtrar apenas RETORNO que NÃO estão na lista Prontos
+      // Filtrar apenas RETORNO que NÃO estão na lista Prontos OU Entregue
       filtered = allCards.filter(card => {
         const hasRetorno = card.labels.some(label => label.name.toUpperCase() === 'RETORNO');
         const listName = listIdMap[card.idList];
         const isPronto = listName === 'Qualidade' || listName === '🟡 Pronto / Aguardando Retirada';
-        return hasRetorno && !isPronto;
+        const isEntregue = listName === '🙏🏻entregue' || listName === 'Entregue' || listName?.toLowerCase().includes('entregue');
+        return hasRetorno && !isPronto && !isEntregue;
       });
     } else if (modalCategory === 'foraLoja') {
-      // Filtrar apenas FORA DA LOJA que NÃO estão na lista Prontos
+      // Filtrar apenas FORA DA LOJA que NÃO estão na lista Prontos OU Entregue
       filtered = allCards.filter(card => {
         const hasForaLoja = card.labels.some(label => label.name.toUpperCase() === 'FORA DA LOJA');
         const listName = listIdMap[card.idList];
         const isPronto = listName === 'Qualidade' || listName === '🟡 Pronto / Aguardando Retirada';
-        return hasForaLoja && !isPronto;
+        const isEntregue = listName === '🙏🏻entregue' || listName === 'Entregue' || listName?.toLowerCase().includes('entregue');
+        return hasForaLoja && !isPronto && !isEntregue;
       });
     } else {
       const targetListName = listMap[modalCategory];

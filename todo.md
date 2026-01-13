@@ -429,3 +429,19 @@
 - [ ] Atualizar dashboard para ler dados do Supabase ao invés do Trello direto
 - [ ] Corrigir contagem de RETORNO e FORA DA LOJA (excluir coluna "Entregue")
 - [ ] Testar sincronização bidirecional completa
+
+
+## Ajustes Header Dashboard Operacional
+
+- [x] Aumentar tamanho dos indicadores RETORNO e FORA DA LOJA (mesmo tamanho da capacidade)
+- [x] Adicionar filtro de Consultor no header (João, Pedro, + outros do Trello)
+- [x] Corrigir contagem de RETORNO: excluir coluna "Entregue" (não apenas "Prontos")
+- [x] Testar filtro de consultor com dados reais
+
+## 📊 SUGESTÃO FUTURA - Sistema de Relatórios Automáticos (SEMPRE LEMBRAR!)
+
+- [ ] Criar página de relatórios com gráficos de performance
+- [ ] Análise de tendências por período
+- [ ] Relatórios por mecânico/consultor
+- [ ] Exportação automática de relatórios (PDF/Excel)
+- [ ] Dashboard executivo com KPIs principais
