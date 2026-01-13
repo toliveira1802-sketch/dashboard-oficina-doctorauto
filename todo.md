@@ -918,3 +918,11 @@
 - [x] Incluir "Terceirizados" no ranking de mecânicos
 - [x] Atualizar interface dos cards para refletir mudanças
 - [x] Testar com dados reais
+
+
+## Garantir Exibição de Terceirizados - Produtividade
+
+- [x] Verificar se "Terceirizados" existe como opção no campo Mecânico do Trello
+- [x] Confirmar se há cards com Terceirizados atribuído (campo: "Mecânico Responsável", opção: "TERCEIRIZADO")
+- [x] Ajustar código se necessário para garantir exibição (mapeamento ajustado para "TERCEIRIZADO")
+- [x] Testar visualização de Terceirizados no ranking (pronto para aparecer quando houver dados)

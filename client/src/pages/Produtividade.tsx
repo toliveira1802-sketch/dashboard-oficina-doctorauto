@@ -41,7 +41,7 @@ const MECANICO_EMOJIS: Record<string, string> = {
   'Aldo': '📖', // bíblia
   'JP': '🎧', // fone de ouvido
   'Wendel': '🧔', // barba
-  'Terceirizados': '👥' // pessoas/grupo
+  'TERCEIRIZADO': '👥' // pessoas/grupo (nome exato do Trello)
 };
 
 export default function Produtividade() {
