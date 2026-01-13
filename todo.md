@@ -651,3 +651,12 @@
 - [x] Corrigir arquivos SQL
 - [x] Atualizar site /setup-supabase
 - [ ] Testar execução no Supabase
+
+
+## Corrigir Erro "unterminated dollar-quoted string" - Part 2
+
+- [x] Investigar erro de dollar-quoted string no Part 2
+- [x] Verificar fechamento correto de todas as funções
+- [x] Corrigir sintaxe SQL (substituído $$ por $function$ e $trigger$)
+- [ ] Validar todos os 3 arquivos
+- [ ] Testar execução no Supabase

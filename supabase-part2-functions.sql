@@ -4,12 +4,12 @@
 
 -- Função para atualizar updated_at automaticamente
 CREATE OR REPLACE FUNCTION update_updated_at_column()
-RETURNS TRIGGER AS $$
+RETURNS TRIGGER AS $trigger$
 BEGIN
     NEW.updated_at = NOW();
     RETURN NEW;
 END;
-$$ language 'plpgsql';
+$trigger$ LANGUAGE plpgsql;
 
 -- Trigger para atualizar updated_at em trello_cards
 DROP TRIGGER IF EXISTS update_trello_cards_updated_at ON trello_cards;
@@ -39,7 +39,7 @@ CREATE OR REPLACE FUNCTION process_kommo_webhook(p_payload JSONB)
 RETURNS JSONB
 LANGUAGE plpgsql
 SECURITY DEFINER
-AS $$
+AS $function$
 DECLARE
   v_lead_id BIGINT;
   v_lead_name TEXT;
@@ -151,7 +151,7 @@ EXCEPTION WHEN OTHERS THEN
     'error', SQLERRM
   );
 END;
-$$;
+$function$;
 
 -- =====================================================
 -- FUNÇÃO: Processar Webhook do Trello
@@ -160,7 +160,7 @@ CREATE OR REPLACE FUNCTION process_trello_webhook(p_payload JSONB)
 RETURNS JSONB
 LANGUAGE plpgsql
 SECURITY DEFINER
-AS $$
+AS $function$
 DECLARE
   v_action_type TEXT;
   v_card_id TEXT;
@@ -269,4 +269,4 @@ EXCEPTION WHEN OTHERS THEN
     'error', SQLERRM
   );
 END;
-$$;
+$function$;
