@@ -6,6 +6,7 @@ import { Textarea } from '@/components/ui/textarea';
 import Navigation from '@/components/Navigation';
 import { trpc } from '@/lib/trpc';
 import { toast } from 'sonner';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 const MECANICOS = ['Samuel', 'Aldo', 'Tadeu', 'Wendel', 'JP'];
 
@@ -17,6 +18,9 @@ export default function Historico() {
 
   const [feedbackTexts, setFeedbackTexts] = useState<Record<string, string>>({});
   const [ocorreuComoEsperado, setOcorreuComoEsperado] = useState<Record<string, number>>({});
+  const [showHistorico, setShowHistorico] = useState(false);
+  const [filtroMecanico, setFiltroMecanico] = useState<string>('todos');
+  const [filtroCumprido, setFiltroCumprido] = useState<string>('todos');
 
   // Buscar agenda do dia
   const { data: agendaData } = trpc.agenda.getByDate.useQuery({ date: selectedDate });
@@ -206,7 +210,150 @@ export default function Historico() {
         <div className="mt-6 text-center text-xs text-slate-500">
           <p>Feedbacks ajudam a melhorar o planejamento futuro</p>
         </div>
+
+        {/* Botão para ver Histórico Automático */}
+        <div className="mt-8 text-center">
+          <Button
+            onClick={() => setShowHistorico(!showHistorico)}
+            variant="outline"
+            className="w-full max-w-md"
+          >
+            {showHistorico ? 'Ocultar' : 'Ver'} Histórico Automático de Agendas
+          </Button>
+        </div>
+
+        {/* Histórico Automático */}
+        {showHistorico && (
+          <Card className="mt-6 p-6 bg-white">
+            <h2 className="text-2xl font-bold mb-4">📋 Histórico Automático de Agendas</h2>
+            <p className="text-slate-600 mb-6">
+              Registro automático de todas as agendas com feedback de cumprimento
+            </p>
+
+            {/* Filtros */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+              <div>
+                <label className="text-sm font-semibold text-slate-700 mb-2 block">
+                  Mecânico:
+                </label>
+                <Select value={filtroMecanico} onValueChange={setFiltroMecanico}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="todos">Todos</SelectItem>
+                    {MECANICOS.map(m => (
+                      <SelectItem key={m} value={m}>{m}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <label className="text-sm font-semibold text-slate-700 mb-2 block">
+                  Status:
+                </label>
+                <Select value={filtroCumprido} onValueChange={setFiltroCumprido}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="todos">Todos</SelectItem>
+                    <SelectItem value="1">Cumpridos</SelectItem>
+                    <SelectItem value="0">Não Cumpridos</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            {/* Tabela de Histórico */}
+            <HistoricoTable filtroMecanico={filtroMecanico} filtroCumprido={filtroCumprido} />
+          </Card>
+        )}
       </div>
+    </div>
+  );
+}
+
+// Componente separado para tabela de histórico
+function HistoricoTable({ filtroMecanico, filtroCumprido }: { filtroMecanico: string; filtroCumprido: string }) {
+  const { data: historicoData, isLoading } = trpc.agenda.getHistory.useQuery({});
+
+  if (isLoading) {
+    return <div className="text-center py-8 text-slate-600">Carregando histórico...</div>;
+  }
+
+  if (!historicoData || historicoData.length === 0) {
+    return (
+      <div className="text-center py-8 text-slate-600">
+        Nenhum registro de histórico encontrado. Mude a data da agenda para gerar registros automáticos.
+      </div>
+    );
+  }
+
+  // Aplicar filtros
+  let filtrado = historicoData;
+  if (filtroMecanico !== 'todos') {
+    filtrado = filtrado.filter(h => h.mecanico === filtroMecanico);
+  }
+  if (filtroCumprido !== 'todos') {
+    filtrado = filtrado.filter(h => h.cumprido === parseInt(filtroCumprido));
+  }
+
+  // Agrupar por data
+  const porData: Record<string, any[]> = {};
+  filtrado.forEach(item => {
+    if (!porData[item.date]) {
+      porData[item.date] = [];
+    }
+    porData[item.date].push(item);
+  });
+
+  const datas = Object.keys(porData).sort().reverse(); // Mais recente primeiro
+
+  return (
+    <div className="space-y-6">
+      {datas.map(data => (
+        <div key={data} className="border border-slate-200 rounded-lg p-4">
+          <h3 className="font-bold text-lg mb-3">📅 {data}</h3>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-slate-200">
+                  <th className="text-left py-2 px-3">Mecânico</th>
+                  <th className="text-left py-2 px-3">Horário</th>
+                  <th className="text-left py-2 px-3">Placa</th>
+                  <th className="text-left py-2 px-3">Modelo</th>
+                  <th className="text-center py-2 px-3">Status</th>
+                  <th className="text-left py-2 px-3">Motivo</th>
+                </tr>
+              </thead>
+              <tbody>
+                {porData[data].map((item, idx) => (
+                  <tr key={idx} className="border-b border-slate-100 hover:bg-slate-50">
+                    <td className="py-2 px-3 font-semibold">{item.mecanico}</td>
+                    <td className="py-2 px-3">{item.horario}</td>
+                    <td className="py-2 px-3 text-blue-600">{item.placa || '-'}</td>
+                    <td className="py-2 px-3">{item.modelo || '-'}</td>
+                    <td className="py-2 px-3 text-center">
+                      {item.cumprido === 1 ? (
+                        <span className="inline-flex items-center px-2 py-1 bg-green-100 text-green-700 rounded text-xs font-semibold">
+                          ✅ Cumprido
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center px-2 py-1 bg-red-100 text-red-700 rounded text-xs font-semibold">
+                          ❌ Não Cumprido
+                        </span>
+                      )}
+                    </td>
+                    <td className="py-2 px-3 text-slate-600">{item.motivo || '-'}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      ))}
     </div>
   );
 }

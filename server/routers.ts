@@ -4,7 +4,7 @@ import { systemRouter } from "./_core/systemRouter";
 import { publicProcedure, router } from "./_core/trpc";
 import { z } from "zod";
 import { getDb } from "./db";
-import { agendas, feedbacks, sugestoes } from "../drizzle/schema";
+import { agendas, feedbacks, sugestoes, agendaHistory } from "../drizzle/schema";
 import { eq, and } from "drizzle-orm";
 
 export const appRouter = router({
@@ -86,6 +86,55 @@ export const appRouter = router({
         
         await db.delete(agendas).where(eq(agendas.date, input.date));
         return { success: true };
+      }),
+
+    // Salvar histórico de agenda com feedback
+    saveHistory: publicProcedure
+      .input(z.object({
+        feedbacks: z.array(z.object({
+          date: z.string(),
+          mecanico: z.string(),
+          horario: z.string(),
+          placa: z.string().optional(),
+          modelo: z.string().optional(),
+          tipo: z.string().optional(),
+          isEncaixe: z.number().optional(),
+          cumprido: z.number(),
+          motivo: z.string().optional(),
+        }))
+      }))
+      .mutation(async ({ input, ctx }) => {
+        const db = await getDb();
+        if (!db) throw new Error('Database not available');
+        
+        // Inserir todos os feedbacks no histórico
+        await db.insert(agendaHistory).values(
+          input.feedbacks.map(f => ({
+            ...f,
+            createdBy: ctx.user?.id,
+          }))
+        );
+        
+        return { success: true, count: input.feedbacks.length };
+      }),
+
+    // Buscar histórico de agendas
+    getHistory: publicProcedure
+      .input(z.object({
+        dateFrom: z.string().optional(),
+        dateTo: z.string().optional(),
+        mecanico: z.string().optional(),
+        cumprido: z.number().optional(), // 1 = cumprido, 0 = não cumprido
+      }))
+      .query(async ({ input }) => {
+        const db = await getDb();
+        if (!db) return [];
+        
+        // TODO: Implementar filtros dinâmicos quando necessário
+        // Por enquanto retorna todos
+        const result = await db.select().from(agendaHistory);
+        
+        return result;
       }),
   }),
 

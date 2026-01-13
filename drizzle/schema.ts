@@ -228,3 +228,26 @@ export const metasFinanceiras = mysqlTable("metasFinanceiras", {
 
 export type MetaFinanceira = typeof metasFinanceiras.$inferSelect;
 export type InsertMetaFinanceira = typeof metasFinanceiras.$inferInsert;
+
+/**
+ * Histórico de agendas diárias
+ * Armazena snapshot da agenda de cada dia com feedback de cumprimento
+ */
+export const agendaHistory = mysqlTable("agendaHistory", {
+  id: int("id").autoincrement().primaryKey(),
+  date: varchar("date", { length: 10 }).notNull(), // Formato: YYYY-MM-DD
+  mecanico: varchar("mecanico", { length: 50 }).notNull(), // Samuel, Aldo, Tadeu, Wendel, JP
+  horario: varchar("horario", { length: 5 }).notNull(), // 08h00, 09h00, etc
+  placa: varchar("placa", { length: 20 }), // Placa do veículo
+  modelo: text("modelo"), // Modelo do veículo
+  tipo: varchar("tipo", { length: 50 }), // Tipo de serviço
+  isEncaixe: int("isEncaixe").default(0).notNull(), // 0 = normal, 1 = encaixe
+  cumprido: int("cumprido").default(1).notNull(), // 1 = sim, 0 = não
+  motivo: text("motivo"), // Motivo de não cumprimento (faltou, enrolou, peça atrasou, etc)
+  observacoes: text("observacoes"), // Observações adicionais
+  createdBy: int("createdBy"), // ID do usuário que registrou
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type AgendaHistory = typeof agendaHistory.$inferSelect;
+export type InsertAgendaHistory = typeof agendaHistory.$inferInsert;

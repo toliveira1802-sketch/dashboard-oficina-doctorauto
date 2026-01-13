@@ -1006,3 +1006,13 @@
 - [x] Modificar webhook Kommo para capturar e salvar data do agendamento
 - [x] Adicionar data ao custom field "Data de Entrada" do Trello ao criar card
 - [ ] Testar fluxo completo: Kommo → Supabase → Trello (requer teste real com webhook)
+
+
+## Sistema de Feedback Diário da Agenda
+
+- [x] Criar tabela agenda_history no banco de dados (data, mecânico, horário, placa, status, motivo)
+- [x] Implementar modal de feedback ao mudar data (cumprido/não cumprido + motivo)
+- [x] Salvar agenda + feedback no histórico automaticamente
+- [x] Adicionar botão rápido para Histórico (separado das abas)
+- [x] Melhorar página de Histórico com filtros (mecânico, período, status)
+- [ ] Testar fluxo completo de feedback e histórico

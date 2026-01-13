@@ -58,6 +58,9 @@ export default function Agenda() {
   const [filteredPlacas, setFilteredPlacas] = useState<any[]>([]);
   const [showPlacasDropdown, setShowPlacasDropdown] = useState(false);
   const [menuAberto, setMenuAberto] = useState<{ mecanico: string; horario: string } | null>(null);
+  const [showFeedbackModal, setShowFeedbackModal] = useState(false);
+  const [previousDate, setPreviousDate] = useState<string | null>(null);
+  const [pendingNewDate, setPendingNewDate] = useState<string | null>(null);
   // Buscar placas do Trello
   useEffect(() => {
     const fetchPlacas = async () => {
@@ -241,7 +244,18 @@ export default function Agenda() {
             <input
               type="date"
               value={selectedDate}
-              onChange={(e) => setSelectedDate(e.target.value)}
+              onChange={(e) => {
+                const newDate = e.target.value;
+                if (selectedDate !== newDate && agendaData && agendaData.length > 0) {
+                  // Há agenda no dia atual, abrir modal de feedback
+                  setPreviousDate(selectedDate);
+                  setPendingNewDate(newDate);
+                  setShowFeedbackModal(true);
+                } else {
+                  // Sem agenda, mudar direto
+                  setSelectedDate(newDate);
+                }
+              }}
               className="px-3 py-2 border border-slate-300 rounded-md"
             />
             <Button onClick={() => refetch()} variant="outline">
@@ -406,6 +420,116 @@ export default function Agenda() {
           </p>
         </div>
       </div>
+
+      {/* Modal de Feedback */}
+      {showFeedbackModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <Card className="w-full max-w-2xl max-h-[90vh] overflow-y-auto p-6 bg-white">
+            <h2 className="text-xl font-bold mb-4">📋 Feedback do Dia {previousDate}
+            </h2>
+            <p className="text-slate-600 mb-6">
+              Antes de mudar para <strong>{pendingNewDate}</strong>, registre o que aconteceu hoje:
+            </p>
+
+            {/* Lista de agendamentos do dia */}
+            <div className="space-y-4 mb-6">
+              {agendaData?.map((item: any, idx: number) => (
+                <div key={idx} className="border border-slate-200 rounded-lg p-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <div>
+                      <span className="font-semibold">{item.mecanico}</span> - {item.horario}
+                      {item.placa && <span className="ml-2 text-blue-600">{item.placa}</span>}
+                    </div>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => {
+                          // Marcar como cumprido
+                          const el = document.getElementById(`cumprido-${idx}`) as HTMLInputElement;
+                          if (el) el.checked = true;
+                        }}
+                        className="px-3 py-1 bg-green-100 text-green-700 rounded text-sm hover:bg-green-200"
+                      >
+                        ✅ Cumprido
+                      </button>
+                      <button
+                        onClick={() => {
+                          // Marcar como não cumprido
+                          const el = document.getElementById(`cumprido-${idx}`) as HTMLInputElement;
+                          if (el) el.checked = false;
+                        }}
+                        className="px-3 py-1 bg-red-100 text-red-700 rounded text-sm hover:bg-red-200"
+                      >
+                        ❌ Não Cumprido
+                      </button>
+                    </div>
+                  </div>
+                  <input type="hidden" id={`cumprido-${idx}`} defaultValue="1" />
+                  <textarea
+                    id={`motivo-${idx}`}
+                    placeholder="Motivo (se não cumprido): faltou, enrolou, peça atrasou, etc."
+                    className="w-full px-3 py-2 border border-slate-300 rounded mt-2 text-sm"
+                    rows={2}
+                  />
+                </div>
+              ))}
+            </div>
+
+            {/* Botões */}
+            <div className="flex gap-3 justify-end">
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setShowFeedbackModal(false);
+                  setPreviousDate(null);
+                  setPendingNewDate(null);
+                }}
+              >
+                Cancelar
+              </Button>
+              <Button
+                onClick={async () => {
+                  // Salvar feedback no histórico
+                  const feedbacks = agendaData?.map((item: any, idx: number) => {
+                    const cumpridoEl = document.getElementById(`cumprido-${idx}`) as HTMLInputElement;
+                    const motivoEl = document.getElementById(`motivo-${idx}`) as HTMLTextAreaElement;
+                    return {
+                      date: previousDate,
+                      mecanico: item.mecanico,
+                      horario: item.horario,
+                      placa: item.placa,
+                      modelo: item.modelo,
+                      tipo: item.tipo,
+                      isEncaixe: item.isEncaixe,
+                      cumprido: cumpridoEl?.value === '1' ? 1 : 0,
+                      motivo: motivoEl?.value || null,
+                    };
+                  });
+
+                  try {
+                    await fetch('/api/trpc/agenda.saveHistory', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({ feedbacks }),
+                    });
+                    toast.success('Feedback salvo no histórico!');
+                  } catch (error) {
+                    console.error('Erro ao salvar feedback:', error);
+                    toast.error('Erro ao salvar feedback');
+                  }
+
+                  // Mudar para nova data
+                  setShowFeedbackModal(false);
+                  setSelectedDate(pendingNewDate!);
+                  setPreviousDate(null);
+                  setPendingNewDate(null);
+                }}
+              >
+                Salvar e Continuar
+              </Button>
+            </div>
+          </Card>
+        </div>
+      )}
     </div>
   );
 }
