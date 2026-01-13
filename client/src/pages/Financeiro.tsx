@@ -470,6 +470,7 @@ export default function Financeiro() {
                         <div className="text-center p-3 bg-slate-50 rounded-lg">
                           <p className="text-xs text-slate-600 mb-1">Meta Mensal</p>
                           <p className="text-lg font-bold text-slate-900">{formatCurrency(metas.metaMensal / 100)}</p>
+                          <p className="text-xs text-slate-500 mt-1">Faltam {diasRestantes} dias de trabalho</p>
                         </div>
                         <div className="text-center p-3 bg-slate-50 rounded-lg">
                           <p className="text-xs text-slate-600 mb-1">Realizado</p>

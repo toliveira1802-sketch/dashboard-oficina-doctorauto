@@ -842,3 +842,9 @@
 - [x] Adicionar valor fantasma visível na barra (mostrar R$ do aprovado no pátio)
 - [x] Adicionar texto na porcentagem: "Se tudo aprovado saísse: XX%"
 - [x] Testar visualização (PERFEITO! Valor fantasma e texto de potencial funcionando!)
+
+
+## Texto Dias Restantes na Meta
+
+- [x] Adicionar texto "Faltam X dias de trabalho" abaixo da Meta Mensal
+- [x] Testar visualização (PERFEITO! Texto aparecendo corretamente!)
