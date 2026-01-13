@@ -940,3 +940,11 @@
 - [x] Tornar placas no card de Lotação clicáveis
 - [x] Ao clicar, abrir modal com detalhes do veículo
 - [x] Testar funcionalidade
+
+
+## Corrigir Card de Lotação - Placas ao Clicar
+
+- [x] Remover lista de placas sempre visível do card de Lotação
+- [x] Tornar o card de Lotação clicável
+- [x] Ao clicar no card, abrir modal com lista de placas
+- [x] Testar funcionalidade

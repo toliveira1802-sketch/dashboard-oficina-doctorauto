@@ -486,51 +486,22 @@ export default function Home() {
               <p className="text-red-200 text-sm mt-1">Gestão de Pátio em Tempo Real</p>
             </div>
             <div className="flex items-center gap-4">
-              {/* Indicador de Capacidade Compacto - MAIOR */}
-              <div className={`px-6 py-3 rounded-xl border-2 ${alertStatus.bgColor} ${alertStatus.borderColor} ${alertStatus.animate} shadow-lg`}>
-                <div className="flex items-center gap-3 mb-2">
+              {/* Indicador de Capacidade Compacto - MAIOR - CLICÁVEL */}
+              <div 
+                className={`px-6 py-3 rounded-xl border-2 ${alertStatus.bgColor} ${alertStatus.borderColor} ${alertStatus.animate} shadow-lg cursor-pointer hover:scale-105 transition-all`}
+                onClick={() => {
+                  setModalCategory('placas_patio');
+                  setModalOpen(true);
+                }}
+              >
+                <div className="flex items-center gap-3">
                   <AlertIcon className={`w-7 h-7 ${alertStatus.color}`} />
                   <div>
                     <p className={`text-base font-bold ${alertStatus.color}`}>{alertStatus.text}</p>
                     <p className="text-sm text-slate-700 font-medium">Capacidade: {metrics.total}/20 ({Math.round((metrics.total / 20) * 100)}%)</p>
+                    <p className="text-xs text-slate-500 mt-1 italic">Clique para ver placas</p>
                   </div>
                 </div>
-                {/* Lista de Placas */}
-                {metrics.total > 0 && (
-                  <div className="mt-2 pt-2 border-t border-slate-200">
-                    <p className="text-xs text-slate-600 font-semibold mb-1">Placas no pátio:</p>
-                    <div className="flex flex-wrap gap-1">
-                      {allCards
-                        .filter(card => {
-                          const listName = listIdMap[card.idList] || '';
-                          const hasForaLojaLabel = card.labels?.some(l => l.name === 'FORA DA LOJA');
-                          return !listName.includes('🙏🏻Entregue') && 
-                                 !listName.includes('AGENDADOS') && 
-                                 !hasForaLojaLabel;
-                        })
-                        .map(card => {
-                          const placaField = card.customFieldItems?.find(item => item.idCustomField === customFieldsMap['Placa']?.id);
-                          const placa = placaField?.value?.text || 'Sem placa';
-                          return { card, placa };
-                        })
-                        .filter(item => item.placa !== 'Sem placa')
-                        .map((item, idx) => (
-                          <span 
-                            key={idx} 
-                            className="text-xs bg-slate-700 text-white px-2 py-0.5 rounded font-mono cursor-pointer hover:bg-slate-900 hover:scale-110 transition-all"
-                            onClick={() => {
-                              setSearchTerm(item.placa);
-                              setModalCategory('todos');
-                              setModalOpen(true);
-                            }}
-                          >
-                            {item.placa}
-                          </span>
-                        ))
-                      }
-                    </div>
-                  </div>
-                )}
               </div>
               
               {/* Indicador RETORNO - MAIOR */}
@@ -1064,6 +1035,7 @@ export default function Home() {
               {modalCategory === 'atrasados' && '⚠️ Veículos Atrasados (Previsão Ultrapassada)'}
               {modalCategory === 'agendados' && '📅 Agendados Hoje'}
               {modalCategory === 'todos' && `🚗 Veículo: ${searchTerm}`}
+              {modalCategory === 'placas_patio' && '🅿️ Placas no Pátio'}
             </DialogTitle>
             <DialogDescription>
               Lista completa de veículos nesta categoria
@@ -1212,6 +1184,15 @@ export default function Home() {
     } else if (modalCategory === 'todos') {
       // Mostrar todos os cards (usado quando clica em placa)
       filtered = allCards;
+    } else if (modalCategory === 'placas_patio') {
+      // Filtrar apenas veículos no pátio (excluir entregues, agendados e fora da loja)
+      filtered = allCards.filter(card => {
+        const listName = listIdMap[card.idList] || '';
+        const hasForaLojaLabel = card.labels?.some(l => l.name === 'FORA DA LOJA');
+        return !listName.includes('🙏🏻Entregue') && 
+               !listName.includes('AGENDADOS') && 
+               !hasForaLojaLabel;
+      });
     } else {
       const targetListName = listMap[modalCategory];
       if (!targetListName) return [];
