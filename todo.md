@@ -671,3 +671,22 @@
 - [ ] Atualizar Dashboard Financeiro para usar Supabase
 - [ ] Remover chamadas diretas à API do Trello
 - [ ] Testar todos os dashboards
+
+
+## Sincronização Automática Trello → Supabase
+
+- [x] Criar script de sincronização inicial
+- [x] Buscar todos os cards do Trello
+- [x] Inserir cards no Supabase (41 cards sincronizados)
+- [x] Criar endpoint /api/supabase/sync para sincronização sob demanda
+- [x] Testar sincronização
+
+
+## Automação Kommo → Trello (Criar Cards)
+
+- [x] Implementar função para criar card no Trello via API
+- [x] Atualizar webhook Kommo para detectar "Agendamento Confirmado"
+- [x] Extrair dados do lead (nome, telefone, placa, modelo)
+- [x] Criar card na lista "🟢 AGENDAMENTO CONFIRMADO"
+- [x] Salvar referência do card no Supabase (kommo_leads.trello_card_id)
+- [ ] Testar fluxo completo com lead real

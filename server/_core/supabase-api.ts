@@ -150,4 +150,19 @@ router.get('/stats', async (req, res) => {
   }
 });
 
+// POST /api/supabase/sync - Sincronizar Trello → Supabase
+router.post('/sync', async (req, res) => {
+  try {
+    const { syncTrelloToSupabase } = await import('../services/trello-to-supabase-sync.js');
+    
+    console.log('[Supabase API] Iniciando sincronização Trello → Supabase...');
+    const result = await syncTrelloToSupabase();
+    
+    res.json(result);
+  } catch (err: any) {
+    console.error('[Supabase API] Erro na sincronização:', err);
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
 export default router;

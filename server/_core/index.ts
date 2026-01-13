@@ -111,109 +111,72 @@ async function startServer() {
     });
   });
   
-  // ===== WEBHOOK MINIMALISTA DO KOMMO =====
-  // POST - Recebe leads do Kommo
+  // ===== WEBHOOK DO KOMMO COM AUTOMAÇÃO =====
   app.post('/api/webhook/kommo', async (req, res) => {
     try {
       const payload = req.body;
-      console.log('[Kommo Webhook] Lead recebido:', JSON.stringify(payload, null, 2));
-      
       const lead = payload?.leads?.[0];
       if (!lead) {
         return res.status(400).json({ success: false, error: 'Payload inválido' });
       }
       
-      const leadName = lead.name || 'N/A';
-      const statusName = lead.status_name || 'N/A';
-      const pipelineName = lead.pipeline_name || 'N/A';
+      const leadId = lead.id;
+      const leadName = lead.name || 'Lead sem nome';
+      const statusName = lead.status_name || '';
+      const pipelineName = lead.pipeline_name || '';
+      const telefone = lead.custom_fields_values?.find((f: any) => f.field_name === 'Telefone')?.values?.[0]?.value || null;
+      const email = lead.custom_fields_values?.find((f: any) => f.field_name === 'Email')?.values?.[0]?.value || null;
       
-      console.log(`[Kommo Webhook] Lead: ${leadName} | Pipeline: ${pipelineName} | Status: ${statusName}`);
+      console.log(`[Kommo] ${leadId}: ${leadName} | ${pipelineName} | ${statusName}`);
       
-      // Se o status for "Agendamento Confirmado", criar card no Trello
-      let trelloCardCreated = false;
-      let trelloCardId = null;
+      // Salvar no Supabase
+      const { supabase } = await import('../supabase.js');
+      await supabase.from('kommo_leads').upsert({
+        kommo_lead_id: leadId,
+        name: leadName,
+        phone: telefone,
+        email: email,
+        pipeline_name: pipelineName,
+        status_name: statusName,
+        custom_fields: lead.custom_fields_values || {},
+        sync_status: 'pending'
+      }, { onConflict: 'kommo_lead_id' });
       
+      // Se Agendamento Confirmado, criar card no Trello
+      let trelloResult = null;
       if (statusName === 'AGENDAMENTO CONFIRMADO' && pipelineName === 'Doctor Prime') {
-        try {
-          console.log('[Kommo Webhook] Criando card no Trello...');
-          
-          // Extrair dados do lead
-          const telefone = lead.custom_fields_values?.find((f: any) => f.field_name === 'Telefone')?.values?.[0]?.value || 'N/A';
-          const email = lead.custom_fields_values?.find((f: any) => f.field_name === 'Email')?.values?.[0]?.value || 'N/A';
-          
-          // Credenciais do Trello
-          const TRELLO_API_KEY = process.env.TRELLO_API_KEY || '5d7cb0184659fe5f671928f3328d5d1a';
-          const TRELLO_TOKEN = process.env.TRELLO_TOKEN || 'ATTAc41176b5a54379ce116e6aa9ec7e865a5e1d522c583995aa1ac071eb846c5414E7CDB404';
-          const TRELLO_BOARD_ID = process.env.TRELLO_BOARD_ID || '69562921bad93c92c7922d0a';
-          
-          // Buscar ID da lista AGENDADOS
-          const listsResponse = await fetch(
-            `https://api.trello.com/1/boards/${TRELLO_BOARD_ID}/lists?key=${TRELLO_API_KEY}&token=${TRELLO_TOKEN}`
-          );
-          const lists = await listsResponse.json();
-          const agendadosList = lists.find((l: any) => l.name === '🟢 AGENDAMENTO CONFIRMADO');
-          
-          if (!agendadosList) {
-            throw new Error('Lista AGENDADOS não encontrada no Trello');
-          }
-          
-          // Criar card
-          const cardName = `${leadName} - ${telefone}`;
-          const cardDesc = `**Lead do Kommo**\n\n**Nome:** ${leadName}\n**Telefone:** ${telefone}\n**Email:** ${email}\n**Pipeline:** ${pipelineName}\n**Status:** ${statusName}\n**Lead ID:** ${lead.id}`;
-          
-          console.log(`[Kommo Webhook] Criando card: ${cardName}`);
-          console.log(`[Kommo Webhook] Lista ID: ${agendadosList.id}`);
-          
-          const createCardResponse = await fetch(
-            `https://api.trello.com/1/cards?key=${TRELLO_API_KEY}&token=${TRELLO_TOKEN}`,
-            {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                name: cardName,
-                desc: cardDesc,
-                idList: agendadosList.id,
-                pos: 'top'
-              })
-            }
-          );
-          
-          console.log(`[Kommo Webhook] Status da resposta Trello: ${createCardResponse.status}`);
-          
-          if (!createCardResponse.ok) {
-            const errorText = await createCardResponse.text();
-            console.error(`[Kommo Webhook] Erro da API Trello: ${errorText}`);
-            throw new Error(`Trello API error: ${createCardResponse.status} - ${errorText}`);
-          }
-          
-          const newCard = await createCardResponse.json();
-          trelloCardCreated = true;
-          trelloCardId = newCard.id;
-          
-          console.log(`[Kommo Webhook] ✅ Card criado no Trello! ID: ${trelloCardId}`);
-          console.log(`[Kommo Webhook] URL: https://trello.com/c/${newCard.shortLink}`);
-        } catch (trelloError: any) {
-          console.error('[Kommo Webhook] Erro ao criar card no Trello:', trelloError);
+        const { createTrelloCard } = await import('../services/create-trello-card.js');
+        trelloResult = await createTrelloCard({
+          name: leadName,
+          phone: telefone || undefined,
+          email: email || undefined,
+          kommoLeadId: leadId
+        });
+        
+        if (trelloResult.success) {
+          console.log('[Kommo] Card criado:', trelloResult.cardId);
+          await supabase.from('kommo_leads').update({
+            trello_card_id: trelloResult.cardId,
+            trello_card_url: trelloResult.cardUrl,
+            sync_status: 'synced',
+            last_sync_at: new Date().toISOString()
+          }).eq('kommo_lead_id', leadId);
+        } else {
+          await supabase.from('kommo_leads').update({
+            sync_status: 'error',
+            sync_error: trelloResult.error
+          }).eq('kommo_lead_id', leadId);
         }
       }
       
-      res.status(200).json({
+      res.json({
         success: true,
-        message: 'Webhook Kommo processado com sucesso!',
-        received: {
-          lead_id: lead.id,
-          name: leadName,
-          pipeline: pipelineName,
-          status: statusName
-        },
-        trello: {
-          card_created: trelloCardCreated,
-          card_id: trelloCardId
-        },
-        timestamp: new Date().toISOString()
+        lead_id: leadId,
+        trello_card_created: !!trelloResult?.success,
+        trello_card_id: trelloResult?.cardId
       });
     } catch (error: any) {
-      console.error('[Kommo Webhook] Erro:', error);
+      console.error('[Kommo] Erro:', error);
       res.status(500).json({ success: false, error: error.message });
     }
   });
