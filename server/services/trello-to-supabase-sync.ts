@@ -1,4 +1,5 @@
 import { supabase } from '../supabase';
+import { extractCustomFields } from './extract-custom-fields';
 
 const TRELLO_API_KEY = process.env.TRELLO_API_KEY || 'e327cf4891fd2fcb6020899e3718c45e';
 const TRELLO_TOKEN = process.env.TRELLO_TOKEN || 'ATTAa37008bfb8c135e0815e9a964d5c7f2e0b2ed2530c6bfdd202061e53ae1a6c18F1F6F8C7';
@@ -11,6 +12,19 @@ interface TrelloCard {
   idList: string;
   labels: Array<{ name: string; color: string }>;
   dateLastActivity: string;
+  customFieldItems?: Array<{
+    id: string;
+    idCustomField: string;
+    value?: { text?: string; date?: string; number?: string };
+    idValue?: string;
+  }>;
+}
+
+interface TrelloCustomField {
+  id: string;
+  name: string;
+  type: string;
+  options?: Array<{ id: string; value: { text: string } }>;
 }
 
 interface TrelloList {
@@ -53,9 +67,20 @@ export async function syncTrelloToSupabase(): Promise<{ success: boolean; synced
         }, { onConflict: 'id' });
     }
     
-    // 2. Buscar todos os cards do board
+    // 2. Buscar custom fields do board
+    const customFieldsResponse = await fetch(
+      `https://api.trello.com/1/boards/${TRELLO_BOARD_ID}/customFields?key=${TRELLO_API_KEY}&token=${TRELLO_TOKEN}`
+    );
+    
+    let customFields: TrelloCustomField[] = [];
+    if (customFieldsResponse.ok) {
+      customFields = await customFieldsResponse.json();
+      console.log(`[Trello→Supabase] ${customFields.length} custom fields encontrados`);
+    }
+    
+    // 3. Buscar todos os cards do board (com custom fields)
     const cardsResponse = await fetch(
-      `https://api.trello.com/1/boards/${TRELLO_BOARD_ID}/cards?key=${TRELLO_API_KEY}&token=${TRELLO_TOKEN}`
+      `https://api.trello.com/1/boards/${TRELLO_BOARD_ID}/cards?customFieldItems=true&key=${TRELLO_API_KEY}&token=${TRELLO_TOKEN}`
     );
     
     if (!cardsResponse.ok) {
@@ -68,9 +93,12 @@ export async function syncTrelloToSupabase(): Promise<{ success: boolean; synced
     let synced = 0;
     let errors = 0;
     
-    // 3. Inserir/atualizar cada card no Supabase
+    // 4. Inserir/atualizar cada card no Supabase
     for (const card of cards) {
       try {
+        // Extrair custom fields
+        const extracted = extractCustomFields(card, customFields);
+        
         const { error } = await supabase
           .from('trello_cards')
           .upsert({
@@ -82,6 +110,9 @@ export async function syncTrelloToSupabase(): Promise<{ success: boolean; synced
             labels: card.labels || [],
             custom_fields: {},
             date_last_activity: card.dateLastActivity ? new Date(card.dateLastActivity).toISOString() : null,
+            responsavel_tecnico: extracted.responsavel_tecnico,
+            placa: extracted.placa,
+            modelo: extracted.modelo,
             synced_at: new Date().toISOString(),
             updated_at: new Date().toISOString()
           }, { onConflict: 'id' });

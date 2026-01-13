@@ -712,3 +712,13 @@
 - [x] Corrigir nomes das listas (adicionar emojis)
 - [x] Desabilitar filtro de consultor temporariamente
 - [x] Validar que dados aparecem corretamente (FUNCIONANDO! 33 carros na oficina)
+
+
+## Implementar Custom Fields no Supabase
+
+- [x] Adicionar colunas na tabela trello_cards: responsavel_tecnico, placa, modelo
+- [x] Atualizar tipos TypeScript no servidor
+- [x] Criar função extract-custom-fields.ts
+- [x] Modificar sincronização para extrair custom fields (43 cards com custom fields)
+- [x] Reativar filtro de consultor no dashboard
+- [x] Testar filtro funcionando (SUCESSO! Filtrando por João, Pedro, Thales, Garage347, Bosch)

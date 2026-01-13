@@ -19,6 +19,9 @@ export interface TrelloCard {
   labels: any[];
   custom_fields: Record<string, any>;
   date_last_activity: string | null;
+  responsavel_tecnico: string | null;
+  placa: string | null;
+  modelo: string | null;
   created_at: string;
   updated_at: string;
   synced_at: string;

@@ -23,6 +23,7 @@ interface TrelloCard {
   customFieldItems?: Array<{
     id: string;
     idCustomField: string;
+    idValue?: string;
     value?: {
       text?: string;
       date?: string;
@@ -232,9 +233,28 @@ export default function Home() {
       cards.forEach(card => {
         const listName = listMap[card.idList];
         
-        // TODO: Filtro de consultor desabilitado temporariamente
-        // Precisa implementar custom fields no Supabase primeiro
-        // if (responsavelFilter !== 'todos') { ... }
+        // Filtro de consultor
+        if (responsavelFilter !== 'todos') {
+          const responsavelField = customFields.find((f: any) => f.name === 'Responsável Técnico');
+          if (responsavelField) {
+            const cardResponsavel = card.customFieldItems?.find(
+              (item: any) => item.idCustomField === responsavelField.id
+            );
+            
+            if (cardResponsavel && cardResponsavel.idValue) {
+              const option = responsavelField.options?.find(
+                (opt: any) => opt.id === cardResponsavel.idValue
+              );
+              const responsavelNome = option?.value?.text;
+              
+              if (responsavelNome !== responsavelFilter) {
+                return; // Pular este card
+              }
+            } else {
+              return; // Pular cards sem responsável definido
+            }
+          }
+        }
         
         // Verificar labels especiais
         const hasRetorno = card.labels.some(label => label.name.toUpperCase() === 'RETORNO');
