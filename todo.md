@@ -498,3 +498,15 @@
 - [x] Adicionar card "Por Tipo de Serviço": breakdown por categoria com Valor Total, Quantidade e Ticket Médio
 - [x] Destacar análise de Promoções para medir upsell
 - [x] Testar métricas com dados reais
+
+
+## Refatoração Dashboard Operacional - Layout Premium
+
+- [x] Remover palavra "Dashboard" do header (fica "Oficina Doctor Auto")
+- [x] Adicionar contador de agendados por dia (buscar lista AGENDADOS do Trello)
+- [x] Remover botões "Histórico da Semana" e "Histórico do Mês"
+- [x] Mover "Última atualização" para o rodapé
+- [x] Aumentar tamanho dos cards CAPACIDADE, RETORNO e FORA DA LOJA
+- [x] Aplicar tema premium vermelho e preto (background escuro, destaques vermelhos, texto branco)
+- [x] Adicionar sombras suaves, bordas elegantes e gradientes sutis
+- [x] Testar layout premium no navegador

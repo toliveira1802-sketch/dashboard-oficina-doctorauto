@@ -433,56 +433,64 @@ export default function Home() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
       <Navigation />
       {/* Header */}
-      <header className="bg-gradient-to-r from-black via-gray-900 to-black border-b border-red-900 shadow-2xl sticky top-0 z-10">
+      <header className="bg-white border-b border-slate-200 shadow-sm sticky top-0 z-10">
         <div className="container py-4">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-white">Oficina Doctor Auto</h1>
-              <p className="text-red-200 text-sm mt-1">Gestão de Pátio em Tempo Real</p>
-              {/* Contador de Agendados */}
-              <div className="mt-2 flex items-center gap-2">
-                <span className="text-red-400 text-sm font-semibold">Agendados Hoje:</span>
-                <span className="bg-red-600 text-white px-3 py-1 rounded-full text-sm font-bold">
-                  {allCards.filter(c => listIdMap[c.idList]?.includes('AGENDADOS')).length}
-                </span>
-              </div>
+              <h1 className="text-2xl font-bold text-slate-900">Dashboard Oficina Doctor Auto</h1>
+              <p className="text-slate-600 text-sm mt-1">Gestão de Pátio em Tempo Real</p>
             </div>
             <div className="flex items-center gap-4">
-              {/* Indicador de Capacidade Compacto - MAIOR */}
-              <div className={`px-6 py-3 rounded-xl border-2 ${alertStatus.bgColor} ${alertStatus.borderColor} ${alertStatus.animate} flex items-center gap-3 shadow-lg`}>
-                <AlertIcon className={`w-7 h-7 ${alertStatus.color}`} />
+              {/* Indicador de Capacidade Compacto */}
+              <div className={`px-4 py-2 rounded-lg border-2 ${alertStatus.bgColor} ${alertStatus.borderColor} ${alertStatus.animate} flex items-center gap-2`}>
+                <AlertIcon className={`w-5 h-5 ${alertStatus.color}`} />
                 <div>
-                  <p className={`text-base font-bold ${alertStatus.color}`}>{alertStatus.text}</p>
-                  <p className="text-sm text-slate-700 font-medium">Capacidade: {metrics.total}/20 ({Math.round((metrics.total / 20) * 100)}%)</p>
+                  <p className={`text-sm font-bold ${alertStatus.color}`}>{alertStatus.text}</p>
+                  <p className="text-xs text-slate-600">Capacidade: {metrics.total}/20 ({Math.round((metrics.total / 20) * 100)}%)</p>
                 </div>
               </div>
               
-              {/* Indicador RETORNO - MAIOR */}
-              <div className="px-6 py-3 rounded-xl border-2 bg-gradient-to-br from-red-50 to-red-100 border-red-400 flex items-center gap-3 cursor-pointer hover:shadow-xl transition-all hover:scale-105" onClick={() => { setModalCategory('retornos'); setModalOpen(true); }}>
-                <div className="bg-gradient-to-br from-red-600 to-red-700 text-white rounded-full w-12 h-12 flex items-center justify-center font-bold text-lg shadow-lg">
+              {/* Indicador RETORNO */}
+              <div className="px-4 py-2 rounded-lg border-2 bg-red-50 border-red-300 flex items-center gap-2 cursor-pointer hover:shadow-md transition-shadow" onClick={() => { setModalCategory('retornos'); setModalOpen(true); }}>
+                <div className="bg-red-600 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold text-sm">
                   {metrics.retornos}
                 </div>
                 <div>
-                  <p className="text-base font-bold text-red-900">🔴 RETORNO</p>
-                  <p className="text-sm text-red-700 font-medium">Na oficina</p>
+                  <p className="text-sm font-bold text-red-900">🔴 RETORNO</p>
+                  <p className="text-xs text-slate-600">Na oficina</p>
                 </div>
               </div>
               
-              {/* Indicador FORA DA LOJA - MAIOR */}
-              <div className="px-6 py-3 rounded-xl border-2 bg-gradient-to-br from-blue-50 to-blue-100 border-blue-400 flex items-center gap-3 cursor-pointer hover:shadow-xl transition-all hover:scale-105" onClick={() => { setModalCategory('foraLoja'); setModalOpen(true); }}>
-                <div className="bg-gradient-to-br from-blue-600 to-blue-700 text-white rounded-full w-12 h-12 flex items-center justify-center font-bold text-lg shadow-lg">
+              {/* Indicador FORA DA LOJA */}
+              <div className="px-4 py-2 rounded-lg border-2 bg-blue-50 border-blue-300 flex items-center gap-2 cursor-pointer hover:shadow-md transition-shadow" onClick={() => { setModalCategory('foraLoja'); setModalOpen(true); }}>
+                <div className="bg-blue-600 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold text-sm">
                   {metrics.foraLoja}
                 </div>
                 <div>
-                  <p className="text-base font-bold text-blue-900">📍 FORA DA LOJA</p>
-                  <p className="text-sm text-blue-700 font-medium">Externos</p>
+                  <p className="text-sm font-bold text-blue-900">📍 FORA DA LOJA</p>
+                  <p className="text-xs text-slate-600">Externos</p>
                 </div>
               </div>
               
-              {/* Botão Download removido */}
+              <div className="text-right">
+                <p className="text-xs text-slate-500">Última atualização</p>
+                <p className="text-slate-700 font-medium text-sm">{lastUpdate.toLocaleTimeString('pt-BR')}</p>
+              </div>
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => {
+                  const mes = new Date().getMonth() + 1;
+                  const ano = new Date().getFullYear();
+                  window.open(`/api/export/historico?mes=${mes}&ano=${ano}`, '_blank');
+                }}
+                title="Baixar histórico do mês"
+              >
+                <Download className="w-4 h-4" />
+              </Button>
               <Button 
                 variant="outline" 
                 size="sm"
@@ -907,23 +915,9 @@ export default function Home() {
         </Card>
 
         {/* Footer Info */}
-        <div className="mt-6 text-center text-sm text-slate-600 bg-white rounded-lg p-4 shadow-sm">
-          <div className="flex items-center justify-center gap-6">
-            <div>
-              <p className="text-xs text-slate-500">Última Atualização</p>
-              <p className="font-semibold text-slate-900">{lastUpdate.toLocaleTimeString('pt-BR')}</p>
-            </div>
-            <div className="h-8 w-px bg-slate-300" />
-            <div>
-              <p className="text-xs text-slate-500">Sincronização Automática</p>
-              <p className="font-medium text-slate-700">A cada 30 minutos</p>
-            </div>
-            <div className="h-8 w-px bg-slate-300" />
-            <div>
-              <p className="text-xs text-slate-500">Recursos Exibidos</p>
-              <p className="font-medium text-slate-700">{filteredRecursos.length} de {recursos.length}</p>
-            </div>
-          </div>
+        <div className="mt-6 text-center text-xs text-slate-500">
+          <p>Dados atualizados automaticamente a cada 30 minutos</p>
+          <p className="mt-1">Board Trello: {TRELLO_BOARD_ID} • {filteredRecursos.length} recursos exibidos</p>
         </div>
       </main>
 
