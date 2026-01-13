@@ -11,7 +11,7 @@
 CREATE TABLE IF NOT EXISTS trello_cards (
   id TEXT PRIMARY KEY,
   name TEXT NOT NULL,
-  desc TEXT,
+  description TEXT,
   id_list TEXT NOT NULL,
   list_name TEXT,
   labels JSONB DEFAULT '[]'::jsonb,
@@ -280,7 +280,7 @@ DECLARE
   v_card_name TEXT;
   v_list_id TEXT;
   v_list_name TEXT;
-  v_card_desc TEXT;
+  v_card_description TEXT;
   v_result JSONB;
 BEGIN
   -- Log do webhook
@@ -294,7 +294,7 @@ BEGIN
   IF v_action_type IN ('updateCard', 'createCard') THEN
     v_card_id := p_payload->'action'->'data'->'card'->>'id';
     v_card_name := p_payload->'action'->'data'->'card'->>'name';
-    v_card_desc := p_payload->'action'->'data'->'card'->>'desc';
+    v_card_description := p_payload->'action'->'data'->'card'->>'desc';
     v_list_id := COALESCE(
       p_payload->'action'->'data'->'list'->>'id',
       p_payload->'action'->'data'->'card'->>'idList'
@@ -305,7 +305,7 @@ BEGIN
     INSERT INTO trello_cards (
       id,
       name,
-      desc,
+      description,
       id_list,
       list_name,
       date_last_activity,
@@ -313,7 +313,7 @@ BEGIN
     ) VALUES (
       v_card_id,
       v_card_name,
-      v_card_desc,
+      v_card_description,
       v_list_id,
       v_list_name,
       NOW(),
@@ -322,7 +322,7 @@ BEGIN
     ON CONFLICT (id)
     DO UPDATE SET
       name = EXCLUDED.name,
-      desc = EXCLUDED.desc,
+      description = EXCLUDED.description,
       id_list = EXCLUDED.id_list,
       list_name = EXCLUDED.list_name,
       date_last_activity = NOW(),

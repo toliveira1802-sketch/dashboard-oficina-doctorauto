@@ -11,7 +11,7 @@
 CREATE TABLE IF NOT EXISTS trello_cards (
   id TEXT PRIMARY KEY,
   name TEXT NOT NULL,
-  desc TEXT,
+  description TEXT,
   id_list TEXT NOT NULL,
   list_name TEXT,
   labels JSONB DEFAULT '[]'::jsonb,

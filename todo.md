@@ -627,3 +627,10 @@
 - [x] Adicionar logs em tempo real da execução
 - [x] Aplicar tema premium vermelho/preto
 - [x] Testar execução completa das 3 partes
+
+
+## Correção SQL - Palavra Reservada
+
+- [x] Substituir coluna `desc` por `description` em todos os SQLs
+- [x] Regenerar arquivos SQL divididos (part1, part2, part3)
+- [ ] Testar execução no Supabase sem erros
