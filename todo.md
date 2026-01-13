@@ -979,3 +979,10 @@
 - [x] Testar e identificar problema ao clicar no + (dropdown não aparecia)
 - [x] Corrigir código do botão + e dropdown de placas (adicionado setShowPlacasDropdown)
 - [x] Testar funcionalidade corrigida (dropdown funcionando perfeitamente!)
+
+
+### Melhorar Interação com Placas Agendadas - Agenda
+- [x] Tornar placas agendadas clicáveis (interface simplificada: placa + modelo + botão X)
+- [x] Adicionar menu de opções ao clicar (botão X vermelho sempre visível)
+- [x] Implementar função de remover/cancelar agendamento (botão X funcionando perfeitamente)
+- [x] Testar funcionalidade completa (dropdown + agendamento + remoção)

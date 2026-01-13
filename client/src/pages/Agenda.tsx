@@ -57,6 +57,7 @@ export default function Agenda() {
   const [placasLoading, setPlacasLoading] = useState(false);
   const [filteredPlacas, setFilteredPlacas] = useState<any[]>([]);
   const [showPlacasDropdown, setShowPlacasDropdown] = useState(false);
+  const [menuAberto, setMenuAberto] = useState<{ mecanico: string; horario: string } | null>(null);
   // Buscar placas do Trello
   useEffect(() => {
     const fetchPlacas = async () => {
@@ -292,60 +293,27 @@ export default function Agenda() {
                         } ${hora.startsWith('EXTRA') ? 'bg-orange-50/30' : ''}`}
                       >
                         {item ? (
-                          <>
-                            {/* Estado compacto - só ícone */}
-                            <div className="flex items-center justify-center h-full group-hover:hidden">
-                              <Car className={`h-5 w-5 ${item.isEncaixe ? 'text-orange-600' : 'text-blue-600'}`} />
-                            </div>
-
-                            {/* Estado expandido - hover */}
-                            <div className="hidden group-hover:block absolute top-0 left-0 w-48 bg-white border-2 border-blue-500 rounded-lg shadow-2xl p-3 z-50 space-y-2">
-                              <div className="font-bold text-sm text-slate-900">{item.placa}</div>
-                              <div className="text-xs text-slate-600">{item.modelo}</div>
-                              <div className="text-xs text-slate-500">{item.tipo}</div>
-                              
-                              {item.isEncaixe === 1 && (
-                                <div className="text-xs bg-orange-200 text-orange-800 px-2 py-0.5 rounded inline-block">
-                                  Encaixe
-                                </div>
-                              )}
-
-                              <div className="space-y-1 pt-2 border-t border-slate-200">
-                                <div className="flex gap-1">
-                                  <button
-                                    onClick={() => toast.info(`🚨 B.O de Peça registrado para ${item.placa}`)}
-                                    className="flex-1 text-xs bg-red-100 hover:bg-red-200 text-red-700 px-2 py-1 rounded flex items-center justify-center gap-1"
-                                    title="Reportar problema com peça"
-                                  >
-                                    🚨 B.O Peça
-                                  </button>
-                                  <button
-                                    onClick={() => toast.success(`✅ ${item.placa} marcado como pronto`)}
-                                    className="flex-1 text-xs bg-green-100 hover:bg-green-200 text-green-700 px-2 py-1 rounded flex items-center justify-center gap-1"
-                                    title="Marcar carro como pronto"
-                                  >
-                                    ✅ Pronto
-                                  </button>
-                                </div>
-                                <div className="flex gap-1">
-                                  <button
-                                    onClick={() => handleFinalizado(item)}
-                                    className="flex-1 text-xs bg-teal-100 hover:bg-teal-200 text-teal-700 px-2 py-1 rounded flex items-center justify-center gap-1"
-                                  >
-                                    <CheckCircle className="h-3 w-3" />
-                                    Teste
-                                  </button>
-                                  <button
-                                    onClick={() => handleLiberado(item)}
-                                    className="flex-1 text-xs bg-blue-100 hover:bg-blue-200 text-blue-700 px-2 py-1 rounded flex items-center justify-center gap-1"
-                                  >
-                                    <Truck className="h-3 w-3" />
-                                    Entrega
-                                  </button>
-                                </div>
-                              </div>
-                            </div>
-                          </>
+                          <div className="relative h-full flex flex-col items-center justify-center p-1 group">
+                            <div className="text-[10px] font-bold text-slate-900 truncate w-full text-center">{item.placa}</div>
+                            <div className="text-[9px] text-slate-600 truncate w-full text-center">{item.modelo}</div>
+                            {item.isEncaixe === 1 && (
+                              <div className="text-[8px] bg-orange-200 text-orange-800 px-1 rounded mt-0.5">Encaixe</div>
+                            )}
+                            <button
+                              onClick={() => {
+                                const newAgenda = { ...localAgenda };
+                                if (newAgenda[mecanico]) {
+                                  newAgenda[mecanico][hora] = null;
+                                }
+                                setLocalAgenda(newAgenda);
+                                toast.success(`🗑️ ${item.placa} removido!`);
+                              }}
+                              className="absolute top-0.5 right-0.5 w-4 h-4 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center text-[10px] shadow-sm"
+                              title="Remover agendamento"
+                            >
+                              ×
+                            </button>
+                          </div>
                         ) : editingCell?.mecanico === mecanico && editingCell?.horario === hora ? (
                           <div className="relative w-full h-full bg-white">
                             <input
