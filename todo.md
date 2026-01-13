@@ -520,3 +520,12 @@
 - [x] Adicionar gradientes, sombras e hover effects
 - [x] Testar responsividade e alinhamento dos valores
 - [x] Garantir layout limpo e profissional
+
+
+## Mover Agendados para Status Pátio
+
+- [x] Remover contador "Agendados Hoje" do header
+- [x] Adicionar card "Agendados Hoje" na seção Status Pátio
+- [x] Destacar card visualmente (cor diferenciada)
+- [x] Implementar modal clicável com lista de placas dos agendados
+- [x] Testar funcionalidade de clique e modal

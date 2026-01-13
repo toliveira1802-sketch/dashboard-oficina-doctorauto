@@ -442,13 +442,6 @@ export default function Home() {
             <div>
               <h1 className="text-3xl font-bold text-white">Oficina Doctor Auto</h1>
               <p className="text-red-200 text-sm mt-1">Gestão de Pátio em Tempo Real</p>
-              {/* Contador de Agendados */}
-              <div className="mt-2 flex items-center gap-2">
-                <span className="text-red-400 text-sm font-semibold">Agendados Hoje:</span>
-                <span className="bg-red-600 text-white px-3 py-1 rounded-full text-sm font-bold">
-                  {allCards.filter(c => listIdMap[c.idList]?.includes('AGENDADOS')).length}
-                </span>
-              </div>
             </div>
             <div className="flex items-center gap-4">
               {/* Indicador de Capacidade Compacto - MAIOR */}
@@ -587,6 +580,16 @@ export default function Home() {
             <p className="text-xs text-orange-700 mb-1">Prontos</p>
             <p className="text-2xl font-bold text-orange-900">{metrics.prontos}</p>
             <p className="text-xs text-orange-600 mt-1">aguardando retirada</p>
+          </Card>
+          
+          {/* Card Agendados Hoje - Destacado */}
+          <Card 
+            className="p-3 bg-gradient-to-br from-indigo-100 to-indigo-200 border-2 border-indigo-400 hover:shadow-xl transition-all cursor-pointer hover:scale-105 transform duration-200" 
+            onClick={() => { setModalCategory('agendados'); setModalOpen(true); }}
+          >
+            <p className="text-xs text-indigo-700 mb-1 font-semibold">Agendados Hoje</p>
+            <p className="text-2xl font-bold text-indigo-900">{allCards.filter(c => listIdMap[c.idList]?.includes('AGENDADOS')).length}</p>
+            <p className="text-xs text-indigo-600 mt-1">para entrar</p>
           </Card>
         </div>
           )}
@@ -942,6 +945,7 @@ export default function Home() {
               {modalCategory === 'retornos' && '🔴 Veículos RETORNO'}
               {modalCategory === 'foraLoja' && '📍 Veículos FORA DA LOJA'}
               {modalCategory === 'atrasados' && '⚠️ Veículos Atrasados (Previsão Ultrapassada)'}
+              {modalCategory === 'agendados' && '📅 Agendados Hoje'}
             </DialogTitle>
             <DialogDescription>
               Lista completa de veículos nesta categoria
@@ -1040,6 +1044,12 @@ export default function Home() {
         const isPronto = listName === 'Qualidade' || listName === '🟡 Pronto / Aguardando Retirada';
         const isEntregue = listName === '🙏🏻entregue' || listName === 'Entregue' || listName?.toLowerCase().includes('entregue');
         return hasForaLoja && !isPronto && !isEntregue;
+      });
+    } else if (modalCategory === 'agendados') {
+      // Filtrar apenas carros na lista AGENDADOS
+      filtered = allCards.filter(card => {
+        const listName = listIdMap[card.idList];
+        return listName?.includes('AGENDADOS');
       });
     } else {
       const targetListName = listMap[modalCategory];
