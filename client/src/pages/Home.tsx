@@ -20,6 +20,15 @@ interface TrelloCard {
   desc: string;
   labels: Array<{ name: string; color: string }>;
   dateLastActivity: string;
+  customFieldItems?: Array<{
+    id: string;
+    idCustomField: string;
+    value?: {
+      text?: string;
+      date?: string;
+      number?: string;
+    };
+  }>;
 }
 
 interface Metrics {
@@ -72,6 +81,8 @@ export default function Home() {
   const [modalOpen, setModalOpen] = useState(false);
   const [modalCategory, setModalCategory] = useState<string>('');  
   const [listIdMap, setListIdMap] = useState<{ [key: string]: string }>({});
+  const [consultores, setConsultores] = useState<string[]>([]);
+  const [customFieldsMap, setCustomFieldsMap] = useState<{ [key: string]: any }>({});
   
   // Estados de minimização dos widgets
   const [widgetsMinimized, setWidgetsMinimized] = useState<{ [key: string]: boolean }>({
@@ -157,7 +168,7 @@ export default function Home() {
     
     try {
       const response = await fetch(
-        `https://api.trello.com/1/boards/${TRELLO_BOARD_ID}/cards?key=${TRELLO_API_KEY}&token=${TRELLO_TOKEN}`
+        `https://api.trello.com/1/boards/${TRELLO_BOARD_ID}/cards?key=${TRELLO_API_KEY}&token=${TRELLO_TOKEN}&customFieldItems=true`
       );
       
       if (!response.ok) {
@@ -165,6 +176,26 @@ export default function Home() {
       }
 
       const cards: TrelloCard[] = await response.json();
+      
+      // Buscar custom fields do board
+      const customFieldsResponse = await fetch(
+        `https://api.trello.com/1/boards/${TRELLO_BOARD_ID}/customFields?key=${TRELLO_API_KEY}&token=${TRELLO_TOKEN}`
+      );
+      const customFields = await customFieldsResponse.json();
+      
+      // Mapear custom fields por nome
+      const fieldsMap: { [key: string]: any } = {};
+      customFields.forEach((field: any) => {
+        fieldsMap[field.name] = field;
+      });
+      setCustomFieldsMap(fieldsMap);
+      
+      // Extrair lista única de consultores do custom field "Responsável Técnico"
+      const responsavelField = customFields.find((f: any) => f.name === 'Responsável Técnico');
+      if (responsavelField && responsavelField.options) {
+        const consultoresList = responsavelField.options.map((opt: any) => opt.value.text);
+        setConsultores(consultoresList);
+      }
       
       // Buscar listas para mapear IDs
       const listsResponse = await fetch(
@@ -459,9 +490,9 @@ export default function Home() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="todos">Todos Consultores</SelectItem>
-                  <SelectItem value="João">João</SelectItem>
-                  <SelectItem value="Pedro">Pedro</SelectItem>
-                  <SelectItem value="Outros">Outros</SelectItem>
+                  {consultores.map(consultor => (
+                    <SelectItem key={consultor} value={consultor}>{consultor}</SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
@@ -569,14 +600,26 @@ export default function Home() {
               </div>
               <div>
                 <p className="text-lg font-bold text-orange-900">⚠️ VEÍCULOS ATRASADOS</p>
-                <p className="text-sm text-orange-700">Veículos com mais de 5 dias na mesma etapa</p>
+                <p className="text-sm text-orange-700">Previsão de entrega ultrapassada</p>
               </div>
             </div>
             <div className="text-right">
               <p className="text-3xl font-bold text-orange-900">
                 {allCards.filter(card => {
-                  const dias = Math.floor((new Date().getTime() - new Date(card.dateLastActivity).getTime()) / (1000 * 60 * 60 * 24));
-                  return dias > 5;
+                  // Buscar custom field "Previsão de Entrega"
+                  const previsaoField = customFieldsMap['Previsão de Entrega'];
+                  if (!previsaoField || !card.customFieldItems) return false;
+                  
+                  const previsaoItem = card.customFieldItems.find((item: any) => item.idCustomField === previsaoField.id);
+                  if (!previsaoItem || !previsaoItem.value || !previsaoItem.value.date) return false;
+                  
+                  const previsaoDate = new Date(previsaoItem.value.date);
+                  const hoje = new Date();
+                  hoje.setHours(0, 0, 0, 0);
+                  previsaoDate.setHours(0, 0, 0, 0);
+                  
+                  // Atrasado se a previsão já passou
+                  return previsaoDate < hoje;
                 }).length}
               </p>
               <p className="text-xs text-orange-600">críticos</p>
@@ -865,7 +908,7 @@ export default function Home() {
               {modalCategory === 'prontos' && 'Prontos para Retirada'}
               {modalCategory === 'retornos' && '🔴 Veículos RETORNO'}
               {modalCategory === 'foraLoja' && '📍 Veículos FORA DA LOJA'}
-              {modalCategory === 'atrasados' && '⚠️ Veículos Atrasados (> 5 dias)'}
+              {modalCategory === 'atrasados' && '⚠️ Veículos Atrasados (Previsão Ultrapassada)'}
             </DialogTitle>
             <DialogDescription>
               Lista completa de veículos nesta categoria
@@ -932,10 +975,20 @@ export default function Home() {
     let filtered: TrelloCard[] = [];
 
     if (modalCategory === 'atrasados') {
-      // Filtrar veículos com mais de 5 dias
+      // Filtrar veículos com previsão de entrega ultrapassada
       filtered = allCards.filter(card => {
-        const dias = Math.floor((new Date().getTime() - new Date(card.dateLastActivity).getTime()) / (1000 * 60 * 60 * 24));
-        return dias > 5;
+        const previsaoField = customFieldsMap['Previsão de Entrega'];
+        if (!previsaoField || !card.customFieldItems) return false;
+        
+        const previsaoItem = card.customFieldItems.find((item: any) => item.idCustomField === previsaoField.id);
+        if (!previsaoItem || !previsaoItem.value || !previsaoItem.value.date) return false;
+        
+        const previsaoDate = new Date(previsaoItem.value.date);
+        const hoje = new Date();
+        hoje.setHours(0, 0, 0, 0);
+        previsaoDate.setHours(0, 0, 0, 0);
+        
+        return previsaoDate < hoje;
       });
     } else if (modalCategory === 'retornos') {
       // Filtrar apenas RETORNO que NÃO estão na lista Prontos OU Entregue

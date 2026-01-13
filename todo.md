@@ -462,3 +462,13 @@
 - [ ] Criar sincronização inicial completa ao iniciar servidor
 - [ ] Criar tabelas no Supabase com estrutura JSONB para custom fields
 - [ ] Testar sincronização híbrida completa
+
+
+## Filtro Dinâmico de Consultores e Correção Veículos Atrasados
+
+- [x] Buscar custom field "Responsável Técnico" do Trello
+- [x] Popular dropdown "Todos Consultores" dinamicamente com valores reais do Trello
+- [x] Corrigir lógica de "Veículos Atrasados": usar custom field de data de entrega
+- [x] Veículo atrasado = data de entrega preenchida E ultrapassada (passou)
+- [x] Testar filtro dinâmico e contagem correta de atrasados
+- [ ] Implementar funcionalidade de filtrar dados por consultor selecionado
