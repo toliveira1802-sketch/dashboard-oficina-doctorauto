@@ -106,6 +106,11 @@ export default function Home() {
     const newState = { ...widgetsMinimized, [widget]: !widgetsMinimized[widget] };
     setWidgetsMinimized(newState);
     localStorage.setItem('widgetsMinimized', JSON.stringify(newState));
+    
+    // Forçar refresh dos dados ao expandir tempo médio ou mapa
+    if ((widget === 'tempoMedio' || widget === 'mapaOficina') && newState[widget] === false) {
+      fetchTrelloData();
+    }
   };
 
   // Recursos base da oficina
@@ -656,6 +661,12 @@ export default function Home() {
             <div className="text-right">
               <p className="text-3xl font-bold text-orange-900">
                 {allCards.filter(card => {
+                  // Excluir carros PRONTOS ou ENTREGUES
+                  const listName = listIdMap[card.idList] || '';
+                  const isPronto = listName.includes('Pronto');
+                  const isEntregue = listName.includes('Entregue');
+                  if (isPronto || isEntregue) return false;
+                  
                   // Buscar custom field "Previsão de Entrega"
                   const previsaoField = customFieldsMap['Previsão de Entrega'];
                   if (!previsaoField || !card.customFieldItems) return false;
