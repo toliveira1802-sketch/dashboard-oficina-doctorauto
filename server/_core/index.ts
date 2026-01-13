@@ -50,6 +50,10 @@ async function startServer() {
   const supabaseValidateRoutes = await import('../routes/supabase/validate-tables.js');
   app.use(supabaseValidateRoutes.default);
   
+  // Supabase API routes
+  const supabaseApiRoutes = await import('./supabase-api.js');
+  app.use('/api/supabase', supabaseApiRoutes.default);
+  
   // ===== WEBHOOK MINIMALISTA DO TRELLO =====
   // HEAD - Validação do Trello
   app.head('/api/webhook/trello', (req, res) => {

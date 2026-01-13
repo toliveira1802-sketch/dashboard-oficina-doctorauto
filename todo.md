@@ -660,3 +660,14 @@
 - [x] Corrigir sintaxe SQL (substituído $$ por $function$ e $trigger$)
 - [ ] Validar todos os 3 arquivos
 - [ ] Testar execução no Supabase
+
+
+## Migrar Dashboard para Supabase
+
+- [x] Configurar cliente Supabase no projeto
+- [x] Criar variáveis de ambiente Supabase (URL e API Key)
+- [x] Criar APIs no backend para buscar dados do Supabase
+- [ ] Atualizar Dashboard Operacional para usar Supabase
+- [ ] Atualizar Dashboard Financeiro para usar Supabase
+- [ ] Remover chamadas diretas à API do Trello
+- [ ] Testar todos os dashboards
