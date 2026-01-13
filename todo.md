@@ -403,3 +403,29 @@
 - [x] Modificar endpoint /api/trello/placas para buscar do PostgreSQL
 - [x] Testar dropdown com dados reais do banco (26 veículos carregados com sucesso!)
 - [x] Validar preenchimento automático do modelo (Integrado e funcionando)
+
+
+## Refatoração de Layout - Dashboard Operacional
+
+- [x] Mover indicador de capacidade do card grande para o header (compacto)
+- [x] Implementar sistema de cores dinâmicas baseado em ocupação (Verde 0-60%, Amarelo 60-85%, Vermelho 85-100%, Vermelho pulsante >100%)
+- [x] Reorganizar espaçamento vertical do dashboard (subir métricas e cards)
+- [x] Adicionar animação de alerta para superlotação (>100%)
+
+## Correção Indicadores RETORNO e FORA DA LOJA
+
+- [x] Mover indicadores RETORNO e FORA DA LOJA para o header (ao lado da capacidade)
+- [x] Corrigir contagem: excluir carros que já estão na lista "Prontos" (entregues)
+- [x] Aplicar mesmo estilo compacto do indicador de capacidade
+- [x] Testar contagem correta
+
+
+## Integração Supabase - Sincronização Bidirecional
+
+- [ ] Criar tabela trello_cards no Supabase com estrutura JSONB para custom fields dinâmicos
+- [ ] Configurar variáveis de ambiente do Supabase
+- [ ] Implementar sincronização Trello → Supabase (buscar todos os cards e custom fields)
+- [ ] Implementar webhook/trigger Supabase → Trello (sincronização reversa)
+- [ ] Atualizar dashboard para ler dados do Supabase ao invés do Trello direto
+- [ ] Corrigir contagem de RETORNO e FORA DA LOJA (excluir coluna "Entregue")
+- [ ] Testar sincronização bidirecional completa

@@ -204,13 +204,15 @@ export default function Home() {
         const hasRetorno = card.labels.some(label => label.name.toUpperCase() === 'RETORNO');
         const hasForaLoja = card.labels.some(label => label.name.toUpperCase() === 'FORA DA LOJA');
         
-        // Contar labels especiais (independente da lista)
-        if (hasRetorno) newMetrics.retornos++;
-        if (hasForaLoja) newMetrics.foraLoja++;
+        // Verificar se o carro já foi entregue (lista Prontos)
+        const isPronto = listName === 'Qualidade' || listName === '🟡 Pronto / Aguardando Retirada';
+        
+        // Contar labels especiais APENAS se NÃO estiver na lista de prontos
+        if (hasRetorno && !isPronto) newMetrics.retornos++;
+        if (hasForaLoja && !isPronto) newMetrics.foraLoja++;
         
         // Contar apenas cards que estão "na oficina"
         // EXCLUIR: carros prontos OU com label "FORA DA LOJA"
-        const isPronto = listName === 'Qualidade' || listName === '🟡 Pronto / Aguardando Retirada';
         const contarNaOcupacao = !isPronto && !hasForaLoja;
         
         if (['Diagnóstico', 'Orçamento', 'Aguardando Aprovação', 'Aguardando Peças', 'Pronto para Iniciar', 'Em Execução', 'Qualidade', '🟡 Pronto / Aguardando Retirada'].includes(listName)) {
@@ -315,9 +317,46 @@ export default function Home() {
   };
 
   const getAlertStatus = () => {
-    if (metrics.total > 20) return { icon: AlertCircle, text: 'OFICINA CHEIA', color: 'text-red-600', bgColor: 'bg-red-50' };
-    if (metrics.total > 15) return { icon: Clock, text: 'ATENÇÃO', color: 'text-yellow-600', bgColor: 'bg-yellow-50' };
-    return { icon: CheckCircle, text: 'CAPACIDADE OK', color: 'text-green-600', bgColor: 'bg-green-50' };
+    const percentual = (metrics.total / 20) * 100;
+    
+    if (percentual > 100) {
+      return { 
+        icon: AlertCircle, 
+        text: '⚠️ OFICINA SUPERLOTADA!', 
+        color: 'text-red-600', 
+        bgColor: 'bg-red-100', 
+        borderColor: 'border-red-500',
+        animate: 'animate-pulse'
+      };
+    }
+    if (percentual >= 85) {
+      return { 
+        icon: AlertCircle, 
+        text: 'OFICINA CHEIA', 
+        color: 'text-red-600', 
+        bgColor: 'bg-red-50',
+        borderColor: 'border-red-300',
+        animate: ''
+      };
+    }
+    if (percentual >= 60) {
+      return { 
+        icon: Clock, 
+        text: 'ATENÇÃO', 
+        color: 'text-yellow-600', 
+        bgColor: 'bg-yellow-50',
+        borderColor: 'border-yellow-300',
+        animate: ''
+      };
+    }
+    return { 
+      icon: CheckCircle, 
+      text: 'CAPACIDADE OK', 
+      color: 'text-green-600', 
+      bgColor: 'bg-green-50',
+      borderColor: 'border-green-300',
+      animate: ''
+    };
   };
 
   const alertStatus = getAlertStatus();
@@ -346,6 +385,30 @@ export default function Home() {
               <p className="text-slate-600 text-sm mt-1">Gestão de Pátio em Tempo Real</p>
             </div>
             <div className="flex items-center gap-4">
+              {/* Indicador de Capacidade Compacto */}
+              <div className={`px-4 py-2 rounded-lg border-2 ${alertStatus.bgColor} ${alertStatus.borderColor} ${alertStatus.animate} flex items-center gap-2`}>
+                <AlertIcon className={`w-5 h-5 ${alertStatus.color}`} />
+                <div>
+                  <p className={`text-sm font-bold ${alertStatus.color}`}>{alertStatus.text}</p>
+                  <p className="text-xs text-slate-600">Capacidade: {metrics.total}/20 ({Math.round((metrics.total / 20) * 100)}%)</p>
+                </div>
+              </div>
+              
+              {/* Indicador RETORNO */}
+              <div className="px-3 py-2 rounded-lg border-2 bg-red-50 border-red-300 flex items-center gap-2 cursor-pointer hover:shadow-md transition-shadow" onClick={() => { setModalCategory('retornos'); setModalOpen(true); }}>
+                <div className="bg-red-600 text-white rounded-full w-6 h-6 flex items-center justify-center font-bold text-xs">
+                  {metrics.retornos}
+                </div>
+                <p className="text-xs font-bold text-red-900">🔴 RETORNO</p>
+              </div>
+              
+              {/* Indicador FORA DA LOJA */}
+              <div className="px-3 py-2 rounded-lg border-2 bg-blue-50 border-blue-300 flex items-center gap-2 cursor-pointer hover:shadow-md transition-shadow" onClick={() => { setModalCategory('foraLoja'); setModalOpen(true); }}>
+                <div className="bg-blue-600 text-white rounded-full w-6 h-6 flex items-center justify-center font-bold text-xs">
+                  {metrics.foraLoja}
+                </div>
+                <p className="text-xs font-bold text-blue-900">📍 FORA DA LOJA</p>
+              </div>
               <div className="text-right">
                 <p className="text-xs text-slate-500">Última atualização</p>
                 <p className="text-slate-700 font-medium text-sm">{lastUpdate.toLocaleTimeString('pt-BR')}</p>
@@ -376,19 +439,6 @@ export default function Home() {
       </header>
 
       <main className="container py-6">
-        {/* Alerta de Capacidade */}
-        <Card className={`p-4 mb-6 ${alertStatus.bgColor} border-2`}>
-          <div className="flex items-center gap-3">
-            <AlertIcon className={`w-6 h-6 ${alertStatus.color}`} />
-            <div className="flex-1">
-              <h2 className={`text-xl font-bold ${alertStatus.color}`}>{alertStatus.text}</h2>
-              <p className="text-slate-700 text-sm mt-1">
-                {metrics.total} de 20 carros na oficina ({Math.round((metrics.total / 20) * 100)}% de ocupação)
-              </p>
-            </div>
-          </div>
-        </Card>
-
         {/* Métricas Principais */}
         <Card className="p-4 mb-6 bg-white">
           <div className="flex items-center justify-between mb-3">
@@ -477,37 +527,7 @@ export default function Home() {
         </Card>
 
         {/* Indicadores Especiais */}
-        <div className="grid grid-cols-2 gap-3 mb-6">
-          <Card 
-            className="p-4 bg-red-50 border-2 border-red-200 hover:shadow-lg transition-shadow cursor-pointer hover:scale-105 transform duration-200" 
-            onClick={() => { setModalCategory('retornos'); setModalOpen(true); }}
-          >
-            <div className="flex items-center gap-3">
-              <div className="bg-red-600 text-white rounded-full w-10 h-10 flex items-center justify-center font-bold text-lg">
-                {metrics.retornos}
-              </div>
-              <div>
-                <p className="text-sm font-semibold text-red-900">🔴 RETORNO</p>
-                <p className="text-xs text-red-700">Veículos que retornaram</p>
-              </div>
-            </div>
-          </Card>
-          
-          <Card 
-            className="p-4 bg-blue-50 border-2 border-blue-200 hover:shadow-lg transition-shadow cursor-pointer hover:scale-105 transform duration-200" 
-            onClick={() => { setModalCategory('foraLoja'); setModalOpen(true); }}
-          >
-            <div className="flex items-center gap-3">
-              <div className="bg-blue-600 text-white rounded-full w-10 h-10 flex items-center justify-center font-bold text-lg">
-                {metrics.foraLoja}
-              </div>
-              <div>
-                <p className="text-sm font-semibold text-blue-900">📍 FORA DA LOJA</p>
-                <p className="text-xs text-blue-700">Veículos fora da oficina</p>
-              </div>
-            </div>
-          </Card>
-        </div>
+
 
         {/* Botão Ver Atrasados */}
         <Card className="p-4 mb-6 bg-orange-50 border-2 border-orange-300">
@@ -902,13 +922,21 @@ export default function Home() {
         return dias > 5;
       });
     } else if (modalCategory === 'retornos') {
-      filtered = allCards.filter(card => 
-        card.labels.some(label => label.name.toUpperCase() === 'RETORNO')
-      );
+      // Filtrar apenas RETORNO que NÃO estão na lista Prontos
+      filtered = allCards.filter(card => {
+        const hasRetorno = card.labels.some(label => label.name.toUpperCase() === 'RETORNO');
+        const listName = listIdMap[card.idList];
+        const isPronto = listName === 'Qualidade' || listName === '🟡 Pronto / Aguardando Retirada';
+        return hasRetorno && !isPronto;
+      });
     } else if (modalCategory === 'foraLoja') {
-      filtered = allCards.filter(card => 
-        card.labels.some(label => label.name.toUpperCase() === 'FORA DA LOJA')
-      );
+      // Filtrar apenas FORA DA LOJA que NÃO estão na lista Prontos
+      filtered = allCards.filter(card => {
+        const hasForaLoja = card.labels.some(label => label.name.toUpperCase() === 'FORA DA LOJA');
+        const listName = listIdMap[card.idList];
+        const isPronto = listName === 'Qualidade' || listName === '🟡 Pronto / Aguardando Retirada';
+        return hasForaLoja && !isPronto;
+      });
     } else {
       const targetListName = listMap[modalCategory];
       if (!targetListName) return [];
