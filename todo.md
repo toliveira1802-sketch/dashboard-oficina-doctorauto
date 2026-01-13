@@ -965,3 +965,17 @@
 - [x] Investigar por que valores aparecem como R$ 0,00 (campo era "Valor Aprovado", não "Valor")
 - [x] Corrigir busca do campo Valor no customFieldsMap
 - [x] Testar com dados reais (valores agora aparecem corretamente)
+
+
+## Integrar Lista de Carros com Agenda
+
+- [ ] Tornar placas clicáveis na lista de carros no pátio
+- [ ] Implementar navegação para página Agenda com filtro de placa
+- [ ] Testar integração (clicar na placa e ver Agenda filtrada)
+
+
+## Corrigir Botão + na Agenda
+
+- [x] Testar e identificar problema ao clicar no + (dropdown não aparecia)
+- [x] Corrigir código do botão + e dropdown de placas (adicionado setShowPlacasDropdown)
+- [x] Testar funcionalidade corrigida (dropdown funcionando perfeitamente!)

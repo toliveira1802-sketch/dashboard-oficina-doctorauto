@@ -80,6 +80,7 @@ export default function Agenda() {
   useEffect(() => {
     if (!inputValue.trim()) {
       setFilteredPlacas([]);
+      setShowPlacasDropdown(false);
       return;
     }
     const filtered = placas.filter(p => 
@@ -87,6 +88,7 @@ export default function Agenda() {
       p.modelo.toUpperCase().includes(inputValue.toUpperCase())
     );
     setFilteredPlacas(filtered);
+    setShowPlacasDropdown(filtered.length > 0);
   }, [inputValue, placas]);
 
   // Buscar agenda do dia
