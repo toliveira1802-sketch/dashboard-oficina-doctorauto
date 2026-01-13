@@ -168,7 +168,7 @@ export default function Home() {
     
     try {
       const response = await fetch(
-        `/api/trello/boards/${TRELLO_BOARD_ID}/cards`
+        `https://api.trello.com/1/boards/${TRELLO_BOARD_ID}/cards?key=${TRELLO_API_KEY}&token=${TRELLO_TOKEN}&customFieldItems=true`
       );
       
       if (!response.ok) {
@@ -179,7 +179,7 @@ export default function Home() {
       
       // Buscar custom fields do board
       const customFieldsResponse = await fetch(
-        `/api/trello/boards/${TRELLO_BOARD_ID}/customFields`
+        `https://api.trello.com/1/boards/${TRELLO_BOARD_ID}/customFields?key=${TRELLO_API_KEY}&token=${TRELLO_TOKEN}`
       );
       const customFields = await customFieldsResponse.json();
       
@@ -199,7 +199,7 @@ export default function Home() {
       
       // Buscar listas para mapear IDs
       const listsResponse = await fetch(
-        `/api/trello/boards/${TRELLO_BOARD_ID}/lists`
+        `https://api.trello.com/1/boards/${TRELLO_BOARD_ID}/lists?key=${TRELLO_API_KEY}&token=${TRELLO_TOKEN}`
       );
       const lists = await listsResponse.json();
       

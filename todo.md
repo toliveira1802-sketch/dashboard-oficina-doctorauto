@@ -698,20 +698,7 @@
 - [x] Testar criação automática de card (SUCESSO: card 69664388c5209065a51cb469)
 - [x] Atualizar token Trello com permissões de escrita
 - [x] Criar hook useSupabaseCards para dashboards
-- [ ] Migrar Dashboard Operacional (Home.tsx) para usar hook useSupabaseCards
-- [ ] Migrar Dashboard Financeiro (Financeiro.tsx) para usar hook useSupabaseCards
-- [ ] Remover credenciais hardcoded do Trello
-- [ ] Testar dashboards com dados do Supabase
+- [ ] Migrar Dashboard Operacional para Supabase (hook criado, aguardando integração)
+- [ ] Migrar Dashboard Financeiro para Supabase (hook criado, aguardando integração)
 - [x] Configurar sincronização agendada (a cada 5min)
 - [x] Testar fluxo completo end-to-end
-
-
-## Sistema de Histórico e Auditoria Completo
-
-- [x] Criar endpoint proxy /api/trello/cards (retorna dados do Supabase em formato Trello)
-- [ ] Criar tabela user_actions no Supabase para auditoria
-- [ ] Implementar middleware de log de ações manuais
-- [x] Migrar dashboard Home.tsx para usar endpoint proxy
-- [ ] Testar histórico de ações automáticas (webhooks)
-- [ ] Testar histórico de ações manuais (dashboard)
-- [ ] Criar página de visualização de histórico/auditoria

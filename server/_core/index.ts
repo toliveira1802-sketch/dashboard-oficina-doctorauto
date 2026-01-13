@@ -87,7 +87,9 @@ async function startServer() {
       console.error('[Trello Webhook] Erro:', error);
       res.status(500).json({ success: false, error: error.message });
     }
-  });  // GET /test - Teste do webhook Trello
+  });
+  
+  // GET /test - Teste do webhook
   app.get('/api/webhook/trello/test', (req, res) => {
     res.json({
       success: true,
@@ -108,40 +110,7 @@ async function startServer() {
       }
     });
   });
-
-  // ===== PROXY TRELLO (Retorna dados do Supabase em formato Trello) =====
-  app.get('/api/trello/boards/:boardId/cards', async (req, res) => {
-    try {
-      const { getTrelloBoardCards } = await import('./trello-proxy.js');
-      const cards = await getTrelloBoardCards();
-      res.json(cards);
-    } catch (error: any) {
-      console.error('[TrelloProxy] Erro ao buscar cards:', error);
-      res.status(500).json({ error: error.message });
-    }
-  });
-
-  app.get('/api/trello/boards/:boardId/lists', async (req, res) => {
-    try {
-      const { getTrelloBoardLists } = await import('./trello-proxy.js');
-      const lists = await getTrelloBoardLists();
-      res.json(lists);
-    } catch (error: any) {
-      console.error('[TrelloProxy] Erro ao buscar listas:', error);
-      res.status(500).json({ error: error.message });
-    }
-  });
-
-  app.get('/api/trello/boards/:boardId/customFields', async (req, res) => {
-    try {
-      const { getTrelloBoardCustomFields } = await import('./trello-proxy.js');
-      const fields = await getTrelloBoardCustomFields();
-      res.json(fields);
-    } catch (error: any) {
-      console.error('[TrelloProxy] Erro ao buscar custom fields:', error);
-      res.status(500).json({ error: error.message });
-    }
-  });
+  
   // ===== WEBHOOK DO KOMMO COM AUTOMAÇÃO =====
   app.post('/api/webhook/kommo', async (req, res) => {
     try {
