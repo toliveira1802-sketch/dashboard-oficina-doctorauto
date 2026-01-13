@@ -986,3 +986,23 @@
 - [x] Adicionar menu de opções ao clicar (botão X vermelho sempre visível)
 - [x] Implementar função de remover/cancelar agendamento (botão X funcionando perfeitamente)
 - [x] Testar funcionalidade completa (dropdown + agendamento + remoção)
+
+
+## Notificações Telegram - Botões da Agenda
+
+- [ ] Verificar se bot Telegram já está configurado (variáveis de ambiente)
+- [ ] Criar endpoint API /api/telegram/notify para enviar notificações
+- [ ] Implementar função de envio de mensagem Telegram no backend
+- [ ] Conectar botão 🚨 (B.O Peça) com API de notificações
+- [ ] Conectar botão ✅ (Carro Pronto) com API de notificações
+- [ ] Formatar mensagens com informações relevantes (placa, mecânico, horário)
+- [ ] Testar envio de notificações reais
+
+
+## Capturar Data do Agendamento do Kommo
+
+- [x] Modificar função SQL process_kommo_webhook para extrair campo customizado ID 966023
+- [x] Adicionar coluna scheduled_date na tabela kommo_leads
+- [x] Modificar webhook Kommo para capturar e salvar data do agendamento
+- [x] Adicionar data ao custom field "Data de Entrada" do Trello ao criar card
+- [ ] Testar fluxo completo: Kommo → Supabase → Trello (requer teste real com webhook)

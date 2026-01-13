@@ -1,0 +1,8 @@
+{
+  "query": "ALTER TABLE kommo_leads ADD COLUMN IF NOT EXISTS scheduled_date TIMESTAMP WITH TIME ZONE;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3dWo49LZM7B1Gvy.root --database 7A2gwQ2A8kNLBRdn5ZJDvH --execute ALTER TABLE kommo_leads ADD COLUMN IF NOT EXISTS scheduled_date TIMESTAMP WITH TIME ZONE;",
+  "returncode": 1,
+  "logs": [
+    "ERROR 1064 (42000) at line 1: You have an error in your SQL syntax; check the manual that corresponds to your TiDB version for the right syntax to use line 1 column 78 near \"WITH TIME ZONE\""
+  ]
+}

@@ -81,6 +81,7 @@ CREATE TABLE IF NOT EXISTS kommo_leads (
   responsible_user_id BIGINT,
   responsible_user_name TEXT,
   custom_fields JSONB DEFAULT '{}'::jsonb,
+  scheduled_date TIMESTAMP WITH TIME ZONE,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   trello_card_id TEXT REFERENCES trello_cards(id),

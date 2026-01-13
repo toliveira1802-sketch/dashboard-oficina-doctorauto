@@ -127,6 +127,7 @@ async function createTrelloCard(lead: any) {
   const TRELLO_API_KEY = process.env.TRELLO_API_KEY || 'e327cf4891fd2fcb6020899e3718c45e';
   const TRELLO_TOKEN = process.env.TRELLO_TOKEN || 'ATTAa37008bfb8c135e0815e9a964d5c7f2e0b2ed2530c6bfdd202061e53ae1a6c18F1F6F8C7';
   const TRELLO_LIST_ID_AGENDADOS = process.env.TRELLO_LIST_ID_AGENDADOS || '67820e0d8e9d9c1e7f6e1b8a';
+  const TRELLO_CUSTOM_FIELD_DATA_ENTRADA = '6956da66bd77b3dc2271ad4b'; // ID do custom field "Data de Entrada"
   
   // Montar nome do card
   const cardName = `${lead.name} - ${lead.phone || 'Sem telefone'}`;
@@ -175,6 +176,33 @@ _Card criado automaticamente via integração Kommo → Supabase → Trello_
   const trelloCard = await response.json();
   
   console.log('[Kommo Webhook] Card criado no Trello:', trelloCard);
+  
+  // Adicionar custom field "Data de Entrada" se scheduled_date existir
+  if (lead.scheduled_date && TRELLO_CUSTOM_FIELD_DATA_ENTRADA) {
+    try {
+      const scheduledDate = new Date(lead.scheduled_date);
+      const dateISO = scheduledDate.toISOString();
+      
+      await fetch(
+        `https://api.trello.com/1/cards/${trelloCard.id}/customField/${TRELLO_CUSTOM_FIELD_DATA_ENTRADA}/item?key=${TRELLO_API_KEY}&token=${TRELLO_TOKEN}`,
+        {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            value: {
+              date: dateISO
+            }
+          })
+        }
+      );
+      
+      console.log('[Kommo Webhook] Data de Entrada adicionada ao card:', dateISO);
+    } catch (error: any) {
+      console.error('[Kommo Webhook] Erro ao adicionar Data de Entrada:', error);
+    }
+  }
   
   // Atualizar lead com informações do card criado
   if (!supabase) return trelloCard;

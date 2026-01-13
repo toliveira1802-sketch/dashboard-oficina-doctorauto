@@ -52,6 +52,7 @@ DECLARE
   v_responsible_id BIGINT;
   v_responsible_name TEXT;
   v_custom_fields JSONB;
+  v_scheduled_date TIMESTAMP WITH TIME ZONE;
   v_result JSONB;
 BEGIN
   -- Log do webhook
@@ -75,6 +76,17 @@ BEGIN
     v_custom_fields->>1
   );
   
+  -- Extrair data do agendamento (campo ID 966023)
+  v_scheduled_date := NULL;
+  IF v_custom_fields IS NOT NULL THEN
+    FOR i IN 0..jsonb_array_length(v_custom_fields)-1 LOOP
+      IF (v_custom_fields->i->>'field_id')::TEXT = '966023' THEN
+        v_scheduled_date := to_timestamp((v_custom_fields->i->'values'->0->>'value')::BIGINT);
+        EXIT;
+      END IF;
+    END LOOP;
+  END IF;
+  
   v_pipeline_id := (p_payload->'leads'->0->>'pipeline_id')::BIGINT;
   v_status_id := (p_payload->'leads'->0->>'status_id')::BIGINT;
   v_responsible_id := (p_payload->'leads'->0->>'responsible_user_id')::BIGINT;
@@ -97,6 +109,7 @@ BEGIN
     responsible_user_id,
     responsible_user_name,
     custom_fields,
+    scheduled_date,
     sync_status
   ) VALUES (
     v_lead_id,
@@ -110,6 +123,7 @@ BEGIN
     v_responsible_id,
     v_responsible_name,
     v_custom_fields,
+    v_scheduled_date,
     'pending'
   )
   ON CONFLICT (kommo_lead_id)
@@ -124,6 +138,7 @@ BEGIN
     responsible_user_id = EXCLUDED.responsible_user_id,
     responsible_user_name = EXCLUDED.responsible_user_name,
     custom_fields = EXCLUDED.custom_fields,
+    scheduled_date = EXCLUDED.scheduled_date,
     sync_status = 'pending',
     updated_at = NOW();
   
