@@ -886,3 +886,15 @@
 - [x] Criar seção "Ranking de Eficiência" mostrando valor por dia
 - [x] Ordenar por eficiência (maior para menor)
 - [x] Testar com dados reais (FUNCIONANDO! Samuel R$ 4.245/dia, Elevador 9 R$ 879/dia)
+
+
+## Termômetro de Meta Semanal - Produtividade
+
+- [x] Criar card visual de termômetro no topo da página
+- [x] Mostrar meta da semana/mês (baseado no filtro selecionado)
+- [x] Mostrar valor realizado até o momento
+- [x] Calcular e exibir percentual de conclusão
+- [x] Adicionar projeção de fechamento baseada no ritmo atual
+- [x] Testar com diferentes filtros (Semana 1, 2, 3, 4, Total Mês) (FUNCIONANDO! Semana 1: 85,2%, Total Mês: 29,5%)
+
+

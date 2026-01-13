@@ -283,6 +283,96 @@ export default function Produtividade() {
         </div>
       </div>
 
+      {/* Termômetro de Meta Semanal */}
+      <Card className="mb-6 bg-gradient-to-r from-blue-50 to-cyan-50 border-blue-200">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-blue-900">
+            <TrendingUp className="h-6 w-6" />
+            Termômetro de Meta {filtroSemana === 'total' ? 'Mensal' : `Semana ${filtroSemana.replace('semana', '')}`}
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          {(() => {
+            const metaSemanal = 75000; // R$ 75.000 por semana
+            const metaMensal = metaSemanal * 4; // R$ 300.000 por mês
+            const meta = filtroSemana === 'total' ? metaMensal : metaSemanal;
+            
+            const realizado = mecanicos.reduce((sum, m) => sum + m.valor_produzido, 0);
+            const percentual = meta > 0 ? (realizado / meta) * 100 : 0;
+            
+            // Calcular dias trabalhados e dias restantes (exemplo: 24 dias úteis no mês)
+            const diasUteisTotal = filtroSemana === 'total' ? 24 : 6;
+            const diasTrabalhados = filtroSemana === 'total' ? 10 : 2; // Exemplo
+            const diasRestantes = diasUteisTotal - diasTrabalhados;
+            
+            const mediaDiaria = diasTrabalhados > 0 ? realizado / diasTrabalhados : 0;
+            const projecao = realizado + (mediaDiaria * diasRestantes);
+            const percentualProjecao = meta > 0 ? (projecao / meta) * 100 : 0;
+            
+            return (
+              <div className="space-y-4">
+                {/* Barra de Progresso */}
+                <div>
+                  <div className="flex justify-between mb-2">
+                    <span className="text-sm font-semibold text-slate-700">Progresso</span>
+                    <span className="text-sm font-bold text-blue-600">{percentual.toFixed(1)}%</span>
+                  </div>
+                  <div className="h-8 bg-slate-200 rounded-full overflow-hidden relative">
+                    <div 
+                      className="h-full bg-gradient-to-r from-blue-500 to-cyan-500 transition-all duration-500"
+                      style={{ width: `${Math.min(percentual, 100)}%` }}
+                    />
+                    {percentualProjecao > percentual && (
+                      <div 
+                        className="absolute top-0 h-full bg-blue-300 opacity-40"
+                        style={{ width: `${Math.min(percentualProjecao, 100)}%` }}
+                      />
+                    )}
+                  </div>
+                </div>
+                
+                {/* Métricas */}
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  <div className="bg-white p-4 rounded-lg shadow-sm">
+                    <div className="text-sm text-slate-600 mb-1">Meta</div>
+                    <div className="text-lg font-bold text-slate-900">
+                      R$ {meta.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                    </div>
+                  </div>
+                  
+                  <div className="bg-white p-4 rounded-lg shadow-sm">
+                    <div className="text-sm text-slate-600 mb-1">Realizado</div>
+                    <div className="text-lg font-bold text-green-600">
+                      R$ {realizado.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                    </div>
+                  </div>
+                  
+                  <div className="bg-white p-4 rounded-lg shadow-sm">
+                    <div className="text-sm text-slate-600 mb-1">Projeção</div>
+                    <div className="text-lg font-bold text-blue-600">
+                      R$ {projecao.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                    </div>
+                    <div className="text-xs text-slate-500 mt-1">
+                      {percentualProjecao.toFixed(1)}% da meta
+                    </div>
+                  </div>
+                  
+                  <div className="bg-white p-4 rounded-lg shadow-sm">
+                    <div className="text-sm text-slate-600 mb-1">Faltam</div>
+                    <div className="text-lg font-bold text-orange-600">
+                      R$ {Math.max(0, meta - realizado).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                    </div>
+                    <div className="text-xs text-slate-500 mt-1">
+                      {diasRestantes} dias restantes
+                    </div>
+                  </div>
+                </div>
+              </div>
+            );
+          })()}
+        </CardContent>
+      </Card>
+
       {/* Filtros */}
       <div className="mb-6 space-y-4">
         {/* Filtros de Mecânico e Categoria */}
