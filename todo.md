@@ -768,3 +768,10 @@
 - [x] Definir thresholds de alerta (Diagnóstico>6, Orçamentos>3, Aguard.Aprovação>4, Aguard.Peças>5, Pronto>3, Execução>10)
 - [x] Adicionar indicador visual (badge "⚠️ GARGALO", borda vermelha pulsante)
 - [x] Testar alertas com dados reais (nenhum gargalo detectado no momento)
+
+
+## Cards do Status Pátio Clicáveis
+
+- [x] Adicionar onClick nos cards (Diagnóstico, Orçamentos, Aguard. Aprovação, etc)
+- [x] Abrir modal mostrando placas dos veículos ao clicar
+- [x] Testar todos os cards
