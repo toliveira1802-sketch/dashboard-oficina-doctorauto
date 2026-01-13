@@ -741,3 +741,9 @@
 - [x] Adicionar filtro de período (hoje, semana, mês, ano) no frontend
 - [x] Revisar e corrigir fórmulas de cálculo (parseFloat para valores)
 - [x] Testar com dados reais (FUNCIONANDO! Valores corretos)
+
+
+## Corrigir Lista "Entregue" no Dashboard Financeiro
+
+- [x] Substituir "Prontos" por "🙏🏻Entregue" no código
+- [x] Testar cálculo de faturamento (aguardando dados reais na lista)

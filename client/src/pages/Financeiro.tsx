@@ -127,8 +127,8 @@ export default function Financeiro() {
         const previsao = previsaoStr ? new Date(previsaoStr) : null;
         if (previsao) previsao.setHours(0, 0, 0, 0);
         
-        // Valor Faturado (carros entregues/prontos no período)
-        if (listName === 'Prontos') {
+        // Valor Faturado (carros entregues no período)
+        if (listName === '🙏🏻Entregue') {
           // Verificar se está no período (usar dateLastActivity como proxy de data de conclusão)
           const dataCard = card.dateLastActivity ? new Date(card.dateLastActivity) : null;
           if (dataCard) dataCard.setHours(0, 0, 0, 0);
@@ -145,12 +145,12 @@ export default function Financeiro() {
         }
         
         // Valor Atrasado (previsão < hoje e não entregue)
-        if (previsao && previsao < hoje && listName !== 'Prontos') {
+        if (previsao && previsao < hoje && listName !== '🙏🏻Entregue') {
           valorAtrasado += valor;
         }
         
         // Valor Preso (aprovados mas não entregues)
-        if (valor > 0 && listName !== 'Prontos') {
+        if (valor > 0 && listName !== '🙏🏻Entregue') {
           valorPreso += valor;
         }
       });
