@@ -352,20 +352,20 @@ export default function Financeiro() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
+    <div className="min-h-screen bg-gradient-to-br from-black via-slate-950 to-black">
       <Navigation />
       {/* Header */}
-      <div className="bg-white border-b border-slate-200 shadow-sm">
+      <div className="bg-black border-b border-red-900/30 shadow-xl">
         <div className="container py-6">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-slate-900">Dashboard Financeiro</h1>
-              <p className="text-slate-600 mt-1">Gestão de Valores - Doctor Auto</p>
+              <h1 className="text-3xl font-bold text-white">Financeiro Doctor Auto</h1>
+              <p className="text-red-400 mt-1">Gestão de Valores em Tempo Real</p>
             </div>
             <div className="flex items-center gap-4">
               <div className="text-right">
-                <p className="text-sm text-slate-600">Última atualização</p>
-                <p className="text-lg font-semibold text-slate-900">{lastUpdate}</p>
+                <p className="text-sm text-slate-400">Última atualização</p>
+                <p className="text-lg font-semibold text-white">{lastUpdate}</p>
               </div>
               <Dialog open={modalOpen} onOpenChange={setModalOpen}>
                 <DialogTrigger asChild>
@@ -458,7 +458,7 @@ export default function Financeiro() {
         {/* Filtros */}
         <div className="mb-6 flex gap-4">
           <div>
-            <label className="text-sm font-medium text-slate-700 mb-2 block">
+            <label className="text-sm font-medium text-slate-300 mb-2 block">
               Filtrar por Responsável Técnico
             </label>
             <Select value={responsavelFilter} onValueChange={setResponsavelFilter}>
@@ -475,7 +475,7 @@ export default function Financeiro() {
           </div>
           
           <div>
-            <label className="text-sm font-medium text-slate-700 mb-2 block">
+            <label className="text-sm font-medium text-slate-300 mb-2 block">
               Filtrar por Categoria
             </label>
             <Select value={categoriaFilter} onValueChange={setCategoriaFilter}>
@@ -492,144 +492,150 @@ export default function Financeiro() {
           </div>
         </div>
 
-        {/* Cards de Métricas */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-6 mb-8">
-          <Card className="bg-gradient-to-br from-emerald-500 to-emerald-600 text-white">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium flex items-center gap-2">
-                <DollarSign className="h-4 w-4" />
+        {/* Cards de Métricas - Layout Premium Compacto */}
+        <div className="grid grid-cols-3 gap-4 mb-8">
+          {/* Card 1: Valor Faturado */}
+          <Card className="bg-gradient-to-br from-emerald-600 to-emerald-700 text-white border-emerald-500/20 shadow-xl hover:shadow-2xl hover:scale-105 transition-all duration-300">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-xs font-semibold flex items-center gap-2 uppercase tracking-wide">
+                <DollarSign className="h-3 w-3" />
                 Valor Faturado
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold">{formatCurrency(metrics.valorFaturado)}</div>
-              <p className="text-emerald-100 text-sm mt-1">Carros entregues no mês</p>
+              <div className="text-2xl font-bold mb-1">{formatCurrency(metrics.valorFaturado)}</div>
+              <p className="text-emerald-200 text-xs">Carros entregues</p>
             </CardContent>
           </Card>
 
-          <Card className="bg-gradient-to-br from-blue-500 to-blue-600 text-white">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium flex items-center gap-2">
-                <CheckCircle className="h-4 w-4" />
+          {/* Card 2: Carros Entregues */}
+          <Card className="bg-gradient-to-br from-blue-600 to-blue-700 text-white border-blue-500/20 shadow-xl hover:shadow-2xl hover:scale-105 transition-all duration-300">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-xs font-semibold flex items-center gap-2 uppercase tracking-wide">
+                <CheckCircle className="h-3 w-3" />
                 Carros Entregues
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold">{metrics.carrosEntregues}</div>
-              <p className="text-blue-100 text-sm mt-1">Quantidade no mês</p>
+              <div className="text-2xl font-bold mb-1">{metrics.carrosEntregues}</div>
+              <p className="text-blue-200 text-xs">Quantidade no mês</p>
             </CardContent>
           </Card>
 
-          <Card className="bg-gradient-to-br from-purple-500 to-purple-600 text-white">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium flex items-center gap-2">
-                <TrendingUp className="h-4 w-4" />
-                Ticket Médio Real
+          {/* Card 3: Ticket Médio */}
+          <Card className="bg-gradient-to-br from-purple-600 to-purple-700 text-white border-purple-500/20 shadow-xl hover:shadow-2xl hover:scale-105 transition-all duration-300">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-xs font-semibold flex items-center gap-2 uppercase tracking-wide">
+                <TrendingUp className="h-3 w-3" />
+                Ticket Médio
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold">{formatCurrency(metrics.ticketMedioReal)}</div>
-              <p className="text-purple-100 text-sm mt-1">Por veículo entregue</p>
+              <div className="text-2xl font-bold mb-1">{formatCurrency(metrics.ticketMedioReal)}</div>
+              <p className="text-purple-200 text-xs">Por veículo</p>
             </CardContent>
           </Card>
 
-          <Card className="bg-gradient-to-br from-green-500 to-green-600 text-white">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium flex items-center gap-2">
-                <Calendar className="h-4 w-4" />
+          {/* Card 4: Saída Hoje */}
+          <Card className="bg-gradient-to-br from-green-600 to-green-700 text-white border-green-500/20 shadow-xl hover:shadow-2xl hover:scale-105 transition-all duration-300">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-xs font-semibold flex items-center gap-2 uppercase tracking-wide">
+                <Calendar className="h-3 w-3" />
                 Saída Hoje
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold">{formatCurrency(metrics.valorSaidaHoje)}</div>
-              <p className="text-green-100 text-sm mt-1">Previsão de entrega</p>
+              <div className="text-2xl font-bold mb-1">{formatCurrency(metrics.valorSaidaHoje)}</div>
+              <p className="text-green-200 text-xs">Previsão entrega</p>
             </CardContent>
           </Card>
 
-          <Card className="bg-gradient-to-br from-red-500 to-red-600 text-white">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium flex items-center gap-2">
-                <AlertCircle className="h-4 w-4" />
+          {/* Card 5: Valor Atrasado */}
+          <Card className="bg-gradient-to-br from-red-600 to-red-700 text-white border-red-500/20 shadow-xl hover:shadow-2xl hover:scale-105 transition-all duration-300">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-xs font-semibold flex items-center gap-2 uppercase tracking-wide">
+                <AlertCircle className="h-3 w-3" />
                 Valor Atrasado
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold">{formatCurrency(metrics.valorAtrasado)}</div>
-              <p className="text-red-100 text-sm mt-1">Passou da previsão</p>
+              <div className="text-2xl font-bold mb-1">{formatCurrency(metrics.valorAtrasado)}</div>
+              <p className="text-red-200 text-xs">Passou previsão</p>
             </CardContent>
           </Card>
 
-          <Card className="bg-gradient-to-br from-amber-500 to-amber-600 text-white">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium flex items-center gap-2">
-                <Package className="h-4 w-4" />
+          {/* Card 6: Valor Preso */}
+          <Card className="bg-gradient-to-br from-amber-600 to-amber-700 text-white border-amber-500/20 shadow-xl hover:shadow-2xl hover:scale-105 transition-all duration-300">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-xs font-semibold flex items-center gap-2 uppercase tracking-wide">
+                <Package className="h-3 w-3" />
                 Valor Preso
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold">{formatCurrency(metrics.valorPresoOficina)}</div>
-              <p className="text-amber-100 text-sm mt-1">Aprovado na oficina</p>
+              <div className="text-2xl font-bold mb-1">{formatCurrency(metrics.valorPresoOficina)}</div>
+              <p className="text-amber-200 text-xs">Na oficina</p>
             </CardContent>
           </Card>
         </div>
 
         {/* Breakdown por Tipo de Serviço */}
-        <Card className="mb-8">
+        <Card className="mb-8 bg-slate-900/50 border-slate-800 backdrop-blur-sm">
           <CardHeader>
-            <CardTitle>Análise por Tipo de Serviço</CardTitle>
+            <CardTitle className="text-white">Análise por Tipo de Serviço</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {filteredBreakdown.map(service => (
-                <div key={service.categoria} className="p-4 bg-slate-50 rounded-lg border border-slate-200">
-                  <h3 className="font-semibold text-slate-900 mb-2">{service.categoria}</h3>
+                <div key={service.categoria} className="p-4 bg-slate-800/50 rounded-lg border border-red-900/30 hover:border-red-600/50 transition-all duration-300">
+                  <h3 className="font-semibold text-white mb-2">{service.categoria}</h3>
                   <div className="space-y-1 text-sm">
                     <div className="flex justify-between">
-                      <span className="text-slate-600">Valor Total:</span>
-                      <span className="font-semibold text-slate-900">{formatCurrency(service.valorTotal)}</span>
+                      <span className="text-slate-400">Valor Total:</span>
+                      <span className="font-semibold text-emerald-400">{formatCurrency(service.valorTotal)}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-slate-600">Quantidade:</span>
-                      <span className="font-semibold text-slate-900">{service.quantidade} carros</span>
+                      <span className="text-slate-400">Quantidade:</span>
+                      <span className="font-semibold text-white">{service.quantidade} carros</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-slate-600">Ticket Médio:</span>
-                      <span className="font-semibold text-slate-900">{formatCurrency(service.ticketMedio)}</span>
+                      <span className="text-slate-400">Ticket Médio:</span>
+                      <span className="font-semibold text-blue-400">{formatCurrency(service.ticketMedio)}</span>
                     </div>
                   </div>
                 </div>
               ))}
             </div>
             {filteredBreakdown.length === 0 && (
-              <p className="text-center text-slate-500 py-8">Nenhum serviço encontrado</p>
+              <p className="text-center text-slate-400 py-8">Nenhum serviço encontrado</p>
             )}
           </CardContent>
         </Card>
 
         {/* Tabela de Carros */}
-        <Card>
+        <Card className="bg-slate-900/50 border-slate-800 backdrop-blur-sm">
           <CardHeader>
-            <CardTitle>Veículos na Oficina</CardTitle>
+            <CardTitle className="text-white">Veículos na Oficina</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead>
-                  <tr className="border-b">
-                    <th className="text-left p-3 font-medium text-slate-700">Veículo</th>
-                    <th className="text-left p-3 font-medium text-slate-700">Etapa</th>
-                    <th className="text-left p-3 font-medium text-slate-700">Responsável</th>
-                    <th className="text-left p-3 font-medium text-slate-700">Categoria</th>
-                    <th className="text-right p-3 font-medium text-slate-700">Valor Aprovado</th>
-                    <th className="text-left p-3 font-medium text-slate-700">Previsão Entrega</th>
-                    <th className="text-left p-3 font-medium text-slate-700">Status</th>
+                  <tr className="border-b border-slate-700">
+                    <th className="text-left p-3 font-medium text-slate-300">Veículo</th>
+                    <th className="text-left p-3 font-medium text-slate-300">Etapa</th>
+                    <th className="text-left p-3 font-medium text-slate-300">Responsável</th>
+                    <th className="text-left p-3 font-medium text-slate-300">Categoria</th>
+                    <th className="text-right p-3 font-medium text-slate-300">Valor Aprovado</th>
+                    <th className="text-left p-3 font-medium text-slate-300">Previsão Entrega</th>
+                    <th className="text-left p-3 font-medium text-slate-300">Status</th>
                   </tr>
                 </thead>
                 <tbody>
                   {filteredCards.map(card => {
                     const hoje = new Date();
                     hoje.setHours(0, 0, 0, 0);
-                    let statusColor = 'text-slate-600';
+                    let statusColor = 'text-slate-400';
                     let statusText = 'Em andamento';
                     
                     if (card.previsaoEntrega) {
@@ -637,28 +643,28 @@ export default function Financeiro() {
                       previsao.setHours(0, 0, 0, 0);
                       
                       if (previsao.getTime() === hoje.getTime()) {
-                        statusColor = 'text-green-600 font-semibold';
+                        statusColor = 'text-green-400 font-semibold';
                         statusText = 'Sai hoje';
                       } else if (previsao < hoje) {
-                        statusColor = 'text-red-600 font-semibold';
+                        statusColor = 'text-red-400 font-semibold';
                         statusText = 'Atrasado';
                       }
                     }
 
                     return (
-                      <tr key={card.id} className="border-b hover:bg-slate-50">
-                        <td className="p-3">{card.name}</td>
+                      <tr key={card.id} className="border-b border-slate-800 hover:bg-slate-800/50 transition-colors">
+                        <td className="p-3 text-white">{card.name}</td>
                         <td className="p-3">
-                          <span className="px-2 py-1 bg-slate-100 rounded text-sm">
+                          <span className="px-2 py-1 bg-slate-700/50 text-slate-200 rounded text-sm">
                             {card.listName}
                           </span>
                         </td>
-                        <td className="p-3">{card.responsavel}</td>
-                        <td className="p-3">{card.categoria}</td>
-                        <td className="p-3 text-right font-semibold">
+                        <td className="p-3 text-slate-300">{card.responsavel}</td>
+                        <td className="p-3 text-slate-300">{card.categoria}</td>
+                        <td className="p-3 text-right font-semibold text-emerald-400">
                           {card.valorAprovado > 0 ? formatCurrency(card.valorAprovado) : '-'}
                         </td>
-                        <td className="p-3">
+                        <td className="p-3 text-slate-300">
                           {card.previsaoEntrega 
                             ? new Date(card.previsaoEntrega).toLocaleDateString('pt-BR')
                             : '-'
