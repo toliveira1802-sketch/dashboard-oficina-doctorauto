@@ -560,3 +560,18 @@
 - [x] Testar webhook Kommo com payload de lead do Doctor Prime
 - [x] Validar endpoints GET /test para ambos webhooks
 - [x] Validar endpoint HEAD para webhook Trello
+
+
+## Refatoração Dashboard Financeiro - Novo Layout
+
+- [x] Remover cards antigos do dashboard financeiro
+- [x] Criar card "Valor Faturado" (total de carros entregues/prontos)
+- [x] Criar card "Ticket Médio" (valor faturado / carros entregues)
+- [x] Criar card "Saída Hoje" (carros com previsão de entrega hoje)
+- [x] Criar card "Valor Atrasado" (carros com previsão de entrega vencida)
+- [x] Criar card "Valor Preso" (carros aprovados mas não entregues)
+- [x] Criar card "Carros Entregues" (quantidade total)
+- [x] Organizar em grid 2 linhas x 3 colunas
+- [x] Aplicar tema premium vermelho/preto consistente
+- [x] Integrar com API do Trello para valores reais
+- [x] Testar cálculos e exibição

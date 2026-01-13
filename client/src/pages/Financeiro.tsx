@@ -1,9 +1,7 @@
 import { useState, useEffect } from 'react';
 import Navigation from '@/components/Navigation';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { RefreshCw, DollarSign, TrendingUp, Calendar, AlertCircle, Settings, CheckCircle, Monitor, Package } from 'lucide-react';
+import { RefreshCw, DollarSign, TrendingUp, Calendar, AlertCircle, Settings, Monitor, Package, Clock, CheckCircle } from 'lucide-react';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -13,28 +11,13 @@ const TRELLO_API_KEY = 'e327cf4891fd2fcb6020899e3718c45e';
 const TRELLO_TOKEN = 'ATTAa37008bfb8c135e0815e9a964d5c7f2e0b2ed2530c6bfdd202061e53ae1a6c18F1F6F8C7';
 const TRELLO_BOARD_ID = '69562921bad93c92c7922d0a';
 
-interface TrelloCard {
-  id: string;
-  name: string;
-  idList: string;
-  desc: string;
-  customFieldItems?: any[];
-}
-
 interface FinancialMetrics {
   valorFaturado: number;
-  carrosEntregues: number;
-  ticketMedioReal: number;
-  valorSaidaHoje: number;
-  valorAtrasado: number;
-  valorPresoOficina: number;
-}
-
-interface ServiceBreakdown {
-  categoria: string;
-  valorTotal: number;
-  quantidade: number;
   ticketMedio: number;
+  saidaHoje: number;
+  valorAtrasado: number;
+  valorPreso: number;
+  carrosEntregues: number;
 }
 
 interface MetaFinanceira {
@@ -42,27 +25,20 @@ interface MetaFinanceira {
   mes: number;
   ano: number;
   metaMensal: number;
-  metaPorServico: number | null;
-  metaDiaria: number | null;
+  diasUteis: number;
 }
 
 export default function Financeiro() {
   const [metrics, setMetrics] = useState<FinancialMetrics>({
     valorFaturado: 0,
-    carrosEntregues: 0,
-    ticketMedioReal: 0,
-    valorSaidaHoje: 0,
+    ticketMedio: 0,
+    saidaHoje: 0,
     valorAtrasado: 0,
-    valorPresoOficina: 0
+    valorPreso: 0,
+    carrosEntregues: 0
   });
-  const [cards, setCards] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [lastUpdate, setLastUpdate] = useState<string>('');
-  const [responsavelFilter, setResponsavelFilter] = useState<string>('todos');
-  const [categoriaFilter, setCategoriaFilter] = useState<string>('todas');
-  const [categorias, setCategorias] = useState<string[]>([]);
-  const [responsaveis, setResponsaveis] = useState<string[]>([]);
-  const [serviceBreakdown, setServiceBreakdown] = useState<ServiceBreakdown[]>([]);
   
   // Estados para metas
   const [metas, setMetas] = useState<MetaFinanceira | null>(null);
@@ -70,8 +46,7 @@ export default function Financeiro() {
   const [senha, setSenha] = useState('');
   const [senhaValidada, setSenhaValidada] = useState(false);
   const [metaMensal, setMetaMensal] = useState('');
-  const [metaPorServico, setMetaPorServico] = useState('');
-  const [metaDiaria, setMetaDiaria] = useState('');
+  const [diasUteis, setDiasUteis] = useState('');
 
   const fetchData = async () => {
     setLoading(true);
@@ -81,11 +56,7 @@ export default function Financeiro() {
         `https://api.trello.com/1/boards/${TRELLO_BOARD_ID}/lists?key=${TRELLO_API_KEY}&token=${TRELLO_TOKEN}`
       );
       const lists = await listsResponse.json();
-      const listMap: Record<string, string> = {};
-      lists.forEach((list: any) => {
-        listMap[list.id] = list.name;
-      });
-
+      
       // Buscar custom fields
       const fieldsResponse = await fetch(
         `https://api.trello.com/1/boards/${TRELLO_BOARD_ID}/customFields?key=${TRELLO_API_KEY}&token=${TRELLO_TOKEN}`
@@ -94,169 +65,82 @@ export default function Financeiro() {
       
       const valorAprovadoField = customFields.find((f: any) => f.name === 'Valor Aprovado');
       const previsaoEntregaField = customFields.find((f: any) => f.name === 'Previsão de Entrega');
-      const responsavelField = customFields.find((f: any) => f.name === 'Responsável Técnico');
-      const categoriaField = customFields.find((f: any) => f.name === 'Categoria');
       
-      // Extrair categorias únicas
-      if (categoriaField?.options) {
-        const cats = categoriaField.options.map((opt: any) => opt.value.text);
-        setCategorias(cats);
-      }
-      
-      // Extrair responsáveis únicos
-      if (responsavelField?.options) {
-        const resps = responsavelField.options.map((opt: any) => opt.value.text);
-        setResponsaveis(resps);
-      }
-
       // Buscar cards
       const cardsResponse = await fetch(
         `https://api.trello.com/1/boards/${TRELLO_BOARD_ID}/cards?customFieldItems=true&key=${TRELLO_API_KEY}&token=${TRELLO_TOKEN}`
       );
       const allCards = await cardsResponse.json();
-
-      // Processar dados
-      const hoje = new Date();
-      hoje.setHours(0, 0, 0, 0);
-
-      // Métricas
+      
+      // Filtrar cards com label "FORA DA LOJA"
+      const cards = allCards.filter((card: any) => {
+        const hasForaLabel = card.labels?.some((label: any) => 
+          label.name === 'FORA DA LOJA'
+        );
+        return !hasForaLabel;
+      });
+      
+      // Calcular métricas
       let valorFaturado = 0;
       let carrosEntregues = 0;
       let saidaHoje = 0;
-      let atrasado = 0;
-      let valorPresoOficina = 0;
+      let valorAtrasado = 0;
+      let valorPreso = 0;
       
-      // Para breakdown por serviço
-      const serviceMap = new Map<string, { total: number; count: number }>();
-
-      const processedCards = allCards.map((card: TrelloCard) => {
-        const listName = listMap[card.idList];
+      const hoje = new Date();
+      hoje.setHours(0, 0, 0, 0);
+      
+      cards.forEach((card: any) => {
+        const listName = lists.find((l: any) => l.id === card.idList)?.name || '';
         
         // Extrair valor aprovado
-        let valorAprovado = 0;
-        const valorField = card.customFieldItems?.find((item: any) => 
+        const valorItem = card.customFieldItems?.find((item: any) => 
           item.idCustomField === valorAprovadoField?.id
         );
-        if (valorField?.value?.number) {
-          valorAprovado = parseFloat(valorField.value.number);
-        }
-
+        const valor = valorItem?.value?.number || 0;
+        
         // Extrair previsão de entrega
-        let previsaoEntrega = null;
-        const previsaoField = card.customFieldItems?.find((item: any) => 
+        const previsaoItem = card.customFieldItems?.find((item: any) => 
           item.idCustomField === previsaoEntregaField?.id
         );
-        if (previsaoField?.value?.date) {
-          previsaoEntrega = new Date(previsaoField.value.date);
-        }
-
-        // Extrair responsável técnico
-        let responsavel = 'Não definido';
-        const responsavelFieldItem = card.customFieldItems?.find((item: any) => 
-          item.idCustomField === responsavelField?.id
-        );
-        if (responsavelFieldItem?.idValue) {
-          const option = responsavelField?.options?.find((opt: any) => 
-            opt.id === responsavelFieldItem.idValue
-          );
-          if (option) {
-            responsavel = option.value.text;
-          }
-        }
+        const previsaoStr = previsaoItem?.value?.date;
+        const previsao = previsaoStr ? new Date(previsaoStr) : null;
+        if (previsao) previsao.setHours(0, 0, 0, 0);
         
-        // Extrair categoria
-        let categoria = 'Sem categoria';
-        const categoriaFieldItem = card.customFieldItems?.find((item: any) => 
-          item.idCustomField === categoriaField?.id
-        );
-        if (categoriaFieldItem?.idValue) {
-          const option = categoriaField?.options?.find((opt: any) => 
-            opt.id === categoriaFieldItem.idValue
-          );
-          if (option) {
-            categoria = option.value.text;
-          }
-        }
-
-        // Calcular métricas
-        
-        // 1. Valor Faturado (carros entregues)
-        if (listName.includes('entregue') && valorAprovado > 0) {
-          valorFaturado += valorAprovado;
+        // Valor Faturado (carros entregues/prontos)
+        if (listName === 'Prontos') {
+          valorFaturado += valor;
           carrosEntregues++;
         }
         
-        // 2. Saída Hoje
-        if (previsaoEntrega && valorAprovado > 0) {
-          const previsaoDate = new Date(previsaoEntrega);
-          previsaoDate.setHours(0, 0, 0, 0);
-          if (previsaoDate.getTime() === hoje.getTime()) {
-            saidaHoje += valorAprovado;
-          }
+        // Saída Hoje (previsão de entrega = hoje)
+        if (previsao && previsao.getTime() === hoje.getTime()) {
+          saidaHoje += valor;
         }
         
-        // 3. Valor Atrasado
-        if (previsaoEntrega && valorAprovado > 0 && !listName.includes('entregue')) {
-          const previsaoDate = new Date(previsaoEntrega);
-          previsaoDate.setHours(0, 0, 0, 0);
-          if (previsaoDate < hoje) {
-            atrasado += valorAprovado;
-          }
+        // Valor Atrasado (previsão < hoje e não entregue)
+        if (previsao && previsao < hoje && listName !== 'Prontos') {
+          valorAtrasado += valor;
         }
         
-        // 4. Valor Preso na Oficina (aprovado mas não entregue, dentro do prazo)
-        if (valorAprovado > 0 && !listName.includes('entregue') && !listName.includes('AGENDADOS')) {
-          const dentroDoPrazo = !previsaoEntrega || (previsaoEntrega && new Date(previsaoEntrega) >= hoje);
-          if (dentroDoPrazo) {
-            valorPresoOficina += valorAprovado;
-          }
+        // Valor Preso (aprovados mas não entregues)
+        if (valor > 0 && listName !== 'Prontos') {
+          valorPreso += valor;
         }
-        
-        // Breakdown por serviço (apenas entregues)
-        if (listName.includes('entregue') && valorAprovado > 0) {
-          if (!serviceMap.has(categoria)) {
-            serviceMap.set(categoria, { total: 0, count: 0 });
-          }
-          const current = serviceMap.get(categoria)!;
-          current.total += valorAprovado;
-          current.count++;
-        }
-
-        return {
-          id: card.id,
-          name: card.name,
-          listName,
-          valorAprovado,
-          previsaoEntrega,
-          responsavel,
-          categoria
-        };
       });
-
-      // Calcular breakdown por serviço
-      const breakdown: ServiceBreakdown[] = [];
-      serviceMap.forEach((value, key) => {
-        breakdown.push({
-          categoria: key,
-          valorTotal: value.total,
-          quantidade: value.count,
-          ticketMedio: value.count > 0 ? value.total / value.count : 0
-        });
-      });
-      breakdown.sort((a, b) => b.valorTotal - a.valorTotal);
-      setServiceBreakdown(breakdown);
-
-      setCards(processedCards);
+      
+      const ticketMedio = carrosEntregues > 0 ? valorFaturado / carrosEntregues : 0;
+      
       setMetrics({
         valorFaturado,
-        carrosEntregues,
-        ticketMedioReal: carrosEntregues > 0 ? valorFaturado / carrosEntregues : 0,
-        valorSaidaHoje: saidaHoje,
-        valorAtrasado: atrasado,
-        valorPresoOficina
+        ticketMedio,
+        saidaHoje,
+        valorAtrasado,
+        valorPreso,
+        carrosEntregues
       });
-
-      setLastUpdate(new Date().toLocaleTimeString('pt-BR'));
+      
+      setLastUpdate(new Date().toLocaleString('pt-BR'));
     } catch (error) {
       console.error('Erro ao buscar dados:', error);
     } finally {
@@ -264,85 +148,65 @@ export default function Financeiro() {
     }
   };
 
-  const fetchMetas = async () => {
-    const mesAtual = new Date().getMonth() + 1;
-    const anoAtual = new Date().getFullYear();
+  const carregarMetas = async () => {
     try {
-      const response = await fetch(`/api/metas?mes=${mesAtual}&ano=${anoAtual}`);
+      const response = await fetch('/api/metas');
       if (response.ok) {
         const data = await response.json();
         setMetas(data);
+        if (data) {
+          setMetaMensal((data.metaMensal / 100).toFixed(2));
+          setDiasUteis(data.diasUteis.toString());
+        }
       }
     } catch (error) {
       console.error('Erro ao carregar metas:', error);
     }
   };
 
+  const salvarMetas = async () => {
+    if (!senhaValidada) return;
+    
+    try {
+      const metaMensalNum = parseFloat(metaMensal) * 100;
+      const diasUteisNum = parseInt(diasUteis);
+      
+      const response = await fetch('/api/metas', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          metaMensal: metaMensalNum,
+          diasUteis: diasUteisNum
+        })
+      });
+      
+      if (response.ok) {
+        alert('Metas salvas com sucesso!');
+        await carregarMetas();
+        setModalOpen(false);
+        setSenhaValidada(false);
+        setSenha('');
+      }
+    } catch (error) {
+      console.error('Erro ao salvar metas:', error);
+      alert('Erro ao salvar metas');
+    }
+  };
+
   const validarSenha = () => {
     if (senha === 'admin123') {
       setSenhaValidada(true);
-      if (metas) {
-        setMetaMensal((metas.metaMensal / 100).toFixed(2));
-        setMetaPorServico(metas.metaPorServico ? (metas.metaPorServico / 100).toFixed(2) : '');
-        setMetaDiaria(metas.metaDiaria ? (metas.metaDiaria / 100).toFixed(2) : '');
-      }
     } else {
       alert('Senha incorreta!');
     }
   };
 
-  const salvarMetas = async () => {
-    const mesAtual = new Date().getMonth() + 1;
-    const anoAtual = new Date().getFullYear();
-    try {
-      const payload = {
-        mes: mesAtual,
-        ano: anoAtual,
-        metaMensal: Math.round(parseFloat(metaMensal) * 100),
-        metaPorServico: metaPorServico ? Math.round(parseFloat(metaPorServico) * 100) : null,
-        metaDiaria: metaDiaria ? Math.round(parseFloat(metaDiaria) * 100) : null,
-      };
-
-      const response = await fetch('/api/metas', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      });
-
-      if (response.ok) {
-        alert('Metas salvas com sucesso!');
-        setModalOpen(false);
-        setSenhaValidada(false);
-        setSenha('');
-        fetchMetas();
-      } else {
-        throw new Error('Erro ao salvar');
-      }
-    } catch (error) {
-      alert('Erro ao salvar metas');
-    }
-  };
-
   useEffect(() => {
     fetchData();
-    fetchMetas();
-    const interval = setInterval(fetchData, 30 * 60 * 1000); // 30 minutos
+    carregarMetas();
+    const interval = setInterval(fetchData, 60000);
     return () => clearInterval(interval);
   }, []);
-
-  // Filtrar cards
-  const filteredCards = cards.filter(card => {
-    if (responsavelFilter !== 'todos' && card.responsavel !== responsavelFilter) return false;
-    if (categoriaFilter !== 'todas' && card.categoria !== categoriaFilter) return false;
-    // Não mostrar entregues na tabela
-    if (card.listName.includes('entregue')) return false;
-    return true;
-  });
-  
-  // Filtrar breakdown
-  const filteredBreakdown = categoriaFilter === 'todas' 
-    ? serviceBreakdown 
-    : serviceBreakdown.filter(s => s.categoria === categoriaFilter);
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('pt-BR', {
@@ -352,333 +216,191 @@ export default function Financeiro() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-black via-slate-950 to-black">
+    <div className="min-h-screen bg-gradient-to-br from-black via-gray-900 to-black">
       <Navigation />
-      {/* Header */}
-      <div className="bg-black border-b border-red-900/30 shadow-xl">
-        <div className="container py-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl font-bold text-white">Financeiro Doctor Auto</h1>
-              <p className="text-red-400 mt-1">Gestão de Valores em Tempo Real</p>
-            </div>
-            <div className="flex items-center gap-4">
-              <div className="text-right">
-                <p className="text-sm text-slate-400">Última atualização</p>
-                <p className="text-lg font-semibold text-white">{lastUpdate}</p>
-              </div>
-              <Dialog open={modalOpen} onOpenChange={setModalOpen}>
-                <DialogTrigger asChild>
-                  <Button variant="outline" onClick={() => { setSenhaValidada(false); setSenha(''); }}>
-                    <Settings className="w-4 h-4 mr-2" />
-                    Configurar Metas
-                  </Button>
-                </DialogTrigger>
-                <DialogContent>
-                  <DialogHeader>
-                    <DialogTitle>Configuração de Metas Financeiras</DialogTitle>
-                    <DialogDescription>
-                      {!senhaValidada ? 'Digite a senha para editar as metas' : 'Defina as metas para o mês atual'}
-                    </DialogDescription>
-                  </DialogHeader>
-
-                  {!senhaValidada ? (
-                    <div className="space-y-4">
-                      <div>
-                        <Label htmlFor="senha">Senha de Acesso</Label>
-                        <Input
-                          id="senha"
-                          type="password"
-                          value={senha}
-                          onChange={(e) => setSenha(e.target.value)}
-                          onKeyDown={(e) => e.key === 'Enter' && validarSenha()}
-                          placeholder="Digite a senha"
-                        />
-                      </div>
-                      <Button onClick={validarSenha} className="w-full">
-                        Validar
-                      </Button>
-                    </div>
-                  ) : (
-                    <div className="space-y-4">
-                      <div>
-                        <Label htmlFor="metaMensal">Meta Mensal (R$)</Label>
-                        <Input
-                          id="metaMensal"
-                          type="number"
-                          step="0.01"
-                          value={metaMensal}
-                          onChange={(e) => setMetaMensal(e.target.value)}
-                          placeholder="Ex: 150000.00"
-                        />
-                        <p className="text-xs text-slate-500 mt-1">Faturamento esperado para o mês</p>
-                      </div>
-                      <div>
-                        <Label htmlFor="diasUteis">Dias Úteis do Mês</Label>
-                        <Input
-                          id="diasUteis"
-                          type="number"
-                          value={metaPorServico}
-                          onChange={(e) => setMetaPorServico(e.target.value)}
-                          placeholder="Ex: 22"
-                        />
-                        <p className="text-xs text-slate-500 mt-1">Número de dias úteis de trabalho no mês</p>
-                      </div>
-                      <Button onClick={salvarMetas} className="w-full">
-                        Salvar Metas
-                      </Button>
-                    </div>
-                  )}
-                </DialogContent>
-              </Dialog>
-              <Button
-                onClick={() => window.open('/painel-metas', '_blank')}
-                size="sm"
-                variant="ghost"
-                className="text-white hover:bg-white/20 mr-2"
-                title="Abrir Painel de Metas para TV"
-              >
-                <Monitor className="h-4 w-4" />
-              </Button>
-              <Button
-                onClick={fetchData}
-                disabled={loading}
-                size="sm"
-                variant="ghost"
-                className="text-white hover:bg-white/20"
-              >
-                <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
-              </Button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div className="container py-8">
-        {/* Filtros */}
-        <div className="mb-6 flex gap-4">
+      
+      <div className="container mx-auto p-6 space-y-6">
+        {/* Header */}
+        <div className="flex items-center justify-between bg-black/50 backdrop-blur-sm p-6 rounded-xl border border-red-900/30">
           <div>
-            <label className="text-sm font-medium text-slate-300 mb-2 block">
-              Filtrar por Responsável Técnico
-            </label>
-            <Select value={responsavelFilter} onValueChange={setResponsavelFilter}>
-              <SelectTrigger className="w-64 bg-white">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="todos">Todos</SelectItem>
-                {responsaveis.map(resp => (
-                  <SelectItem key={resp} value={resp}>{resp}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <h1 className="text-4xl font-bold text-white mb-2">💰 Dashboard Financeiro</h1>
+            <p className="text-gray-400">Última atualização: {lastUpdate}</p>
           </div>
-          
-          <div>
-            <label className="text-sm font-medium text-slate-300 mb-2 block">
-              Filtrar por Categoria
-            </label>
-            <Select value={categoriaFilter} onValueChange={setCategoriaFilter}>
-              <SelectTrigger className="w-64 bg-white">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="todas">Todas</SelectItem>
-                {categorias.map(cat => (
-                  <SelectItem key={cat} value={cat}>{cat}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        </div>
-
-        {/* Cards de Métricas - Layout Premium Compacto */}
-        <div className="grid grid-cols-3 gap-4 mb-8">
-          {/* Card 1: Valor Faturado */}
-          <Card className="bg-gradient-to-br from-emerald-600 to-emerald-700 text-white border-emerald-500/20 shadow-xl hover:shadow-2xl hover:scale-105 transition-all duration-300">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-xs font-semibold flex items-center gap-2 uppercase tracking-wide">
-                <DollarSign className="h-3 w-3" />
-                Valor Faturado
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold mb-1">{formatCurrency(metrics.valorFaturado)}</div>
-              <p className="text-emerald-200 text-xs">Carros entregues</p>
-            </CardContent>
-          </Card>
-
-          {/* Card 2: Carros Entregues */}
-          <Card className="bg-gradient-to-br from-blue-600 to-blue-700 text-white border-blue-500/20 shadow-xl hover:shadow-2xl hover:scale-105 transition-all duration-300">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-xs font-semibold flex items-center gap-2 uppercase tracking-wide">
-                <CheckCircle className="h-3 w-3" />
-                Carros Entregues
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold mb-1">{metrics.carrosEntregues}</div>
-              <p className="text-blue-200 text-xs">Quantidade no mês</p>
-            </CardContent>
-          </Card>
-
-          {/* Card 3: Ticket Médio */}
-          <Card className="bg-gradient-to-br from-purple-600 to-purple-700 text-white border-purple-500/20 shadow-xl hover:shadow-2xl hover:scale-105 transition-all duration-300">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-xs font-semibold flex items-center gap-2 uppercase tracking-wide">
-                <TrendingUp className="h-3 w-3" />
-                Ticket Médio
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold mb-1">{formatCurrency(metrics.ticketMedioReal)}</div>
-              <p className="text-purple-200 text-xs">Por veículo</p>
-            </CardContent>
-          </Card>
-
-          {/* Card 4: Saída Hoje */}
-          <Card className="bg-gradient-to-br from-green-600 to-green-700 text-white border-green-500/20 shadow-xl hover:shadow-2xl hover:scale-105 transition-all duration-300">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-xs font-semibold flex items-center gap-2 uppercase tracking-wide">
-                <Calendar className="h-3 w-3" />
-                Saída Hoje
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold mb-1">{formatCurrency(metrics.valorSaidaHoje)}</div>
-              <p className="text-green-200 text-xs">Previsão entrega</p>
-            </CardContent>
-          </Card>
-
-          {/* Card 5: Valor Atrasado */}
-          <Card className="bg-gradient-to-br from-red-600 to-red-700 text-white border-red-500/20 shadow-xl hover:shadow-2xl hover:scale-105 transition-all duration-300">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-xs font-semibold flex items-center gap-2 uppercase tracking-wide">
-                <AlertCircle className="h-3 w-3" />
-                Valor Atrasado
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold mb-1">{formatCurrency(metrics.valorAtrasado)}</div>
-              <p className="text-red-200 text-xs">Passou previsão</p>
-            </CardContent>
-          </Card>
-
-          {/* Card 6: Valor Preso */}
-          <Card className="bg-gradient-to-br from-amber-600 to-amber-700 text-white border-amber-500/20 shadow-xl hover:shadow-2xl hover:scale-105 transition-all duration-300">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-xs font-semibold flex items-center gap-2 uppercase tracking-wide">
-                <Package className="h-3 w-3" />
-                Valor Preso
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold mb-1">{formatCurrency(metrics.valorPresoOficina)}</div>
-              <p className="text-amber-200 text-xs">Na oficina</p>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Breakdown por Tipo de Serviço */}
-        <Card className="mb-8 bg-slate-900/50 border-slate-800 backdrop-blur-sm">
-          <CardHeader>
-            <CardTitle className="text-white">Análise por Tipo de Serviço</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {filteredBreakdown.map(service => (
-                <div key={service.categoria} className="p-4 bg-slate-800/50 rounded-lg border border-red-900/30 hover:border-red-600/50 transition-all duration-300">
-                  <h3 className="font-semibold text-white mb-2">{service.categoria}</h3>
-                  <div className="space-y-1 text-sm">
-                    <div className="flex justify-between">
-                      <span className="text-slate-400">Valor Total:</span>
-                      <span className="font-semibold text-emerald-400">{formatCurrency(service.valorTotal)}</span>
+          <div className="flex gap-3">
+            <Button
+              onClick={fetchData}
+              disabled={loading}
+              className="bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white"
+            >
+              <RefreshCw className={`mr-2 h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
+              Atualizar
+            </Button>
+            
+            <Dialog open={modalOpen} onOpenChange={setModalOpen}>
+              <DialogTrigger asChild>
+                <Button className="bg-gray-800 hover:bg-gray-700 text-white">
+                  <Settings className="mr-2 h-4 w-4" />
+                  Configurar Metas
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="bg-gray-900 border-red-900/30">
+                <DialogHeader>
+                  <DialogTitle className="text-white">Configurar Metas Financeiras</DialogTitle>
+                  <DialogDescription className="text-gray-400">
+                    Configure as metas mensais da oficina
+                  </DialogDescription>
+                </DialogHeader>
+                
+                {!senhaValidada ? (
+                  <div className="space-y-4">
+                    <div>
+                      <Label htmlFor="senha" className="text-white">Senha de Administrador</Label>
+                      <Input
+                        id="senha"
+                        type="password"
+                        value={senha}
+                        onChange={(e) => setSenha(e.target.value)}
+                        onKeyPress={(e) => e.key === 'Enter' && validarSenha()}
+                        className="bg-gray-800 border-gray-700 text-white"
+                        placeholder="Digite a senha"
+                      />
                     </div>
-                    <div className="flex justify-between">
-                      <span className="text-slate-400">Quantidade:</span>
-                      <span className="font-semibold text-white">{service.quantidade} carros</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-slate-400">Ticket Médio:</span>
-                      <span className="font-semibold text-blue-400">{formatCurrency(service.ticketMedio)}</span>
-                    </div>
+                    <Button onClick={validarSenha} className="w-full bg-red-600 hover:bg-red-700">
+                      Validar
+                    </Button>
                   </div>
-                </div>
-              ))}
-            </div>
-            {filteredBreakdown.length === 0 && (
-              <p className="text-center text-slate-400 py-8">Nenhum serviço encontrado</p>
-            )}
-          </CardContent>
-        </Card>
+                ) : (
+                  <div className="space-y-4">
+                    <div>
+                      <Label htmlFor="metaMensal" className="text-white">Meta Mensal (R$)</Label>
+                      <Input
+                        id="metaMensal"
+                        type="number"
+                        step="0.01"
+                        value={metaMensal}
+                        onChange={(e) => setMetaMensal(e.target.value)}
+                        className="bg-gray-800 border-gray-700 text-white"
+                        placeholder="Ex: 150000.00"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="diasUteis" className="text-white">Dias Úteis no Mês</Label>
+                      <Input
+                        id="diasUteis"
+                        type="number"
+                        value={diasUteis}
+                        onChange={(e) => setDiasUteis(e.target.value)}
+                        className="bg-gray-800 border-gray-700 text-white"
+                        placeholder="Ex: 22"
+                      />
+                    </div>
+                    <Button onClick={salvarMetas} className="w-full bg-red-600 hover:bg-red-700">
+                      Salvar Metas
+                    </Button>
+                  </div>
+                )}
+              </DialogContent>
+            </Dialog>
+            
+            <Button
+              onClick={() => window.open('/painel-metas', '_blank')}
+              className="bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white"
+            >
+              <Monitor className="mr-2 h-4 w-4" />
+              Abrir Painel de Metas
+            </Button>
+          </div>
+        </div>
 
-        {/* Tabela de Carros */}
-        <Card className="bg-slate-900/50 border-slate-800 backdrop-blur-sm">
-          <CardHeader>
-            <CardTitle className="text-white">Veículos na Oficina</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead>
-                  <tr className="border-b border-slate-700">
-                    <th className="text-left p-3 font-medium text-slate-300">Veículo</th>
-                    <th className="text-left p-3 font-medium text-slate-300">Etapa</th>
-                    <th className="text-left p-3 font-medium text-slate-300">Responsável</th>
-                    <th className="text-left p-3 font-medium text-slate-300">Categoria</th>
-                    <th className="text-right p-3 font-medium text-slate-300">Valor Aprovado</th>
-                    <th className="text-left p-3 font-medium text-slate-300">Previsão Entrega</th>
-                    <th className="text-left p-3 font-medium text-slate-300">Status</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredCards.map(card => {
-                    const hoje = new Date();
-                    hoje.setHours(0, 0, 0, 0);
-                    let statusColor = 'text-slate-400';
-                    let statusText = 'Em andamento';
-                    
-                    if (card.previsaoEntrega) {
-                      const previsao = new Date(card.previsaoEntrega);
-                      previsao.setHours(0, 0, 0, 0);
-                      
-                      if (previsao.getTime() === hoje.getTime()) {
-                        statusColor = 'text-green-400 font-semibold';
-                        statusText = 'Sai hoje';
-                      } else if (previsao < hoje) {
-                        statusColor = 'text-red-400 font-semibold';
-                        statusText = 'Atrasado';
-                      }
-                    }
-
-                    return (
-                      <tr key={card.id} className="border-b border-slate-800 hover:bg-slate-800/50 transition-colors">
-                        <td className="p-3 text-white">{card.name}</td>
-                        <td className="p-3">
-                          <span className="px-2 py-1 bg-slate-700/50 text-slate-200 rounded text-sm">
-                            {card.listName}
-                          </span>
-                        </td>
-                        <td className="p-3 text-slate-300">{card.responsavel}</td>
-                        <td className="p-3 text-slate-300">{card.categoria}</td>
-                        <td className="p-3 text-right font-semibold text-emerald-400">
-                          {card.valorAprovado > 0 ? formatCurrency(card.valorAprovado) : '-'}
-                        </td>
-                        <td className="p-3 text-slate-300">
-                          {card.previsaoEntrega 
-                            ? new Date(card.previsaoEntrega).toLocaleDateString('pt-BR')
-                            : '-'
-                          }
-                        </td>
-                        <td className={`p-3 ${statusColor}`}>{statusText}</td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
+        {/* Cards Financeiros - Linha 1 */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {/* Valor Faturado */}
+          <div className="bg-gradient-to-br from-green-900/40 to-green-800/20 backdrop-blur-sm p-6 rounded-xl border border-green-700/50 shadow-xl hover:shadow-2xl hover:scale-105 transition-all duration-300">
+            <div className="flex items-center justify-between mb-4">
+              <div className="p-3 bg-green-600/30 rounded-lg">
+                <DollarSign className="h-8 w-8 text-green-400" />
+              </div>
+              <span className="text-green-400 text-sm font-semibold">FATURADO</span>
             </div>
-          </CardContent>
-        </Card>
+            <div className="space-y-2">
+              <p className="text-4xl font-bold text-white">{formatCurrency(metrics.valorFaturado)}</p>
+              <p className="text-gray-400 text-sm">Total entregue</p>
+            </div>
+          </div>
+
+          {/* Ticket Médio */}
+          <div className="bg-gradient-to-br from-blue-900/40 to-blue-800/20 backdrop-blur-sm p-6 rounded-xl border border-blue-700/50 shadow-xl hover:shadow-2xl hover:scale-105 transition-all duration-300">
+            <div className="flex items-center justify-between mb-4">
+              <div className="p-3 bg-blue-600/30 rounded-lg">
+                <TrendingUp className="h-8 w-8 text-blue-400" />
+              </div>
+              <span className="text-blue-400 text-sm font-semibold">TICKET MÉDIO</span>
+            </div>
+            <div className="space-y-2">
+              <p className="text-4xl font-bold text-white">{formatCurrency(metrics.ticketMedio)}</p>
+              <p className="text-gray-400 text-sm">Por veículo</p>
+            </div>
+          </div>
+
+          {/* Saída Hoje */}
+          <div className="bg-gradient-to-br from-cyan-900/40 to-cyan-800/20 backdrop-blur-sm p-6 rounded-xl border border-cyan-700/50 shadow-xl hover:shadow-2xl hover:scale-105 transition-all duration-300">
+            <div className="flex items-center justify-between mb-4">
+              <div className="p-3 bg-cyan-600/30 rounded-lg">
+                <Calendar className="h-8 w-8 text-cyan-400" />
+              </div>
+              <span className="text-cyan-400 text-sm font-semibold">SAÍDA HOJE</span>
+            </div>
+            <div className="space-y-2">
+              <p className="text-4xl font-bold text-white">{formatCurrency(metrics.saidaHoje)}</p>
+              <p className="text-gray-400 text-sm">Previsão de entrega</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Cards Financeiros - Linha 2 */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {/* Valor Atrasado */}
+          <div className="bg-gradient-to-br from-red-900/40 to-red-800/20 backdrop-blur-sm p-6 rounded-xl border border-red-700/50 shadow-xl hover:shadow-2xl hover:scale-105 transition-all duration-300">
+            <div className="flex items-center justify-between mb-4">
+              <div className="p-3 bg-red-600/30 rounded-lg">
+                <AlertCircle className="h-8 w-8 text-red-400" />
+              </div>
+              <span className="text-red-400 text-sm font-semibold">ATRASADO</span>
+            </div>
+            <div className="space-y-2">
+              <p className="text-4xl font-bold text-white">{formatCurrency(metrics.valorAtrasado)}</p>
+              <p className="text-gray-400 text-sm">Previsão vencida</p>
+            </div>
+          </div>
+
+          {/* Valor Preso */}
+          <div className="bg-gradient-to-br from-orange-900/40 to-orange-800/20 backdrop-blur-sm p-6 rounded-xl border border-orange-700/50 shadow-xl hover:shadow-2xl hover:scale-105 transition-all duration-300">
+            <div className="flex items-center justify-between mb-4">
+              <div className="p-3 bg-orange-600/30 rounded-lg">
+                <Clock className="h-8 w-8 text-orange-400" />
+              </div>
+              <span className="text-orange-400 text-sm font-semibold">PRESO</span>
+            </div>
+            <div className="space-y-2">
+              <p className="text-4xl font-bold text-white">{formatCurrency(metrics.valorPreso)}</p>
+              <p className="text-gray-400 text-sm">No pátio</p>
+            </div>
+          </div>
+
+          {/* Carros Entregues */}
+          <div className="bg-gradient-to-br from-purple-900/40 to-purple-800/20 backdrop-blur-sm p-6 rounded-xl border border-purple-700/50 shadow-xl hover:shadow-2xl hover:scale-105 transition-all duration-300">
+            <div className="flex items-center justify-between mb-4">
+              <div className="p-3 bg-purple-600/30 rounded-lg">
+                <CheckCircle className="h-8 w-8 text-purple-400" />
+              </div>
+              <span className="text-purple-400 text-sm font-semibold">ENTREGUES</span>
+            </div>
+            <div className="space-y-2">
+              <p className="text-4xl font-bold text-white">{metrics.carrosEntregues}</p>
+              <p className="text-gray-400 text-sm">Veículos finalizados</p>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );
