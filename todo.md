@@ -909,3 +909,12 @@
 - [x] Adicionar Termômetro de Meta Individual: barra de progresso vs R$ 15.000 semanal
 - [x] Adicionar Emojis: Samuel 🐦, Tadeu 💉, Aldo 📖, JP 🎧, Wendel 🧔
 - [x] Testar com dados reais
+
+
+## Ajustes Finais Cards de Mecânicos - Produtividade
+
+- [x] Remover campo "Tempo Médio" dos cards
+- [x] Alterar "Taxa de Retorno %" para "Retornos" (quantidade)
+- [x] Incluir "Terceirizados" no ranking de mecânicos
+- [x] Atualizar interface dos cards para refletir mudanças
+- [x] Testar com dados reais

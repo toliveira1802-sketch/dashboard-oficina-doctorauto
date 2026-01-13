@@ -21,10 +21,8 @@ interface TrelloCard {
 interface MecanicoStats {
   nome: string;
   carros_total: number;
-  tempo_medio: number;
   valor_produzido: number;
   retornos: number;
-  taxa_retorno: number;
   eficiencia: number; // valor produzido por dia
 }
 
@@ -42,7 +40,8 @@ const MECANICO_EMOJIS: Record<string, string> = {
   'Tadeu': '💉', // seringa
   'Aldo': '📖', // bíblia
   'JP': '🎧', // fone de ouvido
-  'Wendel': '🧔' // barba
+  'Wendel': '🧔', // barba
+  'Terceirizados': '👥' // pessoas/grupo
 };
 
 export default function Produtividade() {
@@ -172,10 +171,8 @@ export default function Produtividade() {
         mecanicoStats[mecanicoNome] = {
           nome: mecanicoNome,
           carros_total: 0,
-          tempo_medio: 0,
           valor_produzido: 0,
           retornos: 0,
-          taxa_retorno: 0,
           eficiencia: 0
         };
       }
@@ -191,15 +188,6 @@ export default function Produtividade() {
       // Verificar retorno
       if (listName.includes('RETORNOS')) {
         mecanicoStats[mecanicoNome].retornos++;
-      }
-
-      // Calcular tempo (simplificado - usar data de entrada até hoje)
-      const dataEntradaItem = card.customFieldItems?.find(item => item.idCustomField === dataEntradaField?.id);
-      if (dataEntradaItem && dataEntradaItem.value?.date) {
-        const entrada = new Date(dataEntradaItem.value.date);
-        const hoje = new Date();
-        const dias = Math.floor((hoje.getTime() - entrada.getTime()) / (1000 * 60 * 60 * 24));
-        mecanicoStats[mecanicoNome].tempo_medio += dias;
       }
 
       // Stats por elevador
@@ -225,6 +213,7 @@ export default function Produtividade() {
             elevadorStats[recursoNome].valor_produzido += parseFloat(valorItem.value.number);
           }
 
+          const dataEntradaItem = card.customFieldItems?.find(item => item.idCustomField === dataEntradaField?.id);
           if (dataEntradaItem && dataEntradaItem.value?.date) {
             const entrada = new Date(dataEntradaItem.value.date);
             const hoje = new Date();
@@ -259,13 +248,11 @@ export default function Produtividade() {
       }
     });
 
-    // Calcular médias e taxas
+    // Calcular eficiência (valor por carro)
     Object.values(mecanicoStats).forEach(stats => {
       if (stats.carros_total > 0) {
-        stats.tempo_medio = stats.tempo_medio / stats.carros_total;
-        stats.taxa_retorno = (stats.retornos / stats.carros_total) * 100;
-        // Calcular eficiência: valor produzido por dia
-        stats.eficiencia = stats.tempo_medio > 0 ? stats.valor_produzido / stats.tempo_medio : 0;
+        // Calcular eficiência: valor produzido por carro
+        stats.eficiencia = stats.valor_produzido / stats.carros_total;
       }
     });
 
@@ -516,18 +503,11 @@ export default function Produtividade() {
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-slate-600 flex items-center gap-1">
-                    <Clock className="h-4 w-4" />
-                    Tempo Médio
-                  </span>
-                  <span className="font-bold">{mecanico.tempo_medio.toFixed(1)} dias</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-slate-600 flex items-center gap-1">
                     <AlertTriangle className="h-4 w-4" />
-                    Taxa de Retorno
+                    Retornos
                   </span>
-                  <span className={`font-bold ${mecanico.taxa_retorno > 5 ? 'text-red-600' : 'text-green-600'}`}>
-                    {mecanico.taxa_retorno.toFixed(1)}%
+                  <span className={`font-bold ${mecanico.retornos > 0 ? 'text-red-600' : 'text-green-600'}`}>
+                    {mecanico.retornos}
                   </span>
                 </div>
                 <div className="flex items-center justify-between">
