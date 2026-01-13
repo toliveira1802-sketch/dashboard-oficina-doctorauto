@@ -712,8 +712,15 @@ export default function Home() {
                   hoje.setHours(0, 0, 0, 0);
                   previsaoDate.setHours(0, 0, 0, 0);
                   
-                  // Atrasado se a previsão já passou
-                  return previsaoDate < hoje;
+                  // Verificar se previsão foi ultrapassada
+                  if (previsaoDate >= hoje) return false;
+                  
+                  // Excluir veículos que já estão Prontos ou Entregues
+                  const listName = listIdMap[card.idList];
+                  const isPronto = listName === '💰Pronto / Aguardando Retirada';
+                  const isEntregue = listName === '🙏🏻entregue' || listName === 'Entregue' || listName?.toLowerCase().includes('entregue');
+                  
+                  return !isPronto && !isEntregue;
                 }).length}
               </p>
               <p className="text-xs text-orange-600">críticos</p>
@@ -1116,6 +1123,7 @@ export default function Home() {
 
     if (modalCategory === 'atrasados') {
       // Filtrar veículos com previsão de entrega ultrapassada
+      // EXCLUINDO os que já estão Prontos ou Entregues
       filtered = allCards.filter(card => {
         const previsaoField = customFieldsMap['Previsão de Entrega'];
         if (!previsaoField || !card.customFieldItems) return false;
@@ -1128,7 +1136,15 @@ export default function Home() {
         hoje.setHours(0, 0, 0, 0);
         previsaoDate.setHours(0, 0, 0, 0);
         
-        return previsaoDate < hoje;
+        // Verificar se previsão foi ultrapassada
+        if (previsaoDate >= hoje) return false;
+        
+        // Excluir veículos que já estão Prontos ou Entregues
+        const listName = listIdMap[card.idList];
+        const isPronto = listName === '💰Pronto / Aguardando Retirada';
+        const isEntregue = listName === '🙏🏻entregue' || listName === 'Entregue' || listName?.toLowerCase().includes('entregue');
+        
+        return !isPronto && !isEntregue;
       });
     } else if (modalCategory === 'retornos') {
       // Filtrar apenas RETORNO que NÃO estão na lista Prontos OU Entregue

@@ -795,3 +795,11 @@
 - [x] Corrigir mapa para exibir placas dos veículos (extração de custom fields)
 - [x] Adicionar botão "Ver no Trello" no modal de veículos
 - [x] Testar todas as correções
+
+
+## Correção - Contador de Veículos Atrasados
+
+- [x] Investigar lógica atual do contador de veículos atrasados
+- [x] Identificar quais listas são consideradas "concluídos/entregues" (Prontos e Entregue)
+- [x] Modificar filtro para excluir veículos dessas listas do contador
+- [x] Testar contador com dados reais (14 → 1 veículo atrasado)
