@@ -722,3 +722,12 @@
 - [x] Modificar sincronização para extrair custom fields (43 cards com custom fields)
 - [x] Reativar filtro de consultor no dashboard
 - [x] Testar filtro funcionando (SUCESSO! Filtrando por João, Pedro, Thales, Garage347, Bosch)
+
+
+## Corrigir Dashboard Financeiro
+
+- [x] Investigar página Financeiro.tsx
+- [x] Identificar problemas (token desatualizado + board ID errado)
+- [x] Listar correções necessárias
+- [x] Implementar correções (token + board ID atualizados)
+- [x] Testar dashboard financeiro (FUNCIONANDO! Valores corretos em R$ 0,00)
