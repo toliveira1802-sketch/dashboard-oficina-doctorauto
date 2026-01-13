@@ -634,3 +634,11 @@
 - [x] Substituir coluna `desc` por `description` em todos os SQLs
 - [x] Regenerar arquivos SQL divididos (part1, part2, part3)
 - [ ] Testar execução no Supabase sem erros
+
+
+## Atualizar Código Dashboard - Campo 'desc' → 'description'
+
+- [x] Buscar todas as referências a campo 'desc' do Trello no código
+- [x] Atualizar componentes React (client/src)
+- [x] Atualizar rotas do servidor (server)
+- [ ] Testar dashboard após atualização

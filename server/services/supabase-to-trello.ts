@@ -8,7 +8,7 @@ export async function updateTrelloCard(
   cardId: string,
   changes: {
     name?: string;
-    desc?: string;
+    description?: string;
     idList?: string;
     customFields?: Record<string, any>;
   }
@@ -18,7 +18,7 @@ export async function updateTrelloCard(
     
     const body: any = {};
     if (changes.name) body.name = changes.name;
-    if (changes.desc) body.desc = changes.desc;
+    if (changes.description) body.desc = changes.description;
     if (changes.idList) body.idList = changes.idList;
     
     const response = await fetch(url, {
@@ -123,7 +123,7 @@ export async function moveTrelloCard(
  */
 export async function createTrelloCard(data: {
   name: string;
-  desc?: string;
+  description?: string;
   idList: string;
   customFields?: Record<string, any>;
 }): Promise<string | null> {
@@ -135,7 +135,7 @@ export async function createTrelloCard(data: {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         name: data.name,
-        desc: data.desc || '',
+        desc: data.description || '',
         idList: data.idList
       })
     });

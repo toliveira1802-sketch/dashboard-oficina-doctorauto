@@ -17,7 +17,7 @@ interface TrelloCard {
   id: string;
   name: string;
   idList: string;
-  desc: string;
+  description: string;
   labels: Array<{ name: string; color: string }>;
   dateLastActivity: string;
   customFieldItems?: Array<{
@@ -289,7 +289,7 @@ export default function Home() {
           else if (isPronto) newMetrics.prontos++;
 
           // Extrair recurso da descrição
-          const recurso = extractRecursoFromDesc(card.desc);
+          const recurso = extractRecursoFromDesc(card.description);
           if (recurso) {
             recursosOcupados.set(recurso, card);
           }

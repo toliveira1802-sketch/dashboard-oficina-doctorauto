@@ -12,7 +12,7 @@ const supabase = createClient(
 interface TrelloCard {
   id: string;
   name: string;
-  desc: string;
+  description: string;
   idList: string;
   labels: Array<{ name: string; color: string }>;
   dateLastActivity: string;
@@ -166,7 +166,7 @@ export async function syncTrelloToSupabase(): Promise<{
         const { error } = await supabase.from('trello_cards').upsert({
           id: card.id,
           name: card.name,
-          desc: card.desc || '',
+          description: card.description || '',
           id_list: card.idList,
           list_name: listName,
           labels: card.labels || [],
@@ -221,7 +221,7 @@ export async function syncSingleCard(cardId: string): Promise<boolean> {
     const { error } = await supabase.from('trello_cards').upsert({
       id: card.id,
       name: card.name,
-      desc: card.desc || '',
+      description: card.description || '',
       id_list: card.idList,
       list_name: listName,
       labels: card.labels || [],

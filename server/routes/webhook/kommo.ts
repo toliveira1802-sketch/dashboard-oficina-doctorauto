@@ -198,7 +198,7 @@ _Card criado automaticamente via integração Kommo → Supabase → Trello_
       .upsert({
       id: trelloCard.id,
       name: trelloCard.name,
-      desc: trelloCard.desc,
+      description: trelloCard.description,
       id_list: trelloCard.idList,
       list_name: 'AGENDADOS',
       date_last_activity: now,
