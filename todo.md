@@ -747,3 +747,11 @@
 
 - [x] Substituir "Prontos" por "🙏🏻Entregue" no código
 - [x] Testar cálculo de faturamento (aguardando dados reais na lista)
+
+
+## Adicionar Modal com Placas nos Dashboards
+
+- [x] Implementar modal no Dashboard Operacional (clicar em card mostra placas)
+- [x] Implementar modal no Dashboard Financeiro (clicar em card mostra placas + valores)
+- [x] Placas extraídas da descrição (regex)
+- [x] Testar ambos dashboards (FUNCIONANDO!)

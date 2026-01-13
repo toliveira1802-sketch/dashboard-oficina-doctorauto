@@ -3,6 +3,7 @@ import Navigation from '@/components/Navigation';
 import { Button } from '@/components/ui/button';
 import { RefreshCw, DollarSign, TrendingUp, Calendar, AlertCircle, Settings, Monitor, Package, Clock, CheckCircle } from 'lucide-react';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 
@@ -40,6 +41,10 @@ export default function Financeiro() {
   const [loading, setLoading] = useState(true);
   const [lastUpdate, setLastUpdate] = useState<string>('');
   const [periodoFiltro, setPeriodoFiltro] = useState<'hoje' | 'semana' | 'mes' | 'ano'>('mes');
+  const [modalDetalhesOpen, setModalDetalhesOpen] = useState(false);
+  const [modalCategory, setModalCategory] = useState<string>('');
+  const [allCards, setAllCards] = useState<any[]>([]);
+  
   
   // Estados para metas
   const [metas, setMetas] = useState<MetaFinanceira | null>(null);
@@ -71,15 +76,18 @@ export default function Financeiro() {
       const cardsResponse = await fetch(
         `https://api.trello.com/1/boards/${TRELLO_BOARD_ID}/cards?customFieldItems=true&key=${TRELLO_API_KEY}&token=${TRELLO_TOKEN}`
       );
-      const allCards = await cardsResponse.json();
+      const allCardsData = await cardsResponse.json();
       
       // Filtrar cards com label "FORA DA LOJA"
-      const cards = allCards.filter((card: any) => {
+      const cards = allCardsData.filter((card: any) => {
         const hasForaLabel = card.labels?.some((label: any) => 
           label.name === 'FORA DA LOJA'
         );
         return !hasForaLabel;
       });
+      
+      // Armazenar todos os cards para uso no modal
+      setAllCards(cards);
       
       // Calcular métricas
       let valorFaturado = 0;
@@ -397,7 +405,7 @@ export default function Financeiro() {
         {/* Cards Financeiros - Linha 2 */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {/* Valor Atrasado */}
-          <div className="bg-gradient-to-br from-red-900/40 to-red-800/20 backdrop-blur-sm p-6 rounded-xl border border-red-700/50 shadow-xl hover:shadow-2xl hover:scale-105 transition-all duration-300">
+          <div onClick={() => { setModalCategory('atrasado'); setModalDetalhesOpen(true); }} className="bg-gradient-to-br from-red-900/40 to-red-800/20 backdrop-blur-sm p-6 rounded-xl border border-red-700/50 shadow-xl hover:shadow-2xl hover:scale-105 transition-all duration-300 cursor-pointer">
             <div className="flex items-center justify-between mb-4">
               <div className="p-3 bg-red-600/30 rounded-lg">
                 <AlertCircle className="h-8 w-8 text-red-400" />
@@ -411,7 +419,7 @@ export default function Financeiro() {
           </div>
 
           {/* Valor Preso */}
-          <div className="bg-gradient-to-br from-orange-900/40 to-orange-800/20 backdrop-blur-sm p-6 rounded-xl border border-orange-700/50 shadow-xl hover:shadow-2xl hover:scale-105 transition-all duration-300">
+          <div onClick={() => { setModalCategory('preso'); setModalDetalhesOpen(true); }} className="bg-gradient-to-br from-orange-900/40 to-orange-800/20 backdrop-blur-sm p-6 rounded-xl border border-orange-700/50 shadow-xl hover:shadow-2xl hover:scale-105 transition-all duration-300 cursor-pointer">
             <div className="flex items-center justify-between mb-4">
               <div className="p-3 bg-orange-600/30 rounded-lg">
                 <Clock className="h-8 w-8 text-orange-400" />
@@ -425,7 +433,7 @@ export default function Financeiro() {
           </div>
 
           {/* Carros Entregues */}
-          <div className="bg-gradient-to-br from-purple-900/40 to-purple-800/20 backdrop-blur-sm p-6 rounded-xl border border-purple-700/50 shadow-xl hover:shadow-2xl hover:scale-105 transition-all duration-300">
+          <div onClick={() => { setModalCategory('entregues'); setModalDetalhesOpen(true); }} className="bg-gradient-to-br from-purple-900/40 to-purple-800/20 backdrop-blur-sm p-6 rounded-xl border border-purple-700/50 shadow-xl hover:shadow-2xl hover:scale-105 transition-all duration-300 cursor-pointer">
             <div className="flex items-center justify-between mb-4">
               <div className="p-3 bg-purple-600/30 rounded-lg">
                 <CheckCircle className="h-8 w-8 text-purple-400" />
@@ -439,6 +447,116 @@ export default function Financeiro() {
           </div>
         </div>
       </div>
+
+      {/* Modal de Detalhes Financeiros */}
+      <Dialog open={modalDetalhesOpen} onOpenChange={setModalDetalhesOpen}>
+        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="text-xl font-bold">
+              {modalCategory === 'atrasado' && '⚠️ Veículos com Valor Atrasado'}
+              {modalCategory === 'preso' && '🕒 Veículos com Valor Preso'}
+              {modalCategory === 'entregues' && '✅ Veículos Entregues'}
+            </DialogTitle>
+            <DialogDescription>
+              Lista completa de veículos nesta categoria
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-2 mt-4">
+            {allCards
+              .filter((card: any) => {
+                // Extrair dados do card
+                const valorItem = card.customFieldItems?.find((item: any) => 
+                  item.idCustomField === '67839e2a0e7ca7e8c2e1c1f2'
+                );
+                const valor = valorItem?.value?.number ? parseFloat(valorItem.value.number) : 0;
+                
+                const previsaoItem = card.customFieldItems?.find((item: any) => 
+                  item.idCustomField === '67839e2a0e7ca7e8c2e1c1f3'
+                );
+                const previsaoStr = previsaoItem?.value?.date;
+                const previsao = previsaoStr ? new Date(previsaoStr) : null;
+                if (previsao) previsao.setHours(0, 0, 0, 0);
+                
+                const hoje = new Date();
+                hoje.setHours(0, 0, 0, 0);
+                
+                const listMap: { [key: string]: string } = {};
+                const listName = listMap[card.idList] || '';
+                
+                // Filtrar por categoria
+                if (modalCategory === 'atrasado') {
+                  return previsao && previsao < hoje && listName !== '🙏🏻Entregue';
+                } else if (modalCategory === 'preso') {
+                  return valor > 0 && listName !== '🙏🏻Entregue';
+                } else if (modalCategory === 'entregues') {
+                  return listName === '🙏🏻Entregue';
+                }
+                return false;
+              })
+              .map((card: any, index: number) => {
+                // Extrair placa da descrição
+                const placaMatch = card.desc?.match(/Placa:\s*([A-Z0-9-]+)/i);
+                const placa = placaMatch ? placaMatch[1] : 'Sem placa';
+                
+                // Extrair valor
+                const valorItem = card.customFieldItems?.find((item: any) => 
+                  item.idCustomField === '67839e2a0e7ca7e8c2e1c1f2'
+                );
+                const valor = valorItem?.value?.number ? parseFloat(valorItem.value.number) : 0;
+                
+                return (
+                  <div key={card.id} className="p-4 bg-slate-800 rounded-lg hover:bg-slate-700 transition-colors">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <span className="text-lg font-bold text-blue-400">🚗 {placa}</span>
+                        <span className="text-slate-300">{card.name}</span>
+                      </div>
+                      {valor > 0 && (
+                        <span className="text-green-400 font-semibold">
+                          {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(valor)}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            
+            {allCards.filter((card: any) => {
+              const valorItem = card.customFieldItems?.find((item: any) => 
+                item.idCustomField === '67839e2a0e7ca7e8c2e1c1f2'
+              );
+              const valor = valorItem?.value?.number ? parseFloat(valorItem.value.number) : 0;
+              
+              const previsaoItem = card.customFieldItems?.find((item: any) => 
+                item.idCustomField === '67839e2a0e7ca7e8c2e1c1f3'
+              );
+              const previsaoStr = previsaoItem?.value?.date;
+              const previsao = previsaoStr ? new Date(previsaoStr) : null;
+              if (previsao) previsao.setHours(0, 0, 0, 0);
+              
+              const hoje = new Date();
+              hoje.setHours(0, 0, 0, 0);
+              
+              const listMap: { [key: string]: string } = {};
+              const listName = listMap[card.idList] || '';
+              
+              if (modalCategory === 'atrasado') {
+                return previsao && previsao < hoje && listName !== '🙏🏻Entregue';
+              } else if (modalCategory === 'preso') {
+                return valor > 0 && listName !== '🙏🏻Entregue';
+              } else if (modalCategory === 'entregues') {
+                return listName === '🙏🏻Entregue';
+              }
+              return false;
+            }).length === 0 && (
+              <div className="text-center py-8 text-slate-400">
+                <p>Nenhum veículo nesta categoria</p>
+              </div>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

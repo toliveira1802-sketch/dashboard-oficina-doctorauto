@@ -959,11 +959,18 @@ export default function Home() {
                 return 'bg-red-100 text-red-800 border-red-300';
               };
               
+              // Extrair placa da descrição
+              const placaMatch = card.description?.match(/Placa:\s*([A-Z0-9-]+)/i);
+              const placa = placaMatch ? placaMatch[1] : 'Sem placa';
+              
               return (
                 <Card key={card.id} className="p-4 hover:shadow-md transition-shadow">
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-2">
+                        <Badge className="text-sm font-bold bg-blue-600 text-white px-3 py-1">
+                          🚗 {placa}
+                        </Badge>
                         <p className="font-semibold text-slate-900">{card.name}</p>
                         <Badge className={`text-xs font-semibold ${getBadgeColor(diasPermanencia)}`}>
                           🕒 há {diasPermanencia} {diasPermanencia === 1 ? 'dia' : 'dias'}
