@@ -113,6 +113,8 @@ export async function syncTrelloToSupabase(): Promise<{ success: boolean; synced
             responsavel_tecnico: extracted.responsavel_tecnico,
             placa: extracted.placa,
             modelo: extracted.modelo,
+            valor_aprovado: extracted.valor_aprovado,
+            previsao_entrega: extracted.previsao_entrega,
             synced_at: new Date().toISOString(),
             updated_at: new Date().toISOString()
           }, { onConflict: 'id' });

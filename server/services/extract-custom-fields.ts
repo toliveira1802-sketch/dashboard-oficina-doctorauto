@@ -34,6 +34,8 @@ interface ExtractedFields {
   responsavel_tecnico: string | null;
   placa: string | null;
   modelo: string | null;
+  valor_aprovado: number | null;
+  previsao_entrega: string | null;
 }
 
 /**
@@ -96,14 +98,37 @@ export function extractCustomFields(
   const modelo = extractModeloFromName(card.name);
   
   let responsavel_tecnico: string | null = null;
+  let valor_aprovado: number | null = null;
+  let previsao_entrega: string | null = null;
   
-  if (customFields) {
+  if (customFields && card.customFieldItems) {
+    // Responsável Técnico
     responsavel_tecnico = extractCustomFieldValue(card, customFields, 'Responsável Técnico');
+    
+    // Valor Aprovado (number)
+    const valorField = customFields.find(f => f.name === 'Valor Aprovado');
+    if (valorField) {
+      const valorItem = card.customFieldItems.find(i => i.idCustomField === valorField.id);
+      if (valorItem?.value?.number) {
+        valor_aprovado = parseFloat(valorItem.value.number);
+      }
+    }
+    
+    // Previsão de Entrega (date)
+    const previsaoField = customFields.find(f => f.name === 'Previsão de Entrega');
+    if (previsaoField) {
+      const previsaoItem = card.customFieldItems.find(i => i.idCustomField === previsaoField.id);
+      if (previsaoItem?.value?.date) {
+        previsao_entrega = previsaoItem.value.date.split('T')[0]; // Apenas a data (YYYY-MM-DD)
+      }
+    }
   }
 
   return {
     responsavel_tecnico,
     placa,
-    modelo
+    modelo,
+    valor_aprovado,
+    previsao_entrega
   };
 }

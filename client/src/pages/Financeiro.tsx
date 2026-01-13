@@ -39,6 +39,7 @@ export default function Financeiro() {
   });
   const [loading, setLoading] = useState(true);
   const [lastUpdate, setLastUpdate] = useState<string>('');
+  const [periodoFiltro, setPeriodoFiltro] = useState<'hoje' | 'semana' | 'mes' | 'ano'>('mes');
   
   // Estados para metas
   const [metas, setMetas] = useState<MetaFinanceira | null>(null);
@@ -90,6 +91,25 @@ export default function Financeiro() {
       const hoje = new Date();
       hoje.setHours(0, 0, 0, 0);
       
+      // Calcular data inicial do período
+      let dataInicioPeriodo = new Date();
+      dataInicioPeriodo.setHours(0, 0, 0, 0);
+      
+      switch (periodoFiltro) {
+        case 'hoje':
+          // Já está configurado para hoje
+          break;
+        case 'semana':
+          dataInicioPeriodo.setDate(hoje.getDate() - 7);
+          break;
+        case 'mes':
+          dataInicioPeriodo.setMonth(hoje.getMonth() - 1);
+          break;
+        case 'ano':
+          dataInicioPeriodo.setFullYear(hoje.getFullYear() - 1);
+          break;
+      }
+      
       cards.forEach((card: any) => {
         const listName = lists.find((l: any) => l.id === card.idList)?.name || '';
         
@@ -97,7 +117,7 @@ export default function Financeiro() {
         const valorItem = card.customFieldItems?.find((item: any) => 
           item.idCustomField === valorAprovadoField?.id
         );
-        const valor = valorItem?.value?.number || 0;
+        const valor = valorItem?.value?.number ? parseFloat(valorItem.value.number) : 0;
         
         // Extrair previsão de entrega
         const previsaoItem = card.customFieldItems?.find((item: any) => 
@@ -107,10 +127,16 @@ export default function Financeiro() {
         const previsao = previsaoStr ? new Date(previsaoStr) : null;
         if (previsao) previsao.setHours(0, 0, 0, 0);
         
-        // Valor Faturado (carros entregues/prontos)
+        // Valor Faturado (carros entregues/prontos no período)
         if (listName === 'Prontos') {
-          valorFaturado += valor;
-          carrosEntregues++;
+          // Verificar se está no período (usar dateLastActivity como proxy de data de conclusão)
+          const dataCard = card.dateLastActivity ? new Date(card.dateLastActivity) : null;
+          if (dataCard) dataCard.setHours(0, 0, 0, 0);
+          
+          if (!dataCard || dataCard >= dataInicioPeriodo) {
+            valorFaturado += valor;
+            carrosEntregues++;
+          }
         }
         
         // Saída Hoje (previsão de entrega = hoje)
@@ -206,7 +232,7 @@ export default function Financeiro() {
     carregarMetas();
     const interval = setInterval(fetchData, 60000);
     return () => clearInterval(interval);
-  }, []);
+  }, [periodoFiltro]); // Recarregar quando mudar o período
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('pt-BR', {
@@ -226,7 +252,18 @@ export default function Financeiro() {
             <h1 className="text-4xl font-bold text-white mb-2">💰 Dashboard Financeiro</h1>
             <p className="text-gray-400">Última atualização: {lastUpdate}</p>
           </div>
-          <div className="flex gap-3">
+          <div className="flex gap-3 items-center">
+            {/* Filtro de Período */}
+            <select
+              value={periodoFiltro}
+              onChange={(e) => setPeriodoFiltro(e.target.value as any)}
+              className="px-4 py-2 bg-gray-800 text-white border border-red-900/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
+            >
+              <option value="hoje">Hoje</option>
+              <option value="semana">Últimos 7 dias</option>
+              <option value="mes">Últimos 30 dias</option>
+              <option value="ano">Último ano</option>
+            </select>
             <Button
               onClick={fetchData}
               disabled={loading}

@@ -731,3 +731,13 @@
 - [x] Listar correções necessárias
 - [x] Implementar correções (token + board ID atualizados)
 - [x] Testar dashboard financeiro (FUNCIONANDO! Valores corretos em R$ 0,00)
+
+
+## Melhorias Dashboard Financeiro
+
+- [x] Adicionar colunas no Supabase: valor_aprovado, previsao_entrega
+- [x] Atualizar extract-custom-fields para extrair campos financeiros
+- [x] Sincronizar dados financeiros (44 cards, 29 com dados financeiros)
+- [x] Adicionar filtro de período (hoje, semana, mês, ano) no frontend
+- [x] Revisar e corrigir fórmulas de cálculo (parseFloat para valores)
+- [x] Testar com dados reais (FUNCIONANDO! Valores corretos)

@@ -22,6 +22,8 @@ export interface TrelloCard {
   responsavel_tecnico: string | null;
   placa: string | null;
   modelo: string | null;
+  valor_aprovado: number | null;
+  previsao_entrega: string | null;
   created_at: string;
   updated_at: string;
   synced_at: string;
