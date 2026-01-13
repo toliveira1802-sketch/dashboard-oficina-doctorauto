@@ -803,3 +803,11 @@
 - [x] Identificar quais listas são consideradas "concluídos/entregues" (Prontos e Entregue)
 - [x] Modificar filtro para excluir veículos dessas listas do contador
 - [x] Testar contador com dados reais (14 → 1 veículo atrasado)
+
+
+## Ajuste Visual - Página Financeiro
+
+- [x] Analisar cores e layout atual da página Financeiro
+- [x] Remover cores "de cassino" (verde/vermelho vibrantes)
+- [x] Aplicar padrão visual do Operacional (cores neutras e profissionais)
+- [x] Testar página ajustada
