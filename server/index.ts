@@ -14,6 +14,30 @@ async function startServer() {
 
   // Parse JSON body
   app.use(express.json());
+  
+  // Webhook Kommo inline (fallback se import falhar)
+  app.post('/api/webhook/kommo', async (req, res) => {
+    try {
+      console.log('[Kommo Webhook] Payload recebido:', JSON.stringify(req.body, null, 2));
+      res.json({
+        success: true,
+        message: 'Webhook Kommo recebido! Integração funcionando.',
+        timestamp: new Date().toISOString(),
+        payload_received: req.body
+      });
+    } catch (error: any) {
+      console.error('[Kommo Webhook] Erro:', error);
+      res.status(500).json({ success: false, error: error.message });
+    }
+  });
+  
+  app.get('/api/webhook/kommo/test', (req, res) => {
+    res.json({
+      success: true,
+      message: 'Endpoint webhook Kommo está funcionando!',
+      timestamp: new Date().toISOString()
+    });
+  });
 
   // Import and use Trello routes
   const trelloRoutes = await import('./routes/trello.js');
@@ -28,11 +52,21 @@ async function startServer() {
   app.use('/api/supabase', supabaseRoutes.default);
   
   // Import and use Webhook routes (Kommo e Trello)
-  const kommoWebhookRoutes = await import('./routes/webhook/kommo.js');
-  app.use('/api/webhook/kommo', kommoWebhookRoutes.default);
+  try {
+    const kommoWebhookRoutes = await import('./routes/webhook/kommo.js');
+    app.use('/api/webhook/kommo', kommoWebhookRoutes.default);
+    console.log('[Server] Webhook Kommo registered at /api/webhook/kommo');
+  } catch (error) {
+    console.error('[Server] Failed to load Kommo webhook routes:', error);
+  }
   
-  const trelloWebhookRoutes = await import('./routes/webhook/trello.js');
-  app.use('/api/webhook/trello', trelloWebhookRoutes.default);
+  try {
+    const trelloWebhookRoutes = await import('./routes/webhook/trello.js');
+    app.use('/api/webhook/trello', trelloWebhookRoutes.default);
+    console.log('[Server] Webhook Trello registered at /api/webhook/trello');
+  } catch (error) {
+    console.error('[Server] Failed to load Trello webhook routes:', error);
+  }
 
   // Serve static files from dist/public in production
   const staticPath =

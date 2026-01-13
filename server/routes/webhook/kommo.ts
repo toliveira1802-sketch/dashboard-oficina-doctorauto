@@ -3,10 +3,17 @@ import { createClient } from '@supabase/supabase-js';
 
 const router = Router();
 
-const supabase = createClient(
-  process.env.SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
+// Validar variáveis de ambiente
+const SUPABASE_URL = process.env.SUPABASE_URL || '';
+const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
+
+if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
+  console.warn('[Kommo Webhook] AVISO: Variáveis Supabase não configuradas. Webhook funcionará em modo de teste.');
+}
+
+const supabase = SUPABASE_URL && SUPABASE_SERVICE_ROLE_KEY 
+  ? createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY)
+  : null;
 
 /**
  * Webhook do Kommo - Recebe notificações quando lead muda de status
@@ -33,6 +40,15 @@ router.post('/', async (req, res) => {
     }
     
     // Processar webhook via função SQL do Supabase
+    if (!supabase) {
+      console.log('[Kommo Webhook] Modo teste: Supabase não configurado');
+      return res.status(200).json({
+        success: true,
+        message: 'Webhook recebido em modo teste (Supabase não configurado)',
+        payload
+      });
+    }
+    
     const { data: result, error: processError } = await supabase.rpc(
       'process_kommo_webhook',
       { p_payload: payload }
@@ -49,6 +65,8 @@ router.post('/', async (req, res) => {
     // Se o lead foi inserido/atualizado, disparar criação do card no Trello
     if (processResult?.success && processResult?.lead_id) {
       // Buscar dados do lead
+      if (!supabase) return;
+      
       const { data: leadData, error: leadError } = await supabase
         .from('kommo_leads')
         .select('*')
@@ -72,14 +90,16 @@ router.post('/', async (req, res) => {
           console.error('[Kommo Webhook] Erro ao criar card no Trello:', trelloError);
           
           // Atualizar status de erro no lead
-          await supabase
-            .from('kommo_leads')
-            .update({
-              sync_status: 'error',
-              sync_error: trelloError.message,
-              last_sync_at: new Date().toISOString()
-            })
-            .eq('kommo_lead_id', lead.kommo_lead_id);
+          if (supabase) {
+            await supabase
+              .from('kommo_leads')
+              .update({
+                sync_status: 'error',
+                sync_error: trelloError.message,
+                last_sync_at: new Date().toISOString()
+              })
+              .eq('kommo_lead_id', lead.kommo_lead_id);
+          }
         }
       }
     }
@@ -157,6 +177,8 @@ _Card criado automaticamente via integração Kommo → Supabase → Trello_
   console.log('[Kommo Webhook] Card criado no Trello:', trelloCard);
   
   // Atualizar lead com informações do card criado
+  if (!supabase) return trelloCard;
+  
   await supabase
     .from('kommo_leads')
     .update({
@@ -170,9 +192,10 @@ _Card criado automaticamente via integração Kommo → Supabase → Trello_
   
   // Inserir card na tabela trello_cards
   const now = new Date().toISOString();
-  await supabase
-    .from('trello_cards')
-    .upsert({
+  if (supabase) {
+    await supabase
+      .from('trello_cards')
+      .upsert({
       id: trelloCard.id,
       name: trelloCard.name,
       desc: trelloCard.desc,
@@ -186,6 +209,7 @@ _Card criado automaticamente via integração Kommo → Supabase → Trello_
     }, {
       onConflict: 'id'
     });
+  }
   
   console.log('[Kommo Webhook] Lead atualizado com card do Trello:', {
     lead_id: lead.kommo_lead_id,

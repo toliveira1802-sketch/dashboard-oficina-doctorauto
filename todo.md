@@ -541,3 +541,22 @@
 - [ ] Testar webhook Kommo com lead de teste
 - [ ] Testar webhook Trello com atualização de card
 - [x] Documentar configuração dos webhooks (URLs, secrets, payloads)
+
+
+## Configuração Webhook Kommo - Pipeline Doctor Prime
+
+- [ ] Obter URL pública do dashboard
+- [ ] Criar script/instruções para configurar webhook no Kommo
+- [ ] Testar endpoint /api/webhook/kommo com payload de exemplo
+- [ ] Validar criação automática de card no Trello
+- [ ] Documentar credenciais e IDs necessários do Kommo
+
+
+## Webhooks Minimalistas Funcionando
+
+- [x] Criar webhook minimalista do Trello inline no servidor principal
+- [x] Criar webhook minimalista do Kommo inline no servidor principal
+- [x] Testar webhook Trello com payload de exemplo (updateCard)
+- [x] Testar webhook Kommo com payload de lead do Doctor Prime
+- [x] Validar endpoints GET /test para ambos webhooks
+- [x] Validar endpoint HEAD para webhook Trello
