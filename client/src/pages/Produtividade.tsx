@@ -40,6 +40,7 @@ export default function Produtividade() {
   const [elevadores, setElevadores] = useState<ElevadorStats[]>([]);
   const [filtroMecanico, setFiltroMecanico] = useState<string>('todos');
   const [filtroCategoria, setFiltroCategoria] = useState<string>('todos');
+  const [filtroSemana, setFiltroSemana] = useState<string>('total'); // 'semana1', 'semana2', 'semana3', 'semana4', 'total'
   const [ultimaAtualizacao, setUltimaAtualizacao] = useState<string>('');
 
   const fetchData = async () => {
@@ -78,6 +79,23 @@ export default function Produtividade() {
     }
   };
 
+  // Calcular range de datas por semana do mês
+  const getWeekRange = (weekNumber: number): { start: Date; end: Date } => {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = now.getMonth();
+    const firstDay = new Date(year, month, 1);
+    
+    // Calcular início e fim da semana
+    const startDay = 1 + (weekNumber - 1) * 7;
+    const endDay = Math.min(startDay + 6, new Date(year, month + 1, 0).getDate());
+    
+    const start = new Date(year, month, startDay);
+    const end = new Date(year, month, endDay, 23, 59, 59);
+    
+    return { start, end };
+  };
+
   const processarDados = (cards: TrelloCard[], customFields: any[], listMap: Record<string, string>) => {
     // Encontrar campos
     const mecanicoField = customFields.find(f => f.name.includes('Mecânico Responsável'));
@@ -95,8 +113,23 @@ export default function Produtividade() {
     // Stats por elevador
     const elevadorStats: Record<string, ElevadorStats> = {};
 
+    // Filtrar cards por semana se necessário
+    let cardsFiltrados = cards;
+    if (filtroSemana !== 'total') {
+      const weekNumber = parseInt(filtroSemana.replace('semana', ''));
+      const { start, end } = getWeekRange(weekNumber);
+      
+      cardsFiltrados = cards.filter(card => {
+        const dataEntradaItem = card.customFieldItems?.find(item => item.idCustomField === dataEntradaField?.id);
+        if (!dataEntradaItem || !dataEntradaItem.value?.date) return false;
+        
+        const dataEntrada = new Date(dataEntradaItem.value.date);
+        return dataEntrada >= start && dataEntrada <= end;
+      });
+    }
+
     // Processar cada card
-    cards.forEach(card => {
+    cardsFiltrados.forEach(card => {
       const listName = listMap[card.idList] || '';
       
       // Ignorar agendados
@@ -209,7 +242,7 @@ export default function Produtividade() {
     fetchData();
     const interval = setInterval(fetchData, 30 * 60 * 1000); // 30 minutos
     return () => clearInterval(interval);
-  }, [filtroCategoria]);
+  }, [filtroCategoria, filtroSemana]);
 
   const mecanicosFiltrados = mecanicos.filter(m => 
     filtroMecanico === 'todos' || m.nome === filtroMecanico
@@ -239,31 +272,73 @@ export default function Produtividade() {
       </div>
 
       {/* Filtros */}
-      <div className="mb-6 flex gap-4">
-        <Select value={filtroMecanico} onValueChange={setFiltroMecanico}>
-          <SelectTrigger className="w-[200px] bg-white">
-            <SelectValue placeholder="Todos Mecânicos" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="todos">Todos Mecânicos</SelectItem>
-            {mecanicos.map(m => (
-              <SelectItem key={m.nome} value={m.nome}>{m.nome}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+      <div className="mb-6 space-y-4">
+        {/* Filtros de Mecânico e Categoria */}
+        <div className="flex gap-4">
+          <Select value={filtroMecanico} onValueChange={setFiltroMecanico}>
+            <SelectTrigger className="w-[200px] bg-white">
+              <SelectValue placeholder="Todos Mecânicos" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="todos">Todos Mecânicos</SelectItem>
+              {mecanicos.map(m => (
+                <SelectItem key={m.nome} value={m.nome}>{m.nome}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
 
-        <Select value={filtroCategoria} onValueChange={setFiltroCategoria}>
-          <SelectTrigger className="w-[200px] bg-white">
-            <SelectValue placeholder="Todas Categorias" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="todos">Todas Categorias</SelectItem>
-            <SelectItem value="rapido">Rápido</SelectItem>
-            <SelectItem value="medio">Médio</SelectItem>
-            <SelectItem value="demorado">Demorado</SelectItem>
-            <SelectItem value="complexo">Complexo</SelectItem>
-          </SelectContent>
-        </Select>
+          <Select value={filtroCategoria} onValueChange={setFiltroCategoria}>
+            <SelectTrigger className="w-[200px] bg-white">
+              <SelectValue placeholder="Todas Categorias" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="todos">Todas Categorias</SelectItem>
+              <SelectItem value="rapido">Rápido</SelectItem>
+              <SelectItem value="medio">Médio</SelectItem>
+              <SelectItem value="demorado">Demorado</SelectItem>
+              <SelectItem value="complexo">Complexo</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        {/* Filtros por Semana */}
+        <div className="flex gap-2">
+          <Button 
+            variant={filtroSemana === 'semana1' ? 'default' : 'outline'}
+            onClick={() => setFiltroSemana('semana1')}
+            className="bg-white"
+          >
+            Semana 1
+          </Button>
+          <Button 
+            variant={filtroSemana === 'semana2' ? 'default' : 'outline'}
+            onClick={() => setFiltroSemana('semana2')}
+            className="bg-white"
+          >
+            Semana 2
+          </Button>
+          <Button 
+            variant={filtroSemana === 'semana3' ? 'default' : 'outline'}
+            onClick={() => setFiltroSemana('semana3')}
+            className="bg-white"
+          >
+            Semana 3
+          </Button>
+          <Button 
+            variant={filtroSemana === 'semana4' ? 'default' : 'outline'}
+            onClick={() => setFiltroSemana('semana4')}
+            className="bg-white"
+          >
+            Semana 4
+          </Button>
+          <Button 
+            variant={filtroSemana === 'total' ? 'default' : 'outline'}
+            onClick={() => setFiltroSemana('total')}
+            className="bg-white font-bold"
+          >
+            Total Mês
+          </Button>
+        </div>
       </div>
 
       {/* Ranking de Mecânicos */}

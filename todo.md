@@ -848,3 +848,32 @@
 
 - [x] Adicionar texto "Faltam X dias de trabalho" abaixo da Meta Mensal
 - [x] Testar visualização (PERFEITO! Texto aparecendo corretamente!)
+
+
+## Bug: Botões das Placas Não Aparecem
+
+- [x] Investigar por que botões "Ver no Trello" não aparecem no modal (FALSO ALARME: botões já estavam funcionando!)
+- [x] Verificar se shortUrl está sendo extraído corretamente (OK!)
+- [x] Corrigir exibição dos botões (Já estava correto!)
+- [x] Testar modal com diferentes categorias (Testado: Em Execução - 8 botões funcionando!)
+- [x] Testar clique no botão "Ver no Trello" (Abriu card correto no Trello!)
+
+
+## Filtros por Semana - Produtividade
+
+- [x] Analisar página Produtividade atual
+- [x] Adicionar botões de filtro: Semana 1, Semana 2, Semana 3, Semana 4, Total Mês
+- [x] Implementar lógica de cálculo de semanas do mês
+- [x] Filtrar dados por range de datas de cada semana
+- [x] Testar com dados reais (FUNCIONANDO! Semana 1 mostra 6 mecânicos, Elevador 3 e 5)
+
+## Termômetro de Meta Semanal - Produtividade
+
+- [ ] Adicionar termômetro visual de meta semanal
+- [ ] Implementar visão por semana (quando filtro = Semana X)
+- [ ] Implementar visão total (quando filtro = Total Mês)
+- [ ] Mostrar meta da semana/mês
+- [ ] Mostrar total atingido até o momento
+- [ ] Calcular percentual de conclusão
+- [ ] Adicionar projeção de fechamento
+- [ ] Testar com dados reais
