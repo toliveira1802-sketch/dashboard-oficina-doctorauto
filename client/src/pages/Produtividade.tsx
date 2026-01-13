@@ -593,7 +593,7 @@ export default function Produtividade() {
                   const modeloField = card.customFieldItems?.find(item => item.idCustomField === customFieldsMap['Modelo']?.id);
                   const modelo = modeloField?.value?.text || card.name;
                   
-                  const valorField = card.customFieldItems?.find(item => item.idCustomField === customFieldsMap['Valor']?.id);
+                  const valorField = card.customFieldItems?.find(item => item.idCustomField === customFieldsMap['Valor Aprovado']?.id);
                   const valor = valorField?.value?.number || 0;
                   
                   const previsaoField = card.customFieldItems?.find(item => item.idCustomField === customFieldsMap['Previsão de Entrega']?.id);

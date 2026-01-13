@@ -958,3 +958,10 @@
 - [x] Adicionar lista de carros no pátio com informações chave
 - [x] Destacar linha com emoji 💰 quando carro tem previsão de saída no dia
 - [x] Testar funcionalidade
+
+
+## Corrigir Valores na Lista de Carros - Produtividade
+
+- [x] Investigar por que valores aparecem como R$ 0,00 (campo era "Valor Aprovado", não "Valor")
+- [x] Corrigir busca do campo Valor no customFieldsMap
+- [x] Testar com dados reais (valores agora aparecem corretamente)
