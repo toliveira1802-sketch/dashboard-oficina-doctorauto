@@ -825,3 +825,13 @@
 - [x] Corrigir rota POST /api/metas para salvar diasUteis
 - [x] Corrigir rota GET /api/metas para enviar mes/ano
 - [x] Testar barra de progresso funcionando completamente
+
+
+## Melhorias Barra de Progresso - Meta Mensal
+
+- [x] Adicionar botão para minimizar/expandir a barra de progresso
+- [x] Trocar "Falta para atingir" por "Média por dia para atingir" (meta restante ÷ dias úteis restantes)
+- [x] Adicionar valor "fantasma" na barra (aprovado mas não entregue) como overlay transparente
+- [x] Revisar cálculo da projeção de fechamento (agora usa dias restantes corretos)
+- [x] Conferir todas as contas dos cards financeiros
+- [x] Testar todos os cálculos com dados reais (todos corretos!)
