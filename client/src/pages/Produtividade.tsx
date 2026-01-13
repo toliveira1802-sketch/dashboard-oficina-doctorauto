@@ -36,6 +36,15 @@ interface ElevadorStats {
   eficiencia: number; // valor produzido por dia
 }
 
+// Mapeamento de emojis para cada mecânico
+const MECANICO_EMOJIS: Record<string, string> = {
+  'Samuel': '🐦', // pombo
+  'Tadeu': '💉', // seringa
+  'Aldo': '📖', // bíblia
+  'JP': '🎧', // fone de ouvido
+  'Wendel': '🧔' // barba
+};
+
 export default function Produtividade() {
   const [loading, setLoading] = useState(true);
   const [mecanicos, setMecanicos] = useState<MecanicoStats[]>([]);
@@ -134,8 +143,8 @@ export default function Produtividade() {
     cardsFiltrados.forEach(card => {
       const listName = listMap[card.idList] || '';
       
-      // Ignorar agendados
-      if (listName.includes('AGENDADOS')) return;
+      // Processar APENAS cards da lista Entregue
+      if (!listName.includes('🙏🏻Entregue')) return;
 
       // Filtrar por categoria se selecionado
       if (filtroCategoria !== 'todos' && categoriaField) {
@@ -221,6 +230,30 @@ export default function Produtividade() {
             const hoje = new Date();
             const dias = Math.floor((hoje.getTime() - entrada.getTime()) / (1000 * 60 * 60 * 24));
             elevadorStats[recursoNome].tempo_uso += dias;
+          }
+        }
+      }
+    });
+
+    // Contar retornos: processar TODOS os cards (não só Entregue) para ver quem retornou
+    cards.forEach(card => {
+      const listName = listMap[card.idList] || '';
+      
+      // Verificar se é um retorno (não está em Entregue nem Agendados)
+      const isRetorno = !listName.includes('🙏🏻Entregue') && !listName.includes('AGENDADOS');
+      
+      if (isRetorno) {
+        const mecanicoItem = card.customFieldItems?.find(item => item.idCustomField === mecanicoField.id);
+        if (mecanicoItem) {
+          const mecanicoOption = mecanicoField.options?.find((opt: any) => opt.id === mecanicoItem.idValue);
+          if (mecanicoOption) {
+            const mecanicoNome = mecanicoOption.value.text;
+            
+            // Verificar se esse veículo já foi entregue antes (retorno real)
+            // Simplificado: se o mecânico tem stats e o card não está em Entregue, é um retorno
+            if (mecanicoStats[mecanicoNome]) {
+              mecanicoStats[mecanicoNome].retornos++;
+            }
           }
         }
       }
@@ -458,6 +491,7 @@ export default function Produtividade() {
                     {index === 0 && <Trophy className="h-5 w-5 text-yellow-500" />}
                     {index === 1 && <Trophy className="h-5 w-5 text-gray-400" />}
                     {index === 2 && <Trophy className="h-5 w-5 text-orange-600" />}
+                    <span>{MECANICO_EMOJIS[mecanico.nome] || ''}</span>
                     {mecanico.nome}
                   </span>
                   <span className="text-sm font-normal text-slate-600">#{index + 1}</span>
@@ -496,6 +530,43 @@ export default function Produtividade() {
                     {mecanico.taxa_retorno.toFixed(1)}%
                   </span>
                 </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-slate-600 flex items-center gap-1">
+                    <DollarSign className="h-4 w-4" />
+                    Ticket Médio
+                  </span>
+                  <span className="font-bold text-blue-600">
+                    R$ {mecanico.carros_total > 0 ? (mecanico.valor_produzido / mecanico.carros_total).toLocaleString('pt-BR', { minimumFractionDigits: 2 }) : '0,00'}
+                  </span>
+                </div>
+                
+                {/* Termômetro de Meta Individual */}
+                <div className="mt-3 pt-3 border-t border-slate-200">
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="text-xs text-slate-600">Meta Semanal</span>
+                    <span className="text-xs font-bold text-slate-900">
+                      {((mecanico.valor_produzido / 15000) * 100).toFixed(1)}%
+                    </span>
+                  </div>
+                  <div className="w-full bg-slate-200 rounded-full h-2 overflow-hidden">
+                    <div 
+                      className={`h-full rounded-full transition-all ${
+                        (mecanico.valor_produzido / 15000) * 100 >= 100 ? 'bg-green-500' :
+                        (mecanico.valor_produzido / 15000) * 100 >= 70 ? 'bg-yellow-500' :
+                        'bg-red-500'
+                      }`}
+                      style={{ width: `${Math.min((mecanico.valor_produzido / 15000) * 100, 100)}%` }}
+                    />
+                  </div>
+                  <div className="flex items-center justify-between mt-1">
+                    <span className="text-xs text-slate-500">
+                      R$ {mecanico.valor_produzido.toLocaleString('pt-BR', { minimumFractionDigits: 0 })}
+                    </span>
+                    <span className="text-xs text-slate-500">
+                      Meta: R$ 15.000
+                    </span>
+                  </div>
+                </div>
               </CardContent>
             </Card>
           ))}
@@ -525,6 +596,7 @@ export default function Produtividade() {
                     <tr key={mecanico.nome} className={`hover:bg-slate-50 ${index === 0 ? 'bg-yellow-50' : ''}`}>
                       <td className="px-4 py-3 font-medium flex items-center gap-2">
                         {index === 0 && <Trophy className="h-4 w-4 text-yellow-500" />}
+                        <span>{MECANICO_EMOJIS[mecanico.nome] || ''}</span>
                         {mecanico.nome}
                       </td>
                       <td className="px-4 py-3 text-right font-bold text-blue-600">

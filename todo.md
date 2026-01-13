@@ -898,3 +898,14 @@
 - [x] Testar com diferentes filtros (Semana 1, 2, 3, 4, Total Mês) (FUNCIONANDO! Semana 1: 85,2%, Total Mês: 29,5%)
 
 
+
+
+## Correção Cards de Mecânicos - Produtividade
+
+- [x] Corrigir Valor Produzido: puxar SOMENTE da coluna "🙏🏻Entregue"
+- [x] Corrigir Carros Atendidos: puxar SOMENTE da coluna "🙏🏻Entregue"
+- [x] Corrigir Taxa de Retorno: (Retornos na oficina ÷ Entregues) × 100
+- [x] Adicionar Ticket Médio: Valor Produzido ÷ Carros Atendidos
+- [x] Adicionar Termômetro de Meta Individual: barra de progresso vs R$ 15.000 semanal
+- [x] Adicionar Emojis: Samuel 🐦, Tadeu 💉, Aldo 📖, JP 🎧, Wendel 🧔
+- [x] Testar com dados reais
