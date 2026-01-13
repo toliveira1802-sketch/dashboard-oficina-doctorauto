@@ -471,4 +471,4 @@
 - [x] Corrigir lógica de "Veículos Atrasados": usar custom field de data de entrega
 - [x] Veículo atrasado = data de entrega preenchida E ultrapassada (passou)
 - [x] Testar filtro dinâmico e contagem correta de atrasados
-- [ ] Implementar funcionalidade de filtrar dados por consultor selecionado
+- [x] Implementar funcionalidade de filtrar dados por consultor selecionado

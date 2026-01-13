@@ -138,7 +138,7 @@ export default function Home() {
     // Atualizar a cada 30 minutos
     const interval = setInterval(fetchTrelloData, 1800000);
     return () => clearInterval(interval);
-  }, []);
+  }, [responsavelFilter]);
 
   function extractRecursoFromDesc(desc: string): string | null {
     const match = desc.match(/Recurso[:\s]+([^\n]+)/i);
@@ -230,6 +230,33 @@ export default function Home() {
 
       cards.forEach(card => {
         const listName = listMap[card.idList];
+        
+        // Filtrar por consultor se selecionado
+        if (responsavelFilter !== 'todos') {
+          const responsavelField = fieldsMap['Responsável Técnico'];
+          if (responsavelField && card.customFieldItems) {
+            const responsavelItem: any = card.customFieldItems.find((item: any) => item.idCustomField === responsavelField.id);
+            if (responsavelItem) {
+              // Buscar o texto do valor selecionado (pode estar em idValue ou value.text)
+              let responsavelText = '';
+              if (responsavelItem.idValue) {
+                const selectedOption = responsavelField.options?.find((opt: any) => opt.id === responsavelItem.idValue);
+                responsavelText = selectedOption?.value?.text || '';
+              } else if (responsavelItem.value?.text) {
+                responsavelText = responsavelItem.value.text;
+              }
+              
+              // Se não for o consultor selecionado, pular este card
+              if (responsavelText !== responsavelFilter) return;
+            } else {
+              // Se não tem responsável definido, pular
+              return;
+            }
+          } else {
+            // Se não tem custom field, pular
+            return;
+          }
+        }
         
         // Verificar labels especiais
         const hasRetorno = card.labels.some(label => label.name.toUpperCase() === 'RETORNO');
