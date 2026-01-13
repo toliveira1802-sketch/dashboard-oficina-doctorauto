@@ -775,3 +775,13 @@
 - [x] Adicionar onClick nos cards (Diagnóstico, Orçamentos, Aguard. Aprovação, etc)
 - [x] Abrir modal mostrando placas dos veículos ao clicar
 - [x] Testar todos os cards
+
+
+## Bug: Modal não mostra placas dos veículos
+
+- [x] Investigar código do modal (Dialog component)
+- [x] Verificar lógica de extração de placas dos cards
+- [x] Corrigir exibição de placas no modal (problema: nomes das listas tinham emojis)
+- [x] Corrigir mapeamento de listas com emojis corretos do Trello
+- [x] Corrigir extração de placa para usar custom field "Placa"
+- [x] Testar com diferentes categorias (Diagnóstico, Em Execução, etc)

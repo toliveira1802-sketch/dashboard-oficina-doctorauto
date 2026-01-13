@@ -989,9 +989,24 @@ export default function Home() {
                 return 'bg-red-100 text-red-800 border-red-300';
               };
               
-              // Extrair placa da descrição
-              const placaMatch = card.description?.match(/Placa:\s*([A-Z0-9-]+)/i);
-              const placa = placaMatch ? placaMatch[1] : 'Sem placa';
+              // Extrair placa do custom field
+              const placaField = customFieldsMap['Placa'];
+              let placa = 'Sem placa';
+              
+              if (placaField && card.customFieldItems) {
+                const placaItem = card.customFieldItems.find((item: any) => item.idCustomField === placaField.id);
+                if (placaItem && placaItem.value && placaItem.value.text) {
+                  placa = placaItem.value.text;
+                }
+              }
+              
+              // Fallback: tentar extrair da descrição se não encontrar no custom field
+              if (placa === 'Sem placa' && card.description) {
+                const placaMatch = card.description.match(/Placa:\s*([A-Z0-9-]+)/i);
+                if (placaMatch) {
+                  placa = placaMatch[1];
+                }
+              }
               
               return (
                 <Card key={card.id} className="p-4 hover:shadow-md transition-shadow">
@@ -1035,13 +1050,13 @@ export default function Home() {
 
   function getFilteredCards() {
     const listMap: { [key: string]: string } = {
-      'diagnostico': 'Diagnóstico',
-      'orcamentos': 'Orçamento',
-      'aguardando_aprovacao': 'Aguardando Aprovação',
-      'aguardando_pecas': 'Aguardando Peças',
-      'pronto_pra_iniciar': 'Pronto para Iniciar',
-      'em_execucao': 'Em Execução',
-      'prontos': '🟡 Pronto / Aguardando Retirada'
+      'diagnostico': '🧠Diagnóstico',
+      'orcamentos': '📝Orçamento',
+      'aguardando_aprovacao': '🤔Aguardando Aprovação',
+      'aguardando_pecas': '😤Aguardando Peças',
+      'pronto_pra_iniciar': '🫵Pronto para Iniciar',
+      'em_execucao': '🛠️🔩Em Execução',
+      'prontos': '💰Pronto / Aguardando Retirada'
     };
 
     let filtered: TrelloCard[] = [];

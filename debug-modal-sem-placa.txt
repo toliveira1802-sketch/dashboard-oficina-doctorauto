@@ -1,0 +1,5 @@
+Modal ainda mostrando "Nenhum veículo nesta categoria" mesmo com 8 carros em execução.
+
+Possível causa: getFilteredCards() não está retornando os cards corretamente.
+
+Preciso investigar a função getFilteredCards() e o mapeamento de listas.
