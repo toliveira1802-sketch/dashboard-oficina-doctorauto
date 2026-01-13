@@ -472,3 +472,17 @@
 - [x] Veículo atrasado = data de entrega preenchida E ultrapassada (passou)
 - [x] Testar filtro dinâmico e contagem correta de atrasados
 - [x] Implementar funcionalidade de filtrar dados por consultor selecionado
+
+
+## Integração Supabase - Sincronização Híbrida Bidirecional
+
+- [x] Instalar dependências: @supabase/supabase-js, pg
+- [x] Criar tabelas no Supabase com estrutura JSONB dinâmica para custom fields
+- [x] Implementar sincronização inicial Trello → Supabase (importar todos os cards)
+- [x] Implementar webhook Trello → Supabase (tempo real)
+- [x] Implementar polling backup Trello → Supabase (30 min)
+- [x] Implementar trigger Supabase → Trello (bidirecional)
+- [x] Criar API REST para buscar dados do Supabase
+- [ ] Executar SQL no Supabase manualmente (supabase-schema.sql)
+- [ ] Testar sincronização completa quando sandbox resolver rede
+- [ ] Atualizar frontend para usar API Supabase (opcional - pode manter Trello direto)
