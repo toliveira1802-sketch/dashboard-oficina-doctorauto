@@ -702,3 +702,13 @@
 - [ ] Migrar Dashboard Financeiro para Supabase (hook criado, aguardando integração)
 - [x] Configurar sincronização agendada (a cada 5min)
 - [x] Testar fluxo completo end-to-end
+
+
+## URGENTE: Dashboard Mostrando 0 Após Rollback
+
+- [x] Verificar console do navegador para erros
+- [x] Verificar se API Trello está respondendo
+- [x] Atualizar token Trello no frontend
+- [x] Corrigir nomes das listas (adicionar emojis)
+- [x] Desabilitar filtro de consultor temporariamente
+- [x] Validar que dados aparecem corretamente (FUNCIONANDO! 33 carros na oficina)

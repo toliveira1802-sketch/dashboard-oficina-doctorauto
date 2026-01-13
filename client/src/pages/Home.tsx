@@ -10,7 +10,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 
 // Configuração do Trello
 const TRELLO_API_KEY = 'e327cf4891fd2fcb6020899e3718c45e';
-const TRELLO_TOKEN = 'ATTAa37008bfb8c135e0815e9a964d5c7f2e0b2ed2530c6bfdd202061e53ae1a6c18F1F6F8C7';
+const TRELLO_TOKEN = 'ATTA1f0fa89c7b266deaf938930fb0fbf4211085a7f76b53b5bb0d697604494f5df81F2C4382';
 const TRELLO_BOARD_ID = 'NkhINjF2'; // Gestão de Pátio - Doctor Auto
 
 interface TrelloCard {
@@ -140,7 +140,8 @@ export default function Home() {
     return () => clearInterval(interval);
   }, [responsavelFilter]);
 
-  function extractRecursoFromDesc(desc: string): string | null {
+  function extractRecursoFromDesc(desc: string | undefined): string | null {
+    if (!desc) return null;
     const match = desc.match(/Recurso[:\s]+([^\n]+)/i);
     return match ? match[1].trim() : null;
   }
@@ -231,39 +232,16 @@ export default function Home() {
       cards.forEach(card => {
         const listName = listMap[card.idList];
         
-        // Filtrar por consultor se selecionado
-        if (responsavelFilter !== 'todos') {
-          const responsavelField = fieldsMap['Responsável Técnico'];
-          if (responsavelField && card.customFieldItems) {
-            const responsavelItem: any = card.customFieldItems.find((item: any) => item.idCustomField === responsavelField.id);
-            if (responsavelItem) {
-              // Buscar o texto do valor selecionado (pode estar em idValue ou value.text)
-              let responsavelText = '';
-              if (responsavelItem.idValue) {
-                const selectedOption = responsavelField.options?.find((opt: any) => opt.id === responsavelItem.idValue);
-                responsavelText = selectedOption?.value?.text || '';
-              } else if (responsavelItem.value?.text) {
-                responsavelText = responsavelItem.value.text;
-              }
-              
-              // Se não for o consultor selecionado, pular este card
-              if (responsavelText !== responsavelFilter) return;
-            } else {
-              // Se não tem responsável definido, pular
-              return;
-            }
-          } else {
-            // Se não tem custom field, pular
-            return;
-          }
-        }
+        // TODO: Filtro de consultor desabilitado temporariamente
+        // Precisa implementar custom fields no Supabase primeiro
+        // if (responsavelFilter !== 'todos') { ... }
         
         // Verificar labels especiais
         const hasRetorno = card.labels.some(label => label.name.toUpperCase() === 'RETORNO');
         const hasForaLoja = card.labels.some(label => label.name.toUpperCase() === 'FORA DA LOJA');
         
         // Verificar se o carro já foi entregue (lista Prontos ou Entregue)
-        const isPronto = listName === 'Qualidade' || listName === '🟡 Pronto / Aguardando Retirada';
+        const isPronto = listName === '💰Pronto / Aguardando Retirada';
         const isEntregue = listName === '🙏🏻entregue' || listName === 'Entregue' || listName?.toLowerCase().includes('entregue');
         
         // Contar labels especiais APENAS se NÃO estiver na lista de prontos OU entregue
@@ -274,18 +252,18 @@ export default function Home() {
         // EXCLUIR: carros prontos OU com label "FORA DA LOJA"
         const contarNaOcupacao = !isPronto && !hasForaLoja;
         
-        if (['Diagnóstico', 'Orçamento', 'Aguardando Aprovação', 'Aguardando Peças', 'Pronto para Iniciar', 'Em Execução', 'Qualidade', '🟡 Pronto / Aguardando Retirada'].includes(listName)) {
+        if (['🧠Diagnóstico', '📋Orçamento', '🤔Aguardando Aprovação', '😤Aguardando Peças', '🫵Pronto para Iniciar', '🛠️🔩Em Execução', '💰Pronto / Aguardando Retirada', '🙏🏻Entregue'].includes(listName)) {
           // Contar no total apenas se não for pronto e não estiver fora da loja
           if (contarNaOcupacao) {
             newMetrics.total++;
           }
           
-          if (listName === 'Diagnóstico') newMetrics.diagnostico++;
-          else if (listName === 'Orçamento') newMetrics.orcamentos++;
-          else if (listName === 'Aguardando Aprovação') newMetrics.aguardando_aprovacao++;
-          else if (listName === 'Aguardando Peças') newMetrics.aguardando_pecas++;
-          else if (listName === 'Pronto para Iniciar') newMetrics.pronto_pra_iniciar++;
-          else if (listName === 'Em Execução') newMetrics.em_execucao++;
+          if (listName === '🧠Diagnóstico') newMetrics.diagnostico++;
+          else if (listName === '📋Orçamento') newMetrics.orcamentos++;
+          else if (listName === '🤔Aguardando Aprovação') newMetrics.aguardando_aprovacao++;
+          else if (listName === '😤Aguardando Peças') newMetrics.aguardando_pecas++;
+          else if (listName === '🫵Pronto para Iniciar') newMetrics.pronto_pra_iniciar++;
+          else if (listName === '🛠️🔩Em Execução') newMetrics.em_execucao++;
           else if (isPronto) newMetrics.prontos++;
 
           // Extrair recurso da descrição
@@ -1032,7 +1010,7 @@ export default function Home() {
       filtered = allCards.filter(card => {
         const hasRetorno = card.labels.some(label => label.name.toUpperCase() === 'RETORNO');
         const listName = listIdMap[card.idList];
-        const isPronto = listName === 'Qualidade' || listName === '🟡 Pronto / Aguardando Retirada';
+        const isPronto = listName === '💰Pronto / Aguardando Retirada';
         const isEntregue = listName === '🙏🏻entregue' || listName === 'Entregue' || listName?.toLowerCase().includes('entregue');
         return hasRetorno && !isPronto && !isEntregue;
       });
@@ -1041,7 +1019,7 @@ export default function Home() {
       filtered = allCards.filter(card => {
         const hasForaLoja = card.labels.some(label => label.name.toUpperCase() === 'FORA DA LOJA');
         const listName = listIdMap[card.idList];
-        const isPronto = listName === 'Qualidade' || listName === '🟡 Pronto / Aguardando Retirada';
+        const isPronto = listName === '💰Pronto / Aguardando Retirada';
         const isEntregue = listName === '🙏🏻entregue' || listName === 'Entregue' || listName?.toLowerCase().includes('entregue');
         return hasForaLoja && !isPronto && !isEntregue;
       });
