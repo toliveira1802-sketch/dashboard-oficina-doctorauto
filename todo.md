@@ -445,3 +445,20 @@
 - [ ] Relatórios por mecânico/consultor
 - [ ] Exportação automática de relatórios (PDF/Excel)
 - [ ] Dashboard executivo com KPIs principais
+
+
+## Reorganização Seção Status Pátio
+
+- [x] Remover card "Total na Oficina" (duplicado do header)
+- [x] Renomear "Métricas Principais" para "Status Pátio"
+- [x] Mover filtro de Consultor do header para dentro da seção Status Pátio (ao lado do título)
+- [x] Testar layout reorganizado
+
+## Integração Supabase - Sincronização Híbrida (Tempo Real + Backup)
+
+- [ ] Configurar webhook do Trello para sincronização em tempo real
+- [ ] Implementar endpoint para receber webhooks do Trello
+- [ ] Configurar polling de backup a cada 30 minutos
+- [ ] Criar sincronização inicial completa ao iniciar servidor
+- [ ] Criar tabelas no Supabase com estrutura JSONB para custom fields
+- [ ] Testar sincronização híbrida completa

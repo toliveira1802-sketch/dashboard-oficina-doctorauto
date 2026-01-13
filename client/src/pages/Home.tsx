@@ -417,18 +417,6 @@ export default function Home() {
                 </div>
               </div>
               
-              {/* Filtro de Consultor */}
-              <Select value={responsavelFilter} onValueChange={setResponsavelFilter}>
-                <SelectTrigger className="w-[180px]">
-                  <SelectValue placeholder="Consultor" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="todos">Todos Consultores</SelectItem>
-                  <SelectItem value="João">João</SelectItem>
-                  <SelectItem value="Pedro">Pedro</SelectItem>
-                  <SelectItem value="Outros">Outros</SelectItem>
-                </SelectContent>
-              </Select>
               <div className="text-right">
                 <p className="text-xs text-slate-500">Última atualização</p>
                 <p className="text-slate-700 font-medium text-sm">{lastUpdate.toLocaleTimeString('pt-BR')}</p>
@@ -459,10 +447,24 @@ export default function Home() {
       </header>
 
       <main className="container py-6">
-        {/* Métricas Principais */}
+        {/* Status Pátio */}
         <Card className="p-4 mb-6 bg-white">
           <div className="flex items-center justify-between mb-3">
-            <h3 className="text-lg font-bold text-slate-900">Métricas Principais</h3>
+            <div className="flex items-center gap-4">
+              <h3 className="text-lg font-bold text-slate-900">Status Pátio</h3>
+              {/* Filtro de Consultor */}
+              <Select value={responsavelFilter} onValueChange={setResponsavelFilter}>
+                <SelectTrigger className="w-[180px]">
+                  <SelectValue placeholder="Consultor" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="todos">Todos Consultores</SelectItem>
+                  <SelectItem value="João">João</SelectItem>
+                  <SelectItem value="Pedro">Pedro</SelectItem>
+                  <SelectItem value="Outros">Outros</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
             <Button
               variant="ghost"
               size="sm"
@@ -473,13 +475,7 @@ export default function Home() {
             </Button>
           </div>
           {!widgetsMinimized.metricas && (
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-7 gap-3">
-          <Card className="p-3 bg-white hover:shadow-lg transition-shadow">
-            <p className="text-xs text-slate-600 mb-1">Total na Oficina</p>
-            <p className="text-2xl font-bold text-slate-900">{metrics.total}</p>
-            <p className="text-xs text-slate-500 mt-1">/ 20 vagas</p>
-          </Card>
-          
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
           <Card 
             className="p-3 bg-blue-50 hover:shadow-lg transition-shadow cursor-pointer hover:scale-105 transform duration-200" 
             onClick={() => { setModalCategory('diagnostico'); setModalOpen(true); }}
