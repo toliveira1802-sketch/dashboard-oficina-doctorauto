@@ -235,3 +235,38 @@ BEGIN
     WHERE id = v_card_id;
     
     -- Registrar no histórico
+    INSERT INTO trello_card_history (card_id, action_type, timestamp)
+    VALUES (v_card_id, 'deleteCard', NOW());
+    
+    v_result := jsonb_build_object(
+      'success', true,
+      'card_id', v_card_id,
+      'action', 'deleted'
+    );
+    
+  ELSE
+    v_result := jsonb_build_object(
+      'success', false,
+      'error', 'Action type not supported: ' || v_action_type
+    );
+  END IF;
+  
+  -- Atualizar log como processado
+  UPDATE webhook_logs
+  SET processed = true, processing_result = v_result, processed_at = NOW()
+  WHERE id = (SELECT id FROM webhook_logs ORDER BY created_at DESC LIMIT 1);
+  
+  RETURN v_result;
+  
+EXCEPTION WHEN OTHERS THEN
+  -- Registrar erro no log
+  UPDATE webhook_logs
+  SET processed = true, error = SQLERRM, processed_at = NOW()
+  WHERE id = (SELECT id FROM webhook_logs ORDER BY created_at DESC LIMIT 1);
+  
+  RETURN jsonb_build_object(
+    'success', false,
+    'error', SQLERRM
+  );
+END;
+$$;

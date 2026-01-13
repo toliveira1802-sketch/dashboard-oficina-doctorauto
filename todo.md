@@ -642,3 +642,12 @@
 - [x] Atualizar componentes React (client/src)
 - [x] Atualizar rotas do servidor (server)
 - [ ] Testar dashboard após atualização
+
+
+## Corrigir Erro de Sintaxe SQL - "syntax error at end of input"
+
+- [x] Investigar arquivos SQL (part1, part2, part3)
+- [x] Identificar problema de sintaxe
+- [x] Corrigir arquivos SQL
+- [x] Atualizar site /setup-supabase
+- [ ] Testar execução no Supabase
