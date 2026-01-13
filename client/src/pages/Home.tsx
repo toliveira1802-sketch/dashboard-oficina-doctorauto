@@ -269,8 +269,8 @@ export default function Home() {
         if (hasForaLoja && !isPronto && !isEntregue) newMetrics.foraLoja++;
         
         // Contar apenas cards que estão "na oficina"
-        // EXCLUIR: carros prontos OU com label "FORA DA LOJA"
-        const contarNaOcupacao = !isPronto && !hasForaLoja;
+        // EXCLUIR: carros prontos OU entregues OU com label "FORA DA LOJA"
+        const contarNaOcupacao = !isPronto && !isEntregue && !hasForaLoja;
         
         if (['🧠Diagnóstico', '📋Orçamento', '🤔Aguardando Aprovação', '😤Aguardando Peças', '🫵Pronto para Iniciar', '🛠️🔩Em Execução', '💰Pronto / Aguardando Retirada', '🙏🏻Entregue'].includes(listName)) {
           // Contar no total apenas se não for pronto e não estiver fora da loja

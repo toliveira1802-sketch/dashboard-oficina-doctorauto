@@ -755,3 +755,9 @@
 - [x] Implementar modal no Dashboard Financeiro (clicar em card mostra placas + valores)
 - [x] Placas extraídas da descrição (regex)
 - [x] Testar ambos dashboards (FUNCIONANDO!)
+
+
+## Excluir "Entregue" do Cálculo de Capacidade
+
+- [x] Modificar cálculo de metrics.total para excluir lista "🙏🏻Entregue"
+- [x] Testar capacidade atualizada (SUCESSO! 19/20 ao invés de 35/20)
