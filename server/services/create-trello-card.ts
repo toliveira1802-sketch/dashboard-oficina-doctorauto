@@ -1,9 +1,13 @@
-const TRELLO_API_KEY = process.env.TRELLO_API_KEY || 'e327cf4891fd2fcb6020899e3718c45e';
-const TRELLO_TOKEN = process.env.TRELLO_TOKEN || 'ATTAa37008bfb8c135e0815e9a964d5c7f2e0b2ed2530c6bfdd202061e53ae1a6c18F1F6F8C7';
-const TRELLO_BOARD_ID = process.env.TRELLO_BOARD_ID || 'NkhINjF2';
+const TRELLO_API_KEY = process.env.TRELLO_API_KEY!;
+const TRELLO_TOKEN = process.env.TRELLO_TOKEN!;
+const TRELLO_BOARD_ID = process.env.TRELLO_BOARD_ID!;
+
+if (!TRELLO_API_KEY || !TRELLO_TOKEN || !TRELLO_BOARD_ID) {
+  throw new Error('TRELLO_API_KEY, TRELLO_TOKEN e TRELLO_BOARD_ID devem estar definidos');
+}
 
 // ID da lista "🟢 AGENDAMENTO CONFIRMADO"
-const AGENDAMENTO_CONFIRMADO_LIST_ID = '67820e0d8e9d9c1e7f6e1b8a';
+const AGENDAMENTO_CONFIRMADO_LIST_ID = '69562921014d7fe4602668c2';
 
 export interface CreateCardParams {
   name: string;

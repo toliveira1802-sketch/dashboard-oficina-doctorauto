@@ -690,3 +690,15 @@
 - [x] Criar card na lista "🟢 AGENDAMENTO CONFIRMADO"
 - [x] Salvar referência do card no Supabase (kommo_leads.trello_card_id)
 - [ ] Testar fluxo completo com lead real
+
+
+## Finalizar Integração Completa
+
+- [x] Criar endpoint de teste para simular webhook Kommo
+- [x] Testar criação automática de card (SUCESSO: card 69664388c5209065a51cb469)
+- [x] Atualizar token Trello com permissões de escrita
+- [x] Criar hook useSupabaseCards para dashboards
+- [ ] Migrar Dashboard Operacional para Supabase (hook criado, aguardando integração)
+- [ ] Migrar Dashboard Financeiro para Supabase (hook criado, aguardando integração)
+- [x] Configurar sincronização agendada (a cada 5min)
+- [x] Testar fluxo completo end-to-end

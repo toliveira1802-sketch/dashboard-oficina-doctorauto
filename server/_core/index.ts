@@ -223,11 +223,15 @@ async function startServer() {
     console.log(`Port ${preferredPort} is busy, using port ${port} instead`);
   }
 
-  server.listen(port, () => {
+  server.listen(port, async () => {
     console.log(`Server running on http://localhost:${port}/`);
     
     // Inicia sincronização automática com Trello
     startTrelloSync();
+    
+    // Inicia sincronização agendada Trello → Supabase (a cada 5 minutos)
+    const { startScheduledSync } = await import('../services/scheduled-sync.js');
+    startScheduledSync(5);
   });
 }
 
