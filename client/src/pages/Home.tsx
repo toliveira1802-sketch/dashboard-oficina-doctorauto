@@ -487,12 +487,42 @@ export default function Home() {
             </div>
             <div className="flex items-center gap-4">
               {/* Indicador de Capacidade Compacto - MAIOR */}
-              <div className={`px-6 py-3 rounded-xl border-2 ${alertStatus.bgColor} ${alertStatus.borderColor} ${alertStatus.animate} flex items-center gap-3 shadow-lg`}>
-                <AlertIcon className={`w-7 h-7 ${alertStatus.color}`} />
-                <div>
-                  <p className={`text-base font-bold ${alertStatus.color}`}>{alertStatus.text}</p>
-                  <p className="text-sm text-slate-700 font-medium">Capacidade: {metrics.total}/20 ({Math.round((metrics.total / 20) * 100)}%)</p>
+              <div className={`px-6 py-3 rounded-xl border-2 ${alertStatus.bgColor} ${alertStatus.borderColor} ${alertStatus.animate} shadow-lg`}>
+                <div className="flex items-center gap-3 mb-2">
+                  <AlertIcon className={`w-7 h-7 ${alertStatus.color}`} />
+                  <div>
+                    <p className={`text-base font-bold ${alertStatus.color}`}>{alertStatus.text}</p>
+                    <p className="text-sm text-slate-700 font-medium">Capacidade: {metrics.total}/20 ({Math.round((metrics.total / 20) * 100)}%)</p>
+                  </div>
                 </div>
+                {/* Lista de Placas */}
+                {metrics.total > 0 && (
+                  <div className="mt-2 pt-2 border-t border-slate-200">
+                    <p className="text-xs text-slate-600 font-semibold mb-1">Placas no pátio:</p>
+                    <div className="flex flex-wrap gap-1">
+                      {allCards
+                        .filter(card => {
+                          const listName = listIdMap[card.idList] || '';
+                          const hasForaLojaLabel = card.labels?.some(l => l.name === 'FORA DA LOJA');
+                          return !listName.includes('🙏🏻Entregue') && 
+                                 !listName.includes('AGENDADOS') && 
+                                 !hasForaLojaLabel;
+                        })
+                        .map(card => {
+                          const placaField = card.customFieldItems?.find(item => item.idCustomField === customFieldsMap['Placa']?.id);
+                          const placa = placaField?.value?.text || 'Sem placa';
+                          return placa;
+                        })
+                        .filter(placa => placa !== 'Sem placa')
+                        .map((placa, idx) => (
+                          <span key={idx} className="text-xs bg-slate-700 text-white px-2 py-0.5 rounded font-mono">
+                            {placa}
+                          </span>
+                        ))
+                      }
+                    </div>
+                  </div>
+                )}
               </div>
               
               {/* Indicador RETORNO - MAIOR */}
@@ -560,7 +590,7 @@ export default function Home() {
             </Button>
           </div>
           {!widgetsMinimized.metricas && (
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-4 gap-3">
           <Card 
             className={`p-3 bg-blue-50 hover:shadow-lg transition-shadow cursor-pointer hover:scale-105 transform duration-200 ${
               metrics.diagnostico > 6 ? 'border-2 border-red-500 animate-pulse' : ''

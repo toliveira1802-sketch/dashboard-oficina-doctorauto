@@ -926,3 +926,10 @@
 - [x] Confirmar se há cards com Terceirizados atribuído (campo: "Mecânico Responsável", opção: "TERCEIRIZADO")
 - [x] Ajustar código se necessário para garantir exibição (mapeamento ajustado para "TERCEIRIZADO")
 - [x] Testar visualização de Terceirizados no ranking (pronto para aparecer quando houver dados)
+
+
+## Melhorias Dashboard Operacional
+
+- [x] Adicionar lista de placas no card de Lotação do Pátio
+- [x] Reorganizar Status Pátio: 4 cards em cima e 4 cards em baixo
+- [x] Testar layout e visualização
