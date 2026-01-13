@@ -27,6 +27,7 @@ interface MetaFinanceira {
   ano: number;
   metaMensal: number;
   diasUteis: number;
+  diasTrabalhados: number;
 }
 
 export default function Financeiro() {
@@ -53,6 +54,7 @@ export default function Financeiro() {
   const [senhaValidada, setSenhaValidada] = useState(false);
   const [metaMensal, setMetaMensal] = useState('');
   const [diasUteis, setDiasUteis] = useState('');
+  const [diasTrabalhados, setDiasTrabalhados] = useState('');
   const [barraMinimizada, setBarraMinimizada] = useState(false);
 
   const fetchData = async () => {
@@ -211,6 +213,7 @@ export default function Financeiro() {
       const ano = hoje.getFullYear();
       const metaMensalNum = parseFloat(metaMensal) * 100;
       const diasUteisNum = parseInt(diasUteis);
+      const diasTrabalhadosNum = parseInt(diasTrabalhados) || 0;
       
       const response = await fetch('/api/metas', {
         method: 'POST',
@@ -219,7 +222,8 @@ export default function Financeiro() {
           mes,
           ano,
           metaMensal: metaMensalNum,
-          diasUteis: diasUteisNum
+          diasUteis: diasUteisNum,
+          diasTrabalhados: diasTrabalhadosNum
         })
       });
       
@@ -345,7 +349,18 @@ export default function Financeiro() {
                         value={diasUteis}
                         onChange={(e) => setDiasUteis(e.target.value)}
                         className="bg-white border-slate-300 text-slate-900"
-                        placeholder="Ex: 22"
+                        placeholder="Ex: 24"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="diasTrabalhados" className="text-slate-900">Dias Trabalhados (até hoje)</Label>
+                      <Input
+                        id="diasTrabalhados"
+                        type="number"
+                        value={diasTrabalhados}
+                        onChange={(e) => setDiasTrabalhados(e.target.value)}
+                        className="bg-white border-slate-300 text-slate-900"
+                        placeholder="Ex: 10"
                       />
                     </div>
                     <Button onClick={salvarMetas} className="w-full bg-blue-600 hover:bg-blue-700">
@@ -430,13 +445,11 @@ export default function Financeiro() {
                 
                 {/* Informações Detalhadas */}
                 {(() => {
-                  const hoje = new Date();
-                  const diaAtual = hoje.getDate();
-                  const diasDecorridos = diaAtual;
-                  const diasRestantes = Math.max(metas.diasUteis - diasDecorridos, 0);
+                  const diasTrabalhados = metas.diasTrabalhados || 0;
+                  const diasRestantes = Math.max(metas.diasUteis - diasTrabalhados, 0);
                   const metaRestante = Math.max((metas.metaMensal / 100) - metrics.valorFaturado, 0);
                   const mediaDiariaParaAtingir = diasRestantes > 0 ? metaRestante / diasRestantes : 0;
-                  const mediaDiariaAtual = diasDecorridos > 0 ? metrics.valorFaturado / diasDecorridos : 0;
+                  const mediaDiariaAtual = diasTrabalhados > 0 ? metrics.valorFaturado / diasTrabalhados : 0;
                   const projecao = metrics.valorFaturado + (mediaDiariaAtual * diasRestantes);
                   const percentualProjecao = ((projecao / (metas.metaMensal / 100)) * 100);
                   
@@ -467,7 +480,7 @@ export default function Financeiro() {
                           <div className="flex items-center justify-between">
                             <div>
                               <p className="text-sm font-semibold text-indigo-900">Projeção de Fechamento</p>
-                              <p className="text-xs text-indigo-700">Baseado no ritmo atual ({formatCurrency(mediaDiariaAtual)}/dia × {diasRestantes} dias restantes)</p>
+                              <p className="text-xs text-indigo-700">Baseado no ritmo atual: {formatCurrency(mediaDiariaAtual)}/dia ({diasTrabalhados} dias trabalhados) × {diasRestantes} dias restantes</p>
                             </div>
                             <div className="text-right">
                               <p className="text-xl font-bold text-indigo-900">{formatCurrency(projecao)}</p>

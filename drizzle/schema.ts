@@ -220,6 +220,7 @@ export const metasFinanceiras = mysqlTable("metasFinanceiras", {
   metaPorServico: int("metaPorServico"), // Valor médio esperado por serviço em centavos
   metaDiaria: int("metaDiaria"), // Meta de faturamento diário em centavos
   diasUteis: int("diasUteis"), // Número de dias úteis no mês
+  diasTrabalhados: int("diasTrabalhados"), // Número de dias úteis já trabalhados no mês
   senhaProtecao: varchar("senhaProtecao", { length: 255 }), // Hash da senha para edição
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
