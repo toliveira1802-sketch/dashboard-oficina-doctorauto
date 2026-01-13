@@ -25,6 +25,7 @@ interface MecanicoStats {
   valor_produzido: number;
   retornos: number;
   taxa_retorno: number;
+  eficiencia: number; // valor produzido por dia
 }
 
 interface ElevadorStats {
@@ -32,6 +33,7 @@ interface ElevadorStats {
   tempo_uso: number;
   valor_produzido: number;
   carros_atendidos: number;
+  eficiencia: number; // valor produzido por dia
 }
 
 export default function Produtividade() {
@@ -164,7 +166,8 @@ export default function Produtividade() {
           tempo_medio: 0,
           valor_produzido: 0,
           retornos: 0,
-          taxa_retorno: 0
+          taxa_retorno: 0,
+          eficiencia: 0
         };
       }
 
@@ -202,7 +205,8 @@ export default function Produtividade() {
               nome: recursoNome,
               tempo_uso: 0,
               valor_produzido: 0,
-              carros_atendidos: 0
+              carros_atendidos: 0,
+              eficiencia: 0
             };
           }
 
@@ -227,7 +231,15 @@ export default function Produtividade() {
       if (stats.carros_total > 0) {
         stats.tempo_medio = stats.tempo_medio / stats.carros_total;
         stats.taxa_retorno = (stats.retornos / stats.carros_total) * 100;
+        // Calcular eficiência: valor produzido por dia
+        stats.eficiencia = stats.tempo_medio > 0 ? stats.valor_produzido / stats.tempo_medio : 0;
       }
+    });
+
+    // Calcular eficiência dos elevadores
+    Object.values(elevadorStats).forEach(stats => {
+      // Calcular eficiência: valor produzido por dia de uso
+      stats.eficiencia = stats.tempo_uso > 0 ? stats.valor_produzido / stats.tempo_uso : 0;
     });
 
     // Ordenar por valor produzido (ranking)
@@ -397,6 +409,71 @@ export default function Produtividade() {
               </CardContent>
             </Card>
           ))}
+        </div>
+      </div>
+
+      {/* Ranking de Eficiência */}
+      <div className="mb-6">
+        <h2 className="text-xl font-bold text-slate-900 mb-4 flex items-center gap-2">
+          <TrendingUp className="h-6 w-6 text-blue-500" />
+          Ranking de Eficiência (Valor por Dia)
+        </h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Eficiência de Mecânicos */}
+          <div>
+            <h3 className="text-lg font-semibold text-slate-800 mb-3">Mecânicos</h3>
+            <div className="bg-white rounded-lg shadow overflow-hidden">
+              <table className="w-full">
+                <thead className="bg-blue-50">
+                  <tr>
+                    <th className="px-4 py-3 text-left text-sm font-semibold text-slate-700">Mecânico</th>
+                    <th className="px-4 py-3 text-right text-sm font-semibold text-slate-700">R$/Dia</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-200">
+                  {[...mecanicos].sort((a, b) => b.eficiencia - a.eficiencia).map((mecanico, index) => (
+                    <tr key={mecanico.nome} className={`hover:bg-slate-50 ${index === 0 ? 'bg-yellow-50' : ''}`}>
+                      <td className="px-4 py-3 font-medium flex items-center gap-2">
+                        {index === 0 && <Trophy className="h-4 w-4 text-yellow-500" />}
+                        {mecanico.nome}
+                      </td>
+                      <td className="px-4 py-3 text-right font-bold text-blue-600">
+                        R$ {mecanico.eficiencia.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          {/* Eficiência de Elevadores */}
+          <div>
+            <h3 className="text-lg font-semibold text-slate-800 mb-3">Elevadores/Boxes</h3>
+            <div className="bg-white rounded-lg shadow overflow-hidden">
+              <table className="w-full">
+                <thead className="bg-blue-50">
+                  <tr>
+                    <th className="px-4 py-3 text-left text-sm font-semibold text-slate-700">Recurso</th>
+                    <th className="px-4 py-3 text-right text-sm font-semibold text-slate-700">R$/Dia</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-200">
+                  {[...elevadores].sort((a, b) => b.eficiencia - a.eficiencia).map((elevador, index) => (
+                    <tr key={elevador.nome} className={`hover:bg-slate-50 ${index === 0 ? 'bg-yellow-50' : ''}`}>
+                      <td className="px-4 py-3 font-medium flex items-center gap-2">
+                        {index === 0 && <Trophy className="h-4 w-4 text-yellow-500" />}
+                        {elevador.nome}
+                      </td>
+                      <td className="px-4 py-3 text-right font-bold text-blue-600">
+                        R$ {elevador.eficiencia.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
         </div>
       </div>
 

@@ -877,3 +877,12 @@
 - [ ] Calcular percentual de conclusão
 - [ ] Adicionar projeção de fechamento
 - [ ] Testar com dados reais
+
+
+## Ranking de Eficiência - Produtividade
+
+- [x] Adicionar métrica "eficiência" (valor produzido ÷ tempo médio) aos dados de mecânicos
+- [x] Adicionar métrica "eficiência" (valor produzido ÷ tempo de uso) aos dados de elevadores
+- [x] Criar seção "Ranking de Eficiência" mostrando valor por dia
+- [x] Ordenar por eficiência (maior para menor)
+- [x] Testar com dados reais (FUNCIONANDO! Samuel R$ 4.245/dia, Elevador 9 R$ 879/dia)
