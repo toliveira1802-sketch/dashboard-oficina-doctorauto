@@ -1024,3 +1024,12 @@
 - [x] Verificar webhook do Kommo (código estava correto)
 - [x] Corrigir problema na API ou webhook (variáveis reconfiguradas corretamente)
 - [x] Testar fluxo completo Kommo → Trello (Agenda funcionando sem erros)
+
+
+## Notificações Telegram - Agenda
+
+- [x] Configurar credenciais do Telegram (BOT_TOKEN e CHAT_ID) - parcial, precisa correção
+- [x] Criar função de envio de notificações Telegram (server/lib/telegram.ts)
+- [x] Conectar botão 🚨 (B.O Peça) com notificação
+- [x] Conectar botão ✅ (Carro Pronto) com notificação
+- [ ] Testar envio de notificações no grupo (pendente correção de variáveis)

@@ -46,6 +46,10 @@ async function startServer() {
   const metasRoutes = await import('../routes/metas.js');
   app.use('/api/metas', metasRoutes.default);
   
+  // Telegram routes
+  const telegramRoutes = await import('../routes/telegram.js');
+  app.use('/api/telegram', telegramRoutes.default);
+  
   // Supabase validation routes
   const supabaseValidateRoutes = await import('../routes/supabase/validate-tables.js');
   app.use(supabaseValidateRoutes.default);

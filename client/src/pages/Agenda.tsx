@@ -313,20 +313,79 @@ export default function Agenda() {
                             {item.isEncaixe === 1 && (
                               <div className="text-[8px] bg-orange-200 text-orange-800 px-1 rounded mt-0.5">Encaixe</div>
                             )}
-                            <button
-                              onClick={() => {
-                                const newAgenda = { ...localAgenda };
-                                if (newAgenda[mecanico]) {
-                                  newAgenda[mecanico][hora] = null;
-                                }
-                                setLocalAgenda(newAgenda);
-                                toast.success(`🗑️ ${item.placa} removido!`);
-                              }}
-                              className="absolute top-0.5 right-0.5 w-4 h-4 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center text-[10px] shadow-sm"
-                              title="Remover agendamento"
-                            >
-                              ×
-                            </button>
+                            {/* Botões de ação */}
+                            <div className="absolute top-0.5 right-0.5 flex gap-0.5">
+                              <button
+                                onClick={async () => {
+                                  try {
+                                    const response = await fetch('/api/telegram/notify', {
+                                      method: 'POST',
+                                      headers: { 'Content-Type': 'application/json' },
+                                      body: JSON.stringify({
+                                        type: 'bo_peca',
+                                        placa: item.placa,
+                                        modelo: item.modelo,
+                                        mecanico: mecanico,
+                                        horario: hora
+                                      })
+                                    });
+                                    if (response.ok) {
+                                      toast.success('🚨 B.O Peça enviado!');
+                                    } else {
+                                      toast.error('Erro ao enviar notificação');
+                                    }
+                                  } catch (error) {
+                                    toast.error('Erro ao enviar notificação');
+                                  }
+                                }}
+                                className="w-4 h-4 bg-yellow-500 hover:bg-yellow-600 text-white rounded-full flex items-center justify-center text-[8px] shadow-sm"
+                                title="B.O Peça"
+                              >
+                                🚨
+                              </button>
+                              <button
+                                onClick={async () => {
+                                  try {
+                                    const response = await fetch('/api/telegram/notify', {
+                                      method: 'POST',
+                                      headers: { 'Content-Type': 'application/json' },
+                                      body: JSON.stringify({
+                                        type: 'carro_pronto',
+                                        placa: item.placa,
+                                        modelo: item.modelo,
+                                        mecanico: mecanico,
+                                        horario: hora
+                                      })
+                                    });
+                                    if (response.ok) {
+                                      toast.success('✅ Carro Pronto enviado!');
+                                    } else {
+                                      toast.error('Erro ao enviar notificação');
+                                    }
+                                  } catch (error) {
+                                    toast.error('Erro ao enviar notificação');
+                                  }
+                                }}
+                                className="w-4 h-4 bg-green-500 hover:bg-green-600 text-white rounded-full flex items-center justify-center text-[8px] shadow-sm"
+                                title="Carro Pronto"
+                              >
+                                ✅
+                              </button>
+                              <button
+                                onClick={() => {
+                                  const newAgenda = { ...localAgenda };
+                                  if (newAgenda[mecanico]) {
+                                    newAgenda[mecanico][hora] = null;
+                                  }
+                                  setLocalAgenda(newAgenda);
+                                  toast.success(`🗑️ ${item.placa} removido!`);
+                                }}
+                                className="w-4 h-4 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center text-[10px] shadow-sm"
+                                title="Remover agendamento"
+                              >
+                                ×
+                              </button>
+                            </div>
                           </div>
                         ) : editingCell?.mecanico === mecanico && editingCell?.horario === hora ? (
                           <div className="relative w-full h-full bg-white">
