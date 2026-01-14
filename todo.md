@@ -1016,3 +1016,11 @@
 - [x] Adicionar botão rápido para Histórico (separado das abas)
 - [x] Melhorar página de Histórico com filtros (mecânico, período, status)
 - [ ] Testar fluxo completo de feedback e histórico
+
+
+## Corrigir Integração Kommo → Trello
+
+- [x] Investigar logs do servidor para identificar erro (variáveis de ambiente invertidas)
+- [x] Verificar webhook do Kommo (código estava correto)
+- [x] Corrigir problema na API ou webhook (variáveis reconfiguradas corretamente)
+- [x] Testar fluxo completo Kommo → Trello (Agenda funcionando sem erros)
