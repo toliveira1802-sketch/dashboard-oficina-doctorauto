@@ -1087,3 +1087,10 @@
 - [x] Mover tabela "Próximos Serviços" para depois da agenda principal
 - [x] Agenda principal fica em cima (mais importante)
 - [x] Próximos Serviços fica embaixo
+
+## Corrigir Dropdown de Seleção de Placas na Agenda
+
+- [x] Investigar código do dropdown na agenda
+- [x] Identificar por que não está selecionando a placa ao clicar (onBlur disparava antes do onClick)
+- [x] Corrigir funcionalidade de seleção (mudado para onMouseDown com preventDefault)
+- [x] Testar seleção de placa no dropdown

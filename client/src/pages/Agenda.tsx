@@ -417,7 +417,8 @@ export default function Agenda() {
                                 {filteredPlacas.map((placa: any) => (
                                   <div
                                     key={placa.id}
-                                    onClick={() => {
+                                    onMouseDown={(e) => {
+                                      e.preventDefault(); // Previne onBlur do input
                                       handleSelectPlaca(mecanico, hora, placa.placa);
                                       setEditingCell(null);
                                       setInputValue('');
