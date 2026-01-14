@@ -1081,3 +1081,9 @@
 - [x] Inicializar sempre os 6 mecânicos (Samuel, Tadeu, Aldo, JP, Wendel, TERCEIRIZADO)
 - [x] Garantir que todos aparecem no ranking mesmo com valores zerados
 - [x] Testar visualização no dashboard de Produtividade
+
+## Inverter Ordem das Tabelas na Agenda
+
+- [x] Mover tabela "Próximos Serviços" para depois da agenda principal
+- [x] Agenda principal fica em cima (mais importante)
+- [x] Próximos Serviços fica embaixo
