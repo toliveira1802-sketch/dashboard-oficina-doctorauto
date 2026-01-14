@@ -1094,3 +1094,12 @@
 - [x] Identificar por que não está selecionando a placa ao clicar (onBlur disparava antes do onClick)
 - [x] Corrigir funcionalidade de seleção (mudado para onMouseDown com preventDefault)
 - [x] Testar seleção de placa no dropdown
+
+## Navegação por Teclado no Dropdown da Agenda
+
+- [x] Adicionar estado selectedIndex para rastrear índice do item selecionado
+- [x] Implementar handler para setas ↑↓ no input (ArrowUp/ArrowDown)
+- [x] Adicionar lógica para Enter selecionar item destacado
+- [x] Adicionar destaque visual (background azul) no item selecionado
+- [x] Adicionar onMouseEnter para atualizar selectedIndex ao passar mouse
+- [x] Testar navegação completa por teclado

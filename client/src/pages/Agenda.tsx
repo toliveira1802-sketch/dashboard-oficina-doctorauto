@@ -57,6 +57,7 @@ export default function Agenda() {
   const [placasLoading, setPlacasLoading] = useState(false);
   const [filteredPlacas, setFilteredPlacas] = useState<any[]>([]);
   const [showPlacasDropdown, setShowPlacasDropdown] = useState(false);
+  const [selectedIndex, setSelectedIndex] = useState(-1); // Para navegação por teclado
   const [menuAberto, setMenuAberto] = useState<{ mecanico: string; horario: string } | null>(null);
   const [showFeedbackModal, setShowFeedbackModal] = useState(false);
   const [previousDate, setPreviousDate] = useState<string | null>(null);
@@ -86,6 +87,7 @@ export default function Agenda() {
     if (!inputValue.trim()) {
       setFilteredPlacas([]);
       setShowPlacasDropdown(false);
+      setSelectedIndex(-1);
       return;
     }
     const filtered = placas.filter(p => 
@@ -94,6 +96,7 @@ export default function Agenda() {
     );
     setFilteredPlacas(filtered);
     setShowPlacasDropdown(filtered.length > 0);
+    setSelectedIndex(-1); // Reset ao filtrar
   }, [inputValue, placas]);
 
   // Buscar agenda do dia
@@ -395,13 +398,33 @@ export default function Agenda() {
                             value={inputValue}
                             onChange={(e) => setInputValue(e.target.value)}
                             onKeyDown={(e) => {
-                              if (e.key === 'Enter' && inputValue.trim()) {
-                                handleSelectPlaca(mecanico, hora, inputValue.trim());
-                                setEditingCell(null);
-                                setInputValue('');
+                              if (e.key === 'ArrowDown') {
+                                e.preventDefault();
+                                setSelectedIndex(prev => 
+                                  prev < filteredPlacas.length - 1 ? prev + 1 : prev
+                                );
+                              } else if (e.key === 'ArrowUp') {
+                                e.preventDefault();
+                                setSelectedIndex(prev => prev > 0 ? prev - 1 : -1);
+                              } else if (e.key === 'Enter') {
+                                e.preventDefault();
+                                if (selectedIndex >= 0 && filteredPlacas[selectedIndex]) {
+                                  // Selecionar item destacado
+                                  handleSelectPlaca(mecanico, hora, filteredPlacas[selectedIndex].placa);
+                                  setEditingCell(null);
+                                  setInputValue('');
+                                  setShowPlacasDropdown(false);
+                                  setSelectedIndex(-1);
+                                } else if (inputValue.trim()) {
+                                  // Selecionar texto digitado
+                                  handleSelectPlaca(mecanico, hora, inputValue.trim());
+                                  setEditingCell(null);
+                                  setInputValue('');
+                                }
                               } else if (e.key === 'Escape') {
                                 setEditingCell(null);
                                 setInputValue('');
+                                setSelectedIndex(-1);
                               }
                             }}
                             onBlur={() => {
@@ -414,7 +437,7 @@ export default function Agenda() {
                             />
                             {showPlacasDropdown && filteredPlacas.length > 0 && (
                               <div className="absolute top-full left-0 right-0 bg-white border border-blue-300 rounded shadow-lg z-50 max-h-48 overflow-y-auto">
-                                {filteredPlacas.map((placa: any) => (
+                                {filteredPlacas.map((placa: any, index: number) => (
                                   <div
                                     key={placa.id}
                                     onMouseDown={(e) => {
@@ -423,11 +446,17 @@ export default function Agenda() {
                                       setEditingCell(null);
                                       setInputValue('');
                                       setShowPlacasDropdown(false);
+                                      setSelectedIndex(-1);
                                     }}
-                                    className="px-2 py-1 text-xs hover:bg-blue-100 cursor-pointer border-b border-slate-200"
+                                    onMouseEnter={() => setSelectedIndex(index)}
+                                    className={`px-2 py-1 text-xs cursor-pointer border-b border-slate-200 transition-colors ${
+                                      index === selectedIndex ? 'bg-blue-500 text-white' : 'hover:bg-blue-100'
+                                    }`}
                                   >
                                     <div className="font-semibold">{placa.placa}</div>
-                                    <div className="text-slate-600 text-xs">{placa.modelo}</div>
+                                    <div className={`text-xs ${
+                                      index === selectedIndex ? 'text-blue-100' : 'text-slate-600'
+                                    }`}>{placa.modelo}</div>
                                   </div>
                                 ))}
                               </div>
