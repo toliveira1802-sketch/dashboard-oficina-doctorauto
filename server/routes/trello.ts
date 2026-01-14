@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { getDb } from '../db.js';
 import { veiculos as veiculosTable } from '../../drizzle/schema.js';
+import { isNull } from 'drizzle-orm';
 
 const router = Router();
 
@@ -398,13 +399,15 @@ router.get('/placas', async (req, res) => {
     }
     
     // Buscar veículos do banco de dados PostgreSQL
+    // Excluir carros entregues (com dataSaida preenchida)
     const veiculos = await db.select({
       id: veiculosTable.id,
       placa: veiculosTable.placa,
       modelo: veiculosTable.modelo,
       marca: veiculosTable.marca,
-      ano: veiculosTable.ano
-    }).from(veiculosTable).limit(100);
+      ano: veiculosTable.ano,
+      dataSaida: veiculosTable.dataSaida
+    }).from(veiculosTable).where(isNull(veiculosTable.dataSaida)).limit(100);
     
     // Formatar resposta
     const placas = veiculos.map((v: any) => ({

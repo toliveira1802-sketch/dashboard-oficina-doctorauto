@@ -1058,3 +1058,20 @@
 - [x] Integrar notificação no webhook Kommo → Trello (quando card é criado)
 - [x] Integrar notificação no webhook Trello → Kommo (quando lead é atualizado)
 - [x] Testar notificações (pronto para teste real com dados do Kommo/Trello)
+
+## Melhorias Dashboard de Produtividade
+
+- [x] Adicionar indicador de semana nos cards dos mecânicos (ex: "Samuel 🐦 - Semana 3")
+- [x] Ajustar termômetro para ser dinâmico:
+  * Filtro semanal: meta R$ 15k, mostra valor da semana
+  * Filtro mensal: meta R$ 60k (15k × 4), mostra soma do mês
+- [x] Atualizar cálculos de progresso conforme filtro selecionado
+
+## Tabela Próximos Serviços na Agenda
+
+- [x] Criar tabela "Próximos Serviços" na página Agenda
+- [x] Colunas: Samuel, Tadeu, Aldo, JP, Wendel (5 mecânicos)
+- [x] 3 linhas por mecânico para próximos serviços
+- [x] Filtrar dropdown para excluir carros entregues (dataSaida IS NULL)
+- [x] Células vazias mostram "FALAR COM CONSULTOR"
+- [ ] Adicionar funcionalidade de dropdown para adicionar placas (próxima iteração)

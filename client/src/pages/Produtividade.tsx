@@ -496,6 +496,11 @@ export default function Produtividade() {
                     {index === 2 && <Trophy className="h-5 w-5 text-orange-600" />}
                     <span>{MECANICO_EMOJIS[mecanico.nome] || ''}</span>
                     {mecanico.nome}
+                    {filtroSemana !== 'total' && (
+                      <span className="text-xs font-normal text-slate-500 ml-1">
+                        - Semana {filtroSemana.replace('semana', '')}
+                      </span>
+                    )}
                   </span>
                   <span className="text-sm font-normal text-slate-600">#{index + 1}</span>
                 </CardTitle>
@@ -530,30 +535,43 @@ export default function Produtividade() {
                 
                 {/* Termômetro de Meta Individual */}
                 <div className="mt-3 pt-3 border-t border-slate-200">
-                  <div className="flex items-center justify-between mb-1">
-                    <span className="text-xs text-slate-600">Meta Semanal</span>
-                    <span className="text-xs font-bold text-slate-900">
-                      {((mecanico.valor_produzido / 15000) * 100).toFixed(1)}%
-                    </span>
-                  </div>
-                  <div className="w-full bg-slate-200 rounded-full h-2 overflow-hidden">
-                    <div 
-                      className={`h-full rounded-full transition-all ${
-                        (mecanico.valor_produzido / 15000) * 100 >= 100 ? 'bg-green-500' :
-                        (mecanico.valor_produzido / 15000) * 100 >= 70 ? 'bg-yellow-500' :
-                        'bg-red-500'
-                      }`}
-                      style={{ width: `${Math.min((mecanico.valor_produzido / 15000) * 100, 100)}%` }}
-                    />
-                  </div>
-                  <div className="flex items-center justify-between mt-1">
-                    <span className="text-xs text-slate-500">
-                      R$ {mecanico.valor_produzido.toLocaleString('pt-BR', { minimumFractionDigits: 0 })}
-                    </span>
-                    <span className="text-xs text-slate-500">
-                      Meta: R$ 15.000
-                    </span>
-                  </div>
+                  {(() => {
+                    const metaSemanal = 15000;
+                    const metaMensal = metaSemanal * 4; // R$ 60.000
+                    const metaAtual = filtroSemana === 'total' ? metaMensal : metaSemanal;
+                    const percentual = (mecanico.valor_produzido / metaAtual) * 100;
+                    
+                    return (
+                      <>
+                        <div className="flex items-center justify-between mb-1">
+                          <span className="text-xs text-slate-600">
+                            {filtroSemana === 'total' ? 'Meta Mensal' : 'Meta Semanal'}
+                          </span>
+                          <span className="text-xs font-bold text-slate-900">
+                            {percentual.toFixed(1)}%
+                          </span>
+                        </div>
+                        <div className="w-full bg-slate-200 rounded-full h-2 overflow-hidden">
+                          <div 
+                            className={`h-full rounded-full transition-all ${
+                              percentual >= 100 ? 'bg-green-500' :
+                              percentual >= 70 ? 'bg-yellow-500' :
+                              'bg-red-500'
+                            }`}
+                            style={{ width: `${Math.min(percentual, 100)}%` }}
+                          />
+                        </div>
+                        <div className="flex items-center justify-between mt-1">
+                          <span className="text-xs text-slate-500">
+                            R$ {mecanico.valor_produzido.toLocaleString('pt-BR', { minimumFractionDigits: 0 })}
+                          </span>
+                          <span className="text-xs text-slate-500">
+                            Meta: R$ {metaAtual.toLocaleString('pt-BR', { minimumFractionDigits: 0 })}
+                          </span>
+                        </div>
+                      </>
+                    );
+                  })()}
                 </div>
               </CardContent>
             </Card>

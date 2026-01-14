@@ -61,6 +61,7 @@ export default function Agenda() {
   const [showFeedbackModal, setShowFeedbackModal] = useState(false);
   const [previousDate, setPreviousDate] = useState<string | null>(null);
   const [pendingNewDate, setPendingNewDate] = useState<string | null>(null);
+  const [proximosServicos, setProximosServicos] = useState<Record<string, string[]>>({});
   // Buscar placas do Trello
   useEffect(() => {
     const fetchPlacas = async () => {
@@ -264,6 +265,62 @@ export default function Agenda() {
             </Button>
           </div>
         </div>
+
+        {/* Tabela Próximos Serviços */}
+        <Card className="mb-6 overflow-x-auto">
+          <div className="p-4 bg-blue-50 border-b border-blue-200">
+            <h2 className="text-xl font-bold text-blue-900 flex items-center gap-2">
+              <Car className="h-5 w-5" />
+              Próximos Serviços
+            </h2>
+            <p className="text-sm text-blue-700 mt-1">Próximos 3 serviços de cada mecânico</p>
+          </div>
+          <table className="w-full border-collapse">
+            <thead>
+              <tr className="bg-blue-600 text-white">
+                {MECANICOS.map((mecanico) => (
+                  <th key={mecanico} className="p-3 text-center font-bold border border-blue-700 text-sm">
+                    {mecanico}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {[1, 2, 3].map((linha) => (
+                <tr key={linha} className="border-b border-slate-200">
+                  {MECANICOS.map((mecanico) => {
+                    const valorAtual = proximosServicos[mecanico]?.[linha - 1] || '';
+                    
+                    return (
+                      <td key={mecanico} className="p-3 text-center border border-slate-300 h-20 relative group">
+                        {valorAtual ? (
+                          <div className="flex items-center justify-center gap-2">
+                            <span className="font-bold text-slate-900">{valorAtual}</span>
+                            <button
+                              onClick={() => {
+                                const novosServicos = { ...proximosServicos };
+                                if (!novosServicos[mecanico]) novosServicos[mecanico] = [];
+                                novosServicos[mecanico][linha - 1] = '';
+                                setProximosServicos(novosServicos);
+                              }}
+                              className="text-red-500 hover:text-red-700 opacity-0 group-hover:opacity-100 transition-opacity"
+                            >
+                              ×
+                            </button>
+                          </div>
+                        ) : (
+                          <div className="text-slate-400 text-sm italic">
+                            FALAR COM CONSULTOR
+                          </div>
+                        )}
+                      </td>
+                    );
+                  })}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </Card>
 
         {/* Tabela Compacta */}
         <Card className="overflow-x-auto">
