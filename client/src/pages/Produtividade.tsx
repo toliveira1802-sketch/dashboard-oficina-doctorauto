@@ -133,8 +133,15 @@ export default function Produtividade() {
 
     if (!mecanicoField || !recursoField) return;
 
-    // Stats por mecânico
-    const mecanicoStats: Record<string, MecanicoStats> = {};
+    // Stats por mecânico - Inicializar sempre os 6 mecânicos
+    const mecanicoStats: Record<string, MecanicoStats> = {
+      'Samuel': { nome: 'Samuel', carros_total: 0, valor_produzido: 0, retornos: 0, eficiencia: 0 },
+      'Tadeu': { nome: 'Tadeu', carros_total: 0, valor_produzido: 0, retornos: 0, eficiencia: 0 },
+      'Aldo': { nome: 'Aldo', carros_total: 0, valor_produzido: 0, retornos: 0, eficiencia: 0 },
+      'JP': { nome: 'JP', carros_total: 0, valor_produzido: 0, retornos: 0, eficiencia: 0 },
+      'Wendel': { nome: 'Wendel', carros_total: 0, valor_produzido: 0, retornos: 0, eficiencia: 0 },
+      'TERCEIRIZADO': { nome: 'TERCEIRIZADO', carros_total: 0, valor_produzido: 0, retornos: 0, eficiencia: 0 }
+    };
     
     // Stats por elevador
     const elevadorStats: Record<string, ElevadorStats> = {};

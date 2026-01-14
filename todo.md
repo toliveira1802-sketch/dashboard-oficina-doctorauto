@@ -1075,3 +1075,9 @@
 - [x] Filtrar dropdown para excluir carros entregues (dataSaida IS NULL)
 - [x] Células vazias mostram "FALAR COM CONSULTOR"
 - [ ] Adicionar funcionalidade de dropdown para adicionar placas (próxima iteração)
+
+## Adicionar TERCEIRIZADO no Ranking
+
+- [x] Inicializar sempre os 6 mecânicos (Samuel, Tadeu, Aldo, JP, Wendel, TERCEIRIZADO)
+- [x] Garantir que todos aparecem no ranking mesmo com valores zerados
+- [x] Testar visualização no dashboard de Produtividade
