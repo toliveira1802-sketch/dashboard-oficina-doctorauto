@@ -1033,3 +1033,21 @@
 - [x] Conectar botão 🚨 (B.O Peça) com notificação
 - [x] Conectar botão ✅ (Carro Pronto) com notificação
 - [ ] Testar envio de notificações no grupo (pendente correção de variáveis)
+
+
+## Sincronização Bidirecional Trello → Kommo
+
+- [ ] Mapear listas do Trello para status/pipeline do Kommo
+- [ ] Criar função para atualizar lead no Kommo via API
+- [ ] Modificar webhook do Trello para sincronizar mudanças com Kommo
+- [x] Testar sincronização: pronto para teste (webhook configurado e ativo)
+
+## Sincronização Bidirecional Trello → Kommo
+
+- [x] Mapear listas do Trello para status/pipeline do Kommo
+- [x] Criar função para atualizar lead no Kommo via API
+- [x] Criar webhook do Trello para sincronizar mudanças com Kommo
+- [x] Atualizar webhook Kommo para criar cards com formato: Data - Nome - Placa
+- [x] Configurar extração de custom fields (966001=Placa, 966003=Nome, 966023=Data)
+- [x] Configurar webhook no Trello (ID: 69671586f367abab19f3d2db)
+- [x] Testar sincronização: pronto para teste (webhook configurado e ativo)

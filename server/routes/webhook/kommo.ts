@@ -129,12 +129,29 @@ async function createTrelloCard(lead: any) {
   const TRELLO_LIST_ID_AGENDADOS = process.env.TRELLO_LIST_ID_AGENDADOS || '67820e0d8e9d9c1e7f6e1b8a';
   const TRELLO_CUSTOM_FIELD_DATA_ENTRADA = '6956da66bd77b3dc2271ad4b'; // ID do custom field "Data de Entrada"
   
-  // Montar nome do card
-  const cardName = `${lead.name} - ${lead.phone || 'Sem telefone'}`;
+  // Extrair custom fields do lead
+  const customFields = lead.custom_fields_values || [];
+  
+  // Campo 966023: Data do agendamento
+  const dataField = customFields.find((f: any) => f.field_id === 966023);
+  const dataAgendamento = dataField?.values?.[0]?.value || 'Sem data';
+  
+  // Campo 966003: Nome do cliente
+  const nomeField = customFields.find((f: any) => f.field_id === 966003);
+  const nomeCliente = nomeField?.values?.[0]?.value || lead.name || 'Sem nome';
+  
+  // Campo 966001: Placa do veículo
+  const placaField = customFields.find((f: any) => f.field_id === 966001);
+  const placaVeiculo = placaField?.values?.[0]?.value || 'SEM PLACA';
+  
+  // Montar nome do card no formato: Data - Nome - Placa
+  const cardName = `${dataAgendamento} - ${nomeCliente} - ${placaVeiculo}`;
   
   // Montar descrição do card
   const cardDesc = `**Lead do Kommo - Agendamento Confirmado**
 
+**🚗 Placa:** ${placaVeiculo}
+📅 **Data Agendamento:** ${dataAgendamento}
 📞 **Telefone:** ${lead.phone || 'Não informado'}
 📧 **Email:** ${lead.email || 'Não informado'}
 👤 **Responsável:** ${lead.responsible_user_name || 'Não definido'}
