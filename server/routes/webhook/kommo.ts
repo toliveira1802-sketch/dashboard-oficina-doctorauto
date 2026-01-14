@@ -25,6 +25,11 @@ const supabase = SUPABASE_URL && SUPABASE_SERVICE_ROLE_KEY
  * 4. Filtrar por: Pipeline "Dr. Prime" → Status "Agendamento Confirmado"
  */
 router.post('/', async (req, res) => {
+  console.log('\n========================================');
+  console.log('[Kommo Webhook] Requisição recebida!');
+  console.log('[Kommo Webhook] Headers:', JSON.stringify(req.headers, null, 2));
+  console.log('[Kommo Webhook] Body:', JSON.stringify(req.body, null, 2));
+  console.log('========================================\n');
   try {
     console.log('[Kommo Webhook] Recebido:', JSON.stringify(req.body, null, 2));
     
@@ -126,7 +131,7 @@ router.post('/', async (req, res) => {
 async function createTrelloCard(lead: any) {
   const TRELLO_API_KEY = process.env.TRELLO_API_KEY || 'e327cf4891fd2fcb6020899e3718c45e';
   const TRELLO_TOKEN = process.env.TRELLO_TOKEN || 'ATTAa37008bfb8c135e0815e9a964d5c7f2e0b2ed2530c6bfdd202061e53ae1a6c18F1F6F8C7';
-  const TRELLO_LIST_ID_AGENDADOS = process.env.TRELLO_LIST_ID_AGENDADOS || '67820e0d8e9d9c1e7f6e1b8a';
+  const TRELLO_LIST_ID_AGENDADOS = process.env.TRELLO_LIST_ID_AGENDADOS || '69562921014d7fe4602668c2'; // 🟢 AGENDAMENTO CONFIRMADO
   const TRELLO_CUSTOM_FIELD_DATA_ENTRADA = '6956da66bd77b3dc2271ad4b'; // ID do custom field "Data de Entrada"
   
   // Extrair custom fields do lead

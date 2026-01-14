@@ -515,8 +515,8 @@ export default function Financeiro() {
 
         {/* Cards Financeiros - Linha 1 */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {/* Valor Faturado */}
-          <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm hover:shadow-md hover:scale-105 transition-all duration-300">
+           {/* Faturado */}
+          <div onClick={() => { setModalCategory('faturado'); setModalDetalhesOpen(true); }} className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm hover:shadow-md hover:scale-105 transition-all duration-300 cursor-pointer">
             <div className="flex items-center justify-between mb-4">
               <div className="p-3 bg-blue-100 rounded-lg">
                 <DollarSign className="h-8 w-8 text-blue-600" />
@@ -530,7 +530,7 @@ export default function Financeiro() {
           </div>
 
           {/* Ticket Médio */}
-          <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm hover:shadow-md hover:scale-105 transition-all duration-300">
+          <div onClick={() => { setModalCategory('ticketMedio'); setModalDetalhesOpen(true); }} className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm hover:shadow-md hover:scale-105 transition-all duration-300 cursor-pointer">
             <div className="flex items-center justify-between mb-4">
               <div className="p-3 bg-cyan-100 rounded-lg">
                 <TrendingUp className="h-8 w-8 text-cyan-600" />
@@ -544,7 +544,7 @@ export default function Financeiro() {
           </div>
 
           {/* Saída Hoje */}
-          <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm hover:shadow-md hover:scale-105 transition-all duration-300">
+          <div onClick={() => { setModalCategory('saidaHoje'); setModalDetalhesOpen(true); }} className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm hover:shadow-md hover:scale-105 transition-all duration-300 cursor-pointer">
             <div className="flex items-center justify-between mb-4">
               <div className="p-3 bg-purple-100 rounded-lg">
                 <Calendar className="h-8 w-8 text-purple-600" />
@@ -609,6 +609,9 @@ export default function Financeiro() {
         <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="text-xl font-bold">
+              {modalCategory === 'faturado' && '💵 Veículos Faturados'}
+              {modalCategory === 'ticketMedio' && '📈 Detalhamento do Ticket Médio'}
+              {modalCategory === 'saidaHoje' && '📅 Veículos com Saída Hoje'}
               {modalCategory === 'atrasado' && '⚠️ Veículos com Valor Atrasado'}
               {modalCategory === 'preso' && '🕒 Veículos com Valor Preso'}
               {modalCategory === 'entregues' && '✅ Veículos Entregues'}
@@ -641,7 +644,13 @@ export default function Financeiro() {
                 const listName = listMap[card.idList] || '';
                 
                 // Filtrar por categoria
-                if (modalCategory === 'atrasado') {
+                if (modalCategory === 'faturado') {
+                  return listName === '🙏🏻Entregue';
+                } else if (modalCategory === 'ticketMedio') {
+                  return listName === '🙏🏻Entregue';
+                } else if (modalCategory === 'saidaHoje') {
+                  return previsao && previsao.getTime() === hoje.getTime() && listName !== '🙏🏻Entregue';
+                } else if (modalCategory === 'atrasado') {
                   return previsao && previsao < hoje && listName !== '🙏🏻Entregue';
                 } else if (modalCategory === 'preso') {
                   return valor > 0 && listName !== '🙏🏻Entregue';
@@ -697,7 +706,13 @@ export default function Financeiro() {
               const listMap: { [key: string]: string } = {};
               const listName = listMap[card.idList] || '';
               
-              if (modalCategory === 'atrasado') {
+              if (modalCategory === 'faturado') {
+                return listName === '🙏🏻Entregue';
+              } else if (modalCategory === 'ticketMedio') {
+                return listName === '🙏🏻Entregue';
+              } else if (modalCategory === 'saidaHoje') {
+                return previsao && previsao.getTime() === hoje.getTime() && listName !== '🙏🏻Entregue';
+              } else if (modalCategory === 'atrasado') {
                 return previsao && previsao < hoje && listName !== '🙏🏻Entregue';
               } else if (modalCategory === 'preso') {
                 return valor > 0 && listName !== '🙏🏻Entregue';

@@ -1103,3 +1103,41 @@
 - [x] Adicionar destaque visual (background azul) no item selecionado
 - [x] Adicionar onMouseEnter para atualizar selectedIndex ao passar mouse
 - [x] Testar navegação completa por teclado
+
+## Verificar Status da Automação Kommo + Trello
+
+- [ ] Verificar se webhook Kommo → Trello está ativo
+- [ ] Verificar se webhook Trello → Kommo está ativo
+- [ ] Testar criação de card no Trello quando lead move para "Agendamento Confirmado"
+- [ ] Testar atualização de lead no Kommo quando card move no Trello
+- [ ] Validar notificações Telegram em ambos fluxos
+- [ ] Reportar status completo ao usuário
+
+## Corrigir Nome da Lista do Trello no Webhook Kommo
+
+- [x] Atualizar nome da lista de "Agendamento Confirmado" para "🟢 AGENDAMENTO CONFIRMADO"
+- [x] ID da lista atualizado: 69562921014d7fe4602668c2
+- [ ] Testar criação de card com lead real do Kommo
+- [ ] Verificar se card aparece na lista correta
+
+## Investigar Webhook Kommo Não Criando Card
+
+- [ ] Verificar logs do servidor para ver se webhook recebeu requisição
+- [ ] Verificar URL do webhook configurada no Kommo
+- [ ] Testar webhook manualmente com payload de exemplo
+- [ ] Identificar e corrigir problema
+- [ ] Testar novamente com lead real
+
+## Documentação v1 em PDF
+
+- [x] Criar documento Markdown com documentação completa
+- [x] Converter Markdown para PDF
+- [x] Entregar PDF ao usuário
+
+## Expandir Detalhes dos Cards no Financeiro
+
+- [x] Adicionar onClick em todos os 6 cards (FATURADO, TICKET MÉDIO, SAÍDA HOJE, ATRASADO, PRESO, ENTREGUES)
+- [x] Adicionar títulos no modal para cada categoria
+- [x] Implementar filtros para mostrar placas corretas de cada categoria
+- [x] Mostrar lista de placas com informações (placa, nome, valor)
+- [ ] Testar funcionalidade no navegador
