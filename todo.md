@@ -1051,3 +1051,10 @@
 - [x] Configurar extração de custom fields (966001=Placa, 966003=Nome, 966023=Data)
 - [x] Configurar webhook no Trello (ID: 69671586f367abab19f3d2db)
 - [x] Testar sincronização: pronto para teste (webhook configurado e ativo)
+
+## Notificações Telegram para Sincronização
+
+- [x] Criar função sendSyncNotification no server/lib/telegram.ts
+- [x] Integrar notificação no webhook Kommo → Trello (quando card é criado)
+- [x] Integrar notificação no webhook Trello → Kommo (quando lead é atualizado)
+- [x] Testar notificações (pronto para teste real com dados do Kommo/Trello)

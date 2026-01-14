@@ -262,6 +262,22 @@ _Card criado automaticamente via integração Kommo → Supabase → Trello_
     card_url: trelloCard.url
   });
   
+  // Enviar notificação Telegram
+  try {
+    const { sendSyncNotification } = await import('../../lib/telegram');
+    await sendSyncNotification({
+      direction: 'kommo_to_trello',
+      placa: placaVeiculo,
+      nome: nomeCliente,
+      dataAgendamento: dataAgendamento,
+      trelloCardUrl: trelloCard.url
+    });
+    console.log('[Kommo Webhook] Notificação Telegram enviada com sucesso');
+  } catch (telegramError: any) {
+    console.error('[Kommo Webhook] Erro ao enviar notificação Telegram:', telegramError);
+    // Não bloqueia o fluxo se falhar
+  }
+  
   return trelloCard;
 }
 

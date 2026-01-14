@@ -19,6 +19,17 @@ export interface TelegramNotification {
   observacao?: string;
 }
 
+export interface SyncNotification {
+  direction: 'kommo_to_trello' | 'trello_to_kommo';
+  placa: string;
+  nome?: string;
+  dataAgendamento?: string;
+  statusOrigem?: string;
+  statusDestino?: string;
+  trelloCardUrl?: string;
+  kommoLeadId?: number;
+}
+
 /**
  * Envia notificação para o grupo do Telegram
  */
@@ -78,6 +89,80 @@ export async function sendTelegramNotification(notification: TelegramNotificatio
 
   } catch (error: any) {
     console.error('[Telegram] Erro ao enviar notificação:', error.message);
+    return false;
+  }
+}
+
+/**
+ * Envia notificação de sincronização entre Kommo e Trello
+ */
+export async function sendSyncNotification(notification: SyncNotification): Promise<boolean> {
+  if (!TELEGRAM_BOT_TOKEN || !TELEGRAM_CHAT_ID) {
+    console.error('[Telegram] Credenciais não configuradas');
+    return false;
+  }
+
+  try {
+    let message = '';
+
+    if (notification.direction === 'kommo_to_trello') {
+      message = `🔄 *SINCRONIZAÇÃO KOMMO → TRELLO*\n\n`;
+      message += `✅ *Lead agendado criado no Trello*\n\n`;
+      message += `🚗 *Placa:* ${notification.placa}\n`;
+      if (notification.nome) {
+        message += `👤 *Cliente:* ${notification.nome}\n`;
+      }
+      if (notification.dataAgendamento) {
+        message += `📅 *Data:* ${notification.dataAgendamento}\n`;
+      }
+      if (notification.trelloCardUrl) {
+        message += `\n🔗 [Ver card no Trello](${notification.trelloCardUrl})`;
+      }
+      message += `\n\n📌 *Status:* Agendamento Confirmado → Lista Trello`;
+    } else if (notification.direction === 'trello_to_kommo') {
+      message = `🔄 *SINCRONIZAÇÃO TRELLO → KOMMO*\n\n`;
+      message += `✅ *Status do lead atualizado no Kommo*\n\n`;
+      message += `🚗 *Placa:* ${notification.placa}\n`;
+      if (notification.statusOrigem) {
+        message += `📄 *De:* ${notification.statusOrigem}\n`;
+      }
+      if (notification.statusDestino) {
+        message += `🎯 *Para:* ${notification.statusDestino}\n`;
+      }
+      if (notification.kommoLeadId) {
+        message += `\n🆔 *Lead ID:* ${notification.kommoLeadId}`;
+      }
+      message += `\n\n📌 *Ação:* Card movido no Trello, lead atualizado automaticamente`;
+    }
+
+    const response = await fetch(
+      `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          chat_id: TELEGRAM_CHAT_ID,
+          text: message,
+          parse_mode: 'Markdown',
+          disable_web_page_preview: false
+        })
+      }
+    );
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('[Telegram] Erro ao enviar mensagem de sync:', errorText);
+      return false;
+    }
+
+    const data = await response.json();
+    console.log('[Telegram] Notificação de sync enviada:', data.result.message_id);
+    return true;
+
+  } catch (error: any) {
+    console.error('[Telegram] Erro ao enviar notificação de sync:', error.message);
     return false;
   }
 }

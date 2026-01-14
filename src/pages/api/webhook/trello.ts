@@ -108,6 +108,23 @@ export default async function handler(
 
     if (success) {
       console.log(`✅ Sincronização Trello → Kommo concluída com sucesso!`);
+      
+      // Enviar notificação Telegram
+      try {
+        const { sendSyncNotification } = await import('../../../server/lib/telegram');
+        await sendSyncNotification({
+          direction: 'trello_to_kommo',
+          placa,
+          statusOrigem: listBefore.name,
+          statusDestino: listAfter.name,
+          kommoLeadId: leadId
+        });
+        console.log('[Trello Webhook] Notificação Telegram enviada com sucesso');
+      } catch (telegramError: any) {
+        console.error('[Trello Webhook] Erro ao enviar notificação Telegram:', telegramError);
+        // Não bloqueia o fluxo se falhar
+      }
+      
       return res.status(200).json({
         success: true,
         message: 'Lead updated in Kommo',
