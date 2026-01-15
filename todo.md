@@ -1141,3 +1141,27 @@
 - [x] Implementar filtros para mostrar placas corretas de cada categoria
 - [x] Mostrar lista de placas com informações (placa, nome, valor)
 - [ ] Testar funcionalidade no navegador
+
+## Corrigir Cálculos do Financeiro
+
+- [ ] Corrigir cálculo do valor aprovado (não está batendo)
+- [ ] Corrigir contador de dias trabalhados (não está diminuindo)
+- [ ] Verificar cálculo de dias restantes
+- [ ] Garantir que todos os cards mostrem placas corretamente no modal
+- [ ] Testar todos os cálculos
+
+## Gerar PDF com Mapeamento de Elementos Interativos e Memória de Cálculo
+
+- [x] Mapear todos os botões, cards, filtros e elementos clicáveis
+- [x] Incluir ID, nome, página e função de cada elemento
+- [x] Documentar memória de cálculo de todas as métricas (fórmulas, regras, filtros)
+- [x] Criar documento Markdown organizado por página
+- [x] Converter para PDF
+- [x] Entregar para pente fino final
+
+## Alerta de Gargalo de Execução
+- [x] Adicionar novo card de alerta na página Operacional
+- [x] Calcular quantidade de carros "Em Execução"
+- [x] Implementar lógica de cores: Verde (≤10), Amarelo (11-15), Vermelho (>15)
+- [x] Posicionar ao lado do alerta de capacidade total
+- [x] Testar exibição com dados reais

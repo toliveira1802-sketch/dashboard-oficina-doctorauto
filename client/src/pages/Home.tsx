@@ -460,6 +460,39 @@ export default function Home() {
     };
   };
 
+  const getExecutionBottleneckStatus = () => {
+    const emExecucao = metrics.em_execucao;
+    
+    if (emExecucao > 15) {
+      return { 
+        icon: AlertCircle, 
+        text: '🔴 GARGALO CRÍTICO', 
+        color: 'text-red-600', 
+        bgColor: 'bg-red-100', 
+        borderColor: 'border-red-500',
+        animate: 'animate-pulse'
+      };
+    }
+    if (emExecucao >= 11) {
+      return { 
+        icon: Clock, 
+        text: '🟡 ATENÇÃO', 
+        color: 'text-yellow-600', 
+        bgColor: 'bg-yellow-50',
+        borderColor: 'border-yellow-300',
+        animate: ''
+      };
+    }
+    return { 
+      icon: CheckCircle, 
+      text: '🟢 FLUXO OK', 
+      color: 'text-green-600', 
+      bgColor: 'bg-green-50',
+      borderColor: 'border-green-300',
+      animate: ''
+    };
+  };
+
   const alertStatus = getAlertStatus();
   const AlertIcon = alertStatus.icon;
 
@@ -499,6 +532,31 @@ export default function Home() {
                   <div>
                     <p className={`text-base font-bold ${alertStatus.color}`}>{alertStatus.text}</p>
                     <p className="text-sm text-slate-700 font-medium">Capacidade: {metrics.total}/20 ({Math.round((metrics.total / 20) * 100)}%)</p>
+                    <p className="text-xs text-slate-500 mt-1 italic">Clique para ver placas</p>
+                  </div>
+                </div>
+              </div>
+              
+              {/* Indicador de Gargalo de Execução - NOVO */}
+              <div 
+                className={`px-6 py-3 rounded-xl border-2 ${(() => {
+                  const bottleneckStatus = getExecutionBottleneckStatus();
+                  return `${bottleneckStatus.bgColor} ${bottleneckStatus.borderColor} ${bottleneckStatus.animate}`;
+                })()} shadow-lg cursor-pointer hover:scale-105 transition-all`}
+                onClick={() => {
+                  setModalCategory('em_execucao');
+                  setModalOpen(true);
+                }}
+              >
+                <div className="flex items-center gap-3">
+                  {(() => {
+                    const bottleneckStatus = getExecutionBottleneckStatus();
+                    const BottleneckIcon = bottleneckStatus.icon;
+                    return <BottleneckIcon className={`w-7 h-7 ${bottleneckStatus.color}`} />;
+                  })()}
+                  <div>
+                    <p className={`text-base font-bold ${getExecutionBottleneckStatus().color}`}>{getExecutionBottleneckStatus().text}</p>
+                    <p className="text-sm text-slate-700 font-medium">🔧 Em Execução: {metrics.em_execucao}</p>
                     <p className="text-xs text-slate-500 mt-1 italic">Clique para ver placas</p>
                   </div>
                 </div>
