@@ -1165,3 +1165,9 @@
 - [x] Implementar lógica de cores: Verde (≤10), Amarelo (11-15), Vermelho (>15)
 - [x] Posicionar ao lado do alerta de capacidade total
 - [x] Testar exibição com dados reais
+
+## Correção de Filtro de Data - Fevereiro 2025
+- [x] Identificar onde estão os filtros de data nas páginas Financeiro e Produtividade
+- [x] Corrigir filtro para considerar apenas dataSaida >= 01/02/2025
+- [x] Testar com dados reais do Trello
+- [x] Verificar se valores estão corretos

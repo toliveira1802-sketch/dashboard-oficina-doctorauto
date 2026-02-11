@@ -114,7 +114,9 @@ export default function Financeiro() {
           dataInicioPeriodo.setDate(hoje.getDate() - 7);
           break;
         case 'mes':
-          dataInicioPeriodo.setMonth(hoje.getMonth() - 1);
+          // Primeiro dia do mês atual (não mês anterior)
+          dataInicioPeriodo = new Date(hoje.getFullYear(), hoje.getMonth(), 1);
+          dataInicioPeriodo.setHours(0, 0, 0, 0);
           break;
         case 'ano':
           dataInicioPeriodo.setFullYear(hoje.getFullYear() - 1);

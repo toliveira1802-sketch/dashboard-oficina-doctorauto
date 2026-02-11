@@ -146,9 +146,11 @@ export default function Produtividade() {
     // Stats por elevador
     const elevadorStats: Record<string, ElevadorStats> = {};
 
-    // Filtrar cards por semana se necessário
+    // Filtrar cards por semana ou mês atual
     let cardsFiltrados = cards;
+    
     if (filtroSemana !== 'total') {
+      // Filtrar por semana específica
       const weekNumber = parseInt(filtroSemana.replace('semana', ''));
       const { start, end } = getWeekRange(weekNumber);
       
@@ -158,6 +160,19 @@ export default function Produtividade() {
         
         const dataEntrada = new Date(dataEntradaItem.value.date);
         return dataEntrada >= start && dataEntrada <= end;
+      });
+    } else {
+      // Filtrar por mês atual (quando filtro = 'total')
+      const now = new Date();
+      const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+      firstDayOfMonth.setHours(0, 0, 0, 0);
+      
+      cardsFiltrados = cards.filter(card => {
+        const dataEntradaItem = card.customFieldItems?.find(item => item.idCustomField === dataEntradaField?.id);
+        if (!dataEntradaItem || !dataEntradaItem.value?.date) return false;
+        
+        const dataEntrada = new Date(dataEntradaItem.value.date);
+        return dataEntrada >= firstDayOfMonth;
       });
     }
 

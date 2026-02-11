@@ -324,7 +324,7 @@ export default function Painel() {
               onClick={() => window.open('/painel-metas', '_blank')}
               className="bg-gradient-to-br from-yellow-500 to-orange-600 rounded-lg p-6 shadow-xl flex flex-col items-center justify-center hover:scale-105 transition-transform cursor-pointer"
             >
-              <img src="/tigrinho.png" alt="Tigrinho" className="w-32 h-32 mb-3" />
+              <img src="https://files.manuscdn.com/user_upload_by_module/session_file/310519663048341103/sIQIDjwxIDnedEjE.png" alt="Tigrinho" className="w-32 h-32 mb-3" />
               <h2 className="text-2xl font-black text-white text-center drop-shadow-lg">
                 SOLTA A CARTA CARAI
               </h2>
