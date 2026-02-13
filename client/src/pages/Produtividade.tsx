@@ -3,7 +3,8 @@ import Navigation from '@/components/Navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { RefreshCw, Trophy, TrendingUp, Clock, DollarSign, AlertTriangle } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { RefreshCw, Trophy, TrendingUp, Clock, DollarSign, AlertTriangle, X } from 'lucide-react';
 
 // Configuração do Trello
 const TRELLO_API_KEY = 'e327cf4891fd2fcb6020899e3718c45e';
@@ -57,6 +58,28 @@ export default function Produtividade() {
   const [allCards, setAllCards] = useState<TrelloCard[]>([]);
   const [customFieldsMap, setCustomFieldsMap] = useState<Record<string, any>>({});
   const [listIdMap, setListIdMap] = useState<Record<string, string>>({});
+  const [metaMensal, setMetaMensal] = useState<number>(300000); // Valor padrão
+  const [diasUteis, setDiasUteis] = useState<number>(24); // Valor padrão
+  const [mecanicoSelecionado, setMecanicoSelecionado] = useState<string | null>(null);
+  const [placasMecanico, setPlacasMecanico] = useState<string[]>([]);
+
+  const carregarMetas = async () => {
+    try {
+      const hoje = new Date();
+      const mes = hoje.getMonth() + 1;
+      const ano = hoje.getFullYear();
+      const response = await fetch(`/api/metas?mes=${mes}&ano=${ano}`);
+      if (response.ok) {
+        const data = await response.json();
+        if (data) {
+          setMetaMensal(data.metaMensal / 100); // Converter de centavos
+          setDiasUteis(data.diasUteis);
+        }
+      }
+    } catch (error) {
+      console.error('Erro ao carregar metas:', error);
+    }
+  };
 
   const fetchData = async () => {
     setLoading(true);
@@ -128,7 +151,7 @@ export default function Produtividade() {
     const recursoField = customFields.find(f => f.name.includes('Recurso'));
     const categoriaField = customFields.find(f => f.name.includes('Categoria'));
     const valorField = customFields.find(f => f.name.includes('Valor'));
-    const dataEntradaField = customFields.find(f => f.name.includes('Data de Entrada'));
+    const previsaoEntregaField = customFields.find(f => f.name === 'Previsão de Entrega');
     const servicoField = customFields.find(f => f.name.includes('Serviço'));
 
     if (!mecanicoField || !recursoField) return;
@@ -155,24 +178,27 @@ export default function Produtividade() {
       const { start, end } = getWeekRange(weekNumber);
       
       cardsFiltrados = cards.filter(card => {
-        const dataEntradaItem = card.customFieldItems?.find(item => item.idCustomField === dataEntradaField?.id);
-        if (!dataEntradaItem || !dataEntradaItem.value?.date) return false;
+        const previsaoItem = card.customFieldItems?.find(item => item.idCustomField === previsaoEntregaField?.id);
+        if (!previsaoItem || !previsaoItem.value?.date) return false;
         
-        const dataEntrada = new Date(dataEntradaItem.value.date);
-        return dataEntrada >= start && dataEntrada <= end;
+        const previsao = new Date(previsaoItem.value.date);
+        previsao.setHours(0, 0, 0, 0);
+        return previsao >= start && previsao <= end;
       });
     } else {
       // Filtrar por mês atual (quando filtro = 'total')
       const now = new Date();
       const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
       firstDayOfMonth.setHours(0, 0, 0, 0);
+      const lastDayOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59);
       
       cardsFiltrados = cards.filter(card => {
-        const dataEntradaItem = card.customFieldItems?.find(item => item.idCustomField === dataEntradaField?.id);
-        if (!dataEntradaItem || !dataEntradaItem.value?.date) return false;
+        const previsaoItem = card.customFieldItems?.find(item => item.idCustomField === previsaoEntregaField?.id);
+        if (!previsaoItem || !previsaoItem.value?.date) return false;
         
-        const dataEntrada = new Date(dataEntradaItem.value.date);
-        return dataEntrada >= firstDayOfMonth;
+        const previsao = new Date(previsaoItem.value.date);
+        previsao.setHours(0, 0, 0, 0);
+        return previsao >= firstDayOfMonth && previsao <= lastDayOfMonth;
       });
     }
 
@@ -251,13 +277,8 @@ export default function Produtividade() {
             elevadorStats[recursoNome].valor_produzido += parseFloat(valorItem.value.number);
           }
 
-          const dataEntradaItem = card.customFieldItems?.find(item => item.idCustomField === dataEntradaField?.id);
-          if (dataEntradaItem && dataEntradaItem.value?.date) {
-            const entrada = new Date(dataEntradaItem.value.date);
-            const hoje = new Date();
-            const dias = Math.floor((hoje.getTime() - entrada.getTime()) / (1000 * 60 * 60 * 24));
-            elevadorStats[recursoNome].tempo_uso += dias;
-          }
+          // Tempo de uso baseado em quantidade de carros
+          elevadorStats[recursoNome].tempo_uso += 1;
         }
       }
     });
@@ -310,6 +331,7 @@ export default function Produtividade() {
 
   useEffect(() => {
     fetchData();
+    carregarMetas();
     const interval = setInterval(fetchData, 30 * 60 * 1000); // 30 minutos
     return () => clearInterval(interval);
   }, [filtroCategoria, filtroSemana]);
@@ -351,17 +373,19 @@ export default function Produtividade() {
         </CardHeader>
         <CardContent>
           {(() => {
-            const metaSemanal = 75000; // R$ 75.000 por semana
-            const metaMensal = metaSemanal * 4; // R$ 300.000 por mês
+            // Usar metas da API
+            const metaSemanal = metaMensal / 4; // Dividir meta mensal por 4 semanas
             const meta = filtroSemana === 'total' ? metaMensal : metaSemanal;
             
             const realizado = mecanicos.reduce((sum, m) => sum + m.valor_produzido, 0);
             const percentual = meta > 0 ? (realizado / meta) * 100 : 0;
             
-            // Calcular dias trabalhados e dias restantes (exemplo: 24 dias úteis no mês)
-            const diasUteisTotal = filtroSemana === 'total' ? 24 : 6;
-            const diasTrabalhados = filtroSemana === 'total' ? 10 : 2; // Exemplo
-            const diasRestantes = diasUteisTotal - diasTrabalhados;
+            // Calcular dias trabalhados e dias restantes
+            const diasUteisTotal = filtroSemana === 'total' ? diasUteis : Math.floor(diasUteis / 4);
+            const hoje = new Date();
+            const diaAtual = hoje.getDate();
+            const diasTrabalhados = filtroSemana === 'total' ? Math.min(diaAtual, diasUteis) : Math.floor(diaAtual / 7);
+            const diasRestantes = Math.max(0, diasUteisTotal - diasTrabalhados);
             
             const mediaDiaria = diasTrabalhados > 0 ? realizado / diasTrabalhados : 0;
             const projecao = realizado + (mediaDiaria * diasRestantes);
@@ -509,7 +533,58 @@ export default function Produtividade() {
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {mecanicosFiltrados.map((mecanico, index) => (
-            <Card key={mecanico.nome} className={`${index === 0 ? 'border-yellow-400 border-2' : ''}`}>
+            <Card 
+              key={mecanico.nome} 
+              className={`${index === 0 ? 'border-yellow-400 border-2' : ''} cursor-pointer hover:shadow-lg transition-shadow`}
+              onClick={() => {
+                setMecanicoSelecionado(mecanico.nome);
+                // Buscar placas dos carros deste mecânico no período filtrado
+                const placas: string[] = [];
+                const now = new Date();
+                const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+                firstDayOfMonth.setHours(0, 0, 0, 0);
+                const lastDayOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59);
+                
+                allCards.forEach(card => {
+                  const listName = listIdMap[card.idList] || '';
+                  if (listName.includes('🙏🏻Entregue')) {
+                    // Verificar data de entrega
+                    const previsaoField = customFieldsMap['Previsão de Entrega'];
+                    const previsaoItem = card.customFieldItems?.find(item => item.idCustomField === previsaoField?.id);
+                    if (previsaoItem && previsaoItem.value?.date) {
+                      const previsao = new Date(previsaoItem.value.date);
+                      previsao.setHours(0, 0, 0, 0);
+                      
+                      // Filtrar por período (semana ou mês)
+                      let dentroPerio = false;
+                      if (filtroSemana !== 'total') {
+                        const weekNumber = parseInt(filtroSemana.replace('semana', ''));
+                        const startDay = 1 + (weekNumber - 1) * 7;
+                        const endDay = Math.min(startDay + 6, new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate());
+                        const start = new Date(now.getFullYear(), now.getMonth(), startDay);
+                        const end = new Date(now.getFullYear(), now.getMonth(), endDay, 23, 59, 59);
+                        dentroPerio = previsao >= start && previsao <= end;
+                      } else {
+                        dentroPerio = previsao >= firstDayOfMonth && previsao <= lastDayOfMonth;
+                      }
+                      
+                      if (dentroPerio) {
+                        const mecanicoItem = card.customFieldItems?.find(item => item.idCustomField === customFieldsMap['Mecânico Responsável']?.id);
+                        if (mecanicoItem) {
+                          const mecanicoOption = customFieldsMap['Mecânico Responsável']?.options?.find((opt: any) => opt.id === mecanicoItem.idValue);
+                          if (mecanicoOption && mecanicoOption.value.text === mecanico.nome) {
+                            const placaField = card.customFieldItems?.find(item => item.idCustomField === customFieldsMap['Placa']?.id);
+                            const placa = placaField?.value?.text || card.name.split(' - ')[0] || 'N/A';
+                            placas.push(placa);
+                          }
+                        }
+                      }
+                    }
+                  }
+                });
+                setPlacasMecanico(placas);
+              }}
+            >
               <CardHeader className="pb-3">
                 <CardTitle className="flex items-center justify-between">
                   <span className="flex items-center gap-2">
@@ -682,9 +757,41 @@ export default function Produtividade() {
             </tbody>
           </table>
         </div>
+       </div>
       </div>
 
-      </div>
+      {/* Modal de Placas do Mecânico */}
+      <Dialog open={mecanicoSelecionado !== null} onOpenChange={() => setMecanicoSelecionado(null)}>
+        <DialogContent className="bg-white border-slate-200 max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="text-slate-900 flex items-center gap-2">
+              {mecanicoSelecionado && MECANICO_EMOJIS[mecanicoSelecionado]}
+              Carros de {mecanicoSelecionado}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="mt-4">
+            {placasMecanico.length > 0 ? (
+              <div className="grid grid-cols-3 gap-3">
+                {placasMecanico.map((placa, idx) => (
+                  <div 
+                    key={idx} 
+                    className="bg-blue-50 border border-blue-200 rounded-lg p-3 text-center font-bold text-blue-900"
+                  >
+                    {placa}
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-8 text-slate-500">
+                Nenhum carro encontrado para este mecânico no período selecionado.
+              </div>
+            )}
+            <div className="mt-4 text-sm text-slate-600 text-center">
+              Total: {placasMecanico.length} {placasMecanico.length === 1 ? 'carro' : 'carros'}
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

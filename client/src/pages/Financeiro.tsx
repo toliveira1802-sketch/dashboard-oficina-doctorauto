@@ -41,7 +41,10 @@ export default function Financeiro() {
   });
   const [loading, setLoading] = useState(true);
   const [lastUpdate, setLastUpdate] = useState<string>('');
-  const [periodoFiltro, setPeriodoFiltro] = useState<'hoje' | 'semana' | 'mes' | 'ano'>('mes');
+  const [mesSelecionado, setMesSelecionado] = useState<string>(() => {
+    const hoje = new Date();
+    return `${hoje.getFullYear()}-${String(hoje.getMonth() + 1).padStart(2, '0')}`;
+  });
   const [modalDetalhesOpen, setModalDetalhesOpen] = useState(false);
   const [modalCategory, setModalCategory] = useState<string>('');
   const [allCards, setAllCards] = useState<any[]>([]);
@@ -50,8 +53,6 @@ export default function Financeiro() {
   // Estados para metas
   const [metas, setMetas] = useState<MetaFinanceira | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
-  const [senha, setSenha] = useState('');
-  const [senhaValidada, setSenhaValidada] = useState(false);
   const [metaMensal, setMetaMensal] = useState('');
   const [diasUteis, setDiasUteis] = useState('');
   const [diasTrabalhados, setDiasTrabalhados] = useState('');
@@ -102,26 +103,13 @@ export default function Financeiro() {
       const hoje = new Date();
       hoje.setHours(0, 0, 0, 0);
       
-      // Calcular data inicial do período
-      let dataInicioPeriodo = new Date();
+      // Calcular data inicial do mês selecionado
+      const [anoSelecionado, mesSelecionadoNum] = mesSelecionado.split('-').map(Number);
+      const dataInicioPeriodo = new Date(anoSelecionado, mesSelecionadoNum - 1, 1);
       dataInicioPeriodo.setHours(0, 0, 0, 0);
       
-      switch (periodoFiltro) {
-        case 'hoje':
-          // Já está configurado para hoje
-          break;
-        case 'semana':
-          dataInicioPeriodo.setDate(hoje.getDate() - 7);
-          break;
-        case 'mes':
-          // Primeiro dia do mês atual (não mês anterior)
-          dataInicioPeriodo = new Date(hoje.getFullYear(), hoje.getMonth(), 1);
-          dataInicioPeriodo.setHours(0, 0, 0, 0);
-          break;
-        case 'ano':
-          dataInicioPeriodo.setFullYear(hoje.getFullYear() - 1);
-          break;
-      }
+      // Data final do mês selecionado
+      const dataFimPeriodo = new Date(anoSelecionado, mesSelecionadoNum, 0, 23, 59, 59);
       
       cards.forEach((card: any) => {
         const listName = lists.find((l: any) => l.id === card.idList)?.name || '';
@@ -142,11 +130,8 @@ export default function Financeiro() {
         
         // Valor Faturado (carros entregues no período)
         if (listName === '🙏🏻Entregue') {
-          // Verificar se está no período (usar dateLastActivity como proxy de data de conclusão)
-          const dataCard = card.dateLastActivity ? new Date(card.dateLastActivity) : null;
-          if (dataCard) dataCard.setHours(0, 0, 0, 0);
-          
-          if (!dataCard || dataCard >= dataInicioPeriodo) {
+          // Usar Previsão de Entrega como data de entrega
+          if (previsao && previsao >= dataInicioPeriodo && previsao <= dataFimPeriodo) {
             valorFaturado += valor;
             carrosEntregues++;
           }
@@ -207,8 +192,6 @@ export default function Financeiro() {
   };
 
   const salvarMetas = async () => {
-    if (!senhaValidada) return;
-    
     try {
       const hoje = new Date();
       const mes = hoje.getMonth() + 1;
@@ -233,8 +216,6 @@ export default function Financeiro() {
         alert('Metas salvas com sucesso!');
         await carregarMetas();
         setModalOpen(false);
-        setSenhaValidada(false);
-        setSenha('');
       }
     } catch (error) {
       console.error('Erro ao salvar metas:', error);
@@ -242,20 +223,14 @@ export default function Financeiro() {
     }
   };
 
-  const validarSenha = () => {
-    if (senha === 'admin123') {
-      setSenhaValidada(true);
-    } else {
-      alert('Senha incorreta!');
-    }
-  };
+
 
   useEffect(() => {
     fetchData();
     carregarMetas();
     const interval = setInterval(fetchData, 60000);
     return () => clearInterval(interval);
-  }, [periodoFiltro]); // Recarregar quando mudar o período
+  }, [mesSelecionado]); // Recarregar quando mudar o mês
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('pt-BR', {
@@ -276,16 +251,18 @@ export default function Financeiro() {
             <p className="text-slate-600">Última atualização: {lastUpdate}</p>
           </div>
           <div className="flex gap-3 items-center">
-            {/* Filtro de Período */}
+            {/* Filtro de Mês */}
             <select
-              value={periodoFiltro}
-              onChange={(e) => setPeriodoFiltro(e.target.value as any)}
+              value={mesSelecionado}
+              onChange={(e) => setMesSelecionado(e.target.value)}
               className="px-4 py-2 bg-white text-slate-900 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
-              <option value="hoje">Hoje</option>
-              <option value="semana">Últimos 7 dias</option>
-              <option value="mes">Últimos 30 dias</option>
-              <option value="ano">Último ano</option>
+              <option value="2025-02">Fevereiro 2025</option>
+              <option value="2025-01">Janeiro 2025</option>
+              <option value="2024-12">Dezembro 2024</option>
+              <option value="2024-11">Novembro 2024</option>
+              <option value="2024-10">Outubro 2024</option>
+              <option value="2024-09">Setembro 2024</option>
             </select>
             <Button
               onClick={fetchData}
@@ -311,26 +288,7 @@ export default function Financeiro() {
                   </DialogDescription>
                 </DialogHeader>
                 
-                {!senhaValidada ? (
-                  <div className="space-y-4">
-                    <div>
-                      <Label htmlFor="senha" className="text-slate-900">Senha de Administrador</Label>
-                      <Input
-                        id="senha"
-                        type="password"
-                        value={senha}
-                        onChange={(e) => setSenha(e.target.value)}
-                        onKeyPress={(e) => e.key === 'Enter' && validarSenha()}
-                        className="bg-white border-slate-300 text-slate-900"
-                        placeholder="Digite a senha"
-                      />
-                    </div>
-                    <Button onClick={validarSenha} className="w-full bg-blue-600 hover:bg-blue-700">
-                      Validar
-                    </Button>
-                  </div>
-                ) : (
-                  <div className="space-y-4">
+                <div className="space-y-4">
                     <div>
                       <Label htmlFor="metaMensal" className="text-slate-900">Meta Mensal (R$)</Label>
                       <Input
@@ -365,11 +323,10 @@ export default function Financeiro() {
                         placeholder="Ex: 10"
                       />
                     </div>
-                    <Button onClick={salvarMetas} className="w-full bg-blue-600 hover:bg-blue-700">
-                      Salvar Metas
-                    </Button>
-                  </div>
-                )}
+                  <Button onClick={salvarMetas} className="w-full bg-blue-600 hover:bg-blue-700">
+                    Salvar Metas
+                  </Button>
+                </div>
               </DialogContent>
             </Dialog>
             
@@ -384,7 +341,7 @@ export default function Financeiro() {
         </div>
 
         {/* Barra de Progresso - Meta vs Realizado */}
-        {metas && periodoFiltro === 'mes' && (
+        {metas && (
           <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-3">

@@ -1171,3 +1171,22 @@
 - [x] Corrigir filtro para considerar apenas dataSaida >= 01/02/2025
 - [x] Testar com dados reais do Trello
 - [x] Verificar se valores estão corretos
+
+
+## Melhorias Dashboard - Fevereiro 2025
+- [x] Dashboard Financeiro: Adicionar filtro mês a mês (dropdown para selecionar mês)
+- [x] Dashboard Financeiro: Filtrar OS com data >= mês selecionado
+- [x] Dashboard Produtividade: Atualizar termômetro de meta para usar API de metas
+- [x] Dashboard Produtividade: Garantir indicadores consideram apenas mês vigente
+- [x] Ranking de Mecânicos: Tornar cards clicáveis
+- [x] Ranking de Mecânicos: Abrir modal com lista de placas ao clicar
+- [x] Config Metas: Remover senha de proteção do modal
+
+
+## Correções Críticas - Filtros e Cálculos
+- [x] Financeiro: Corrigir filtro de mês para considerar data de entrega dentro do mês selecionado (dia 1 até último dia)
+- [x] Financeiro: Garantir que todas as somatórias usem data de entrega dentro do mês de exercício
+- [x] Produtividade: Corrigir filtro para considerar apenas veículos entregues no mês vigente
+- [x] Produtividade: Corrigir termômetro de meta para calcular corretamente com metas da API
+- [x] Produtividade: Corrigir somatórias de mecânicos para usar data de entrega do mês
+- [x] Produtividade: Corrigir modal de placas dos mecânicos (não está abrindo ao clicar)
