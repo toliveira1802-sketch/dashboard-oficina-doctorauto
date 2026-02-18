@@ -273,6 +273,15 @@ export default function Home() {
 
       // Mapear recursos ocupados
       const recursosOcupados = new Map<string, TrelloCard>();
+      
+      // Filtro de data: mês vigente
+      const now = new Date();
+      const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+      firstDayOfMonth.setHours(0, 0, 0, 0);
+      const lastDayOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59);
+      
+      // Buscar campo de Previsão de Entrega
+      const previsaoEntregaField = customFields.find((f: any) => f.name === 'Previsão de Entrega');
 
       cards.forEach(card => {
         const listName = listMap[card.idList];
@@ -299,6 +308,16 @@ export default function Home() {
             }
           }
         }
+        
+        // Filtrar por data de entrega (apenas carros entregues no mês vigente)
+        const previsaoItem = card.customFieldItems?.find(item => item.idCustomField === previsaoEntregaField?.id);
+        if (!previsaoItem || !previsaoItem.value?.date) return; // Pular cards sem data de entrega
+        
+        const previsao = new Date(previsaoItem.value.date);
+        previsao.setHours(0, 0, 0, 0);
+        
+        // Verificar se está dentro do mês vigente
+        if (previsao < firstDayOfMonth || previsao > lastDayOfMonth) return; // Pular cards fora do período
         
         // Verificar labels especiais
         const hasRetorno = card.labels.some(label => label.name.toUpperCase() === 'RETORNO');

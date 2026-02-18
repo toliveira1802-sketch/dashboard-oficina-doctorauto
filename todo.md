@@ -1190,3 +1190,12 @@
 - [x] Produtividade: Corrigir termômetro de meta para calcular corretamente com metas da API
 - [x] Produtividade: Corrigir somatórias de mecânicos para usar data de entrega do mês
 - [x] Produtividade: Corrigir modal de placas dos mecânicos (não está abrindo ao clicar)
+
+
+## Correção de KPIs - Todas as Páginas
+- [x] Home/Operacional: Corrigir alertas de capacidade para filtrar por data de entrega do mês vigente
+- [x] Home/Operacional: Corrigir alerta de gargalo de execução
+- [x] Home/Operacional: Corrigir contador de retornos
+- [x] Home/Operacional: Corrigir contador "Fora da Loja"
+- [x] Agenda: Verificar e corrigir filtros de data (N/A - página de agendamento, sem KPIs)
+- [x] Histórico: Verificar e corrigir filtros de data (N/A - página de feedback, sem KPIs)
