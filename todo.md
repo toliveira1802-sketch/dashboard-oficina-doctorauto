@@ -1199,3 +1199,9 @@
 - [x] Home/Operacional: Corrigir contador "Fora da Loja"
 - [x] Agenda: Verificar e corrigir filtros de data (N/A - página de agendamento, sem KPIs)
 - [x] Histórico: Verificar e corrigir filtros de data (N/A - página de feedback, sem KPIs)
+
+
+## Correção Lógica de Filtros
+- [x] Home/Operacional: REVERTER filtro de data - deve mostrar TODOS os carros ativos no Trello (estado atual do pátio)
+- [x] Financeiro: MANTER filtro de mês - apenas carros fechados/entregues no mês vigente
+- [x] Produtividade: MANTER filtro de mês - apenas entregas do mês vigente
