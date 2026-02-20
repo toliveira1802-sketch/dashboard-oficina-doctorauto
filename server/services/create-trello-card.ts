@@ -1,10 +1,4 @@
-const TRELLO_API_KEY = process.env.TRELLO_API_KEY!;
-const TRELLO_TOKEN = process.env.TRELLO_TOKEN!;
-const TRELLO_BOARD_ID = process.env.TRELLO_BOARD_ID!;
-
-if (!TRELLO_API_KEY || !TRELLO_TOKEN || !TRELLO_BOARD_ID) {
-  throw new Error('TRELLO_API_KEY, TRELLO_TOKEN e TRELLO_BOARD_ID devem estar definidos');
-}
+import { TRELLO_API_KEY, TRELLO_TOKEN } from '../lib/trello-config';
 
 // ID da lista "🟢 AGENDAMENTO CONFIRMADO"
 const AGENDAMENTO_CONFIRMADO_LIST_ID = '69562921014d7fe4602668c2';

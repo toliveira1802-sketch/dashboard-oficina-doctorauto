@@ -3,14 +3,16 @@ import { getDb } from '../server/db';
 import { agendas, sugestoes } from '../drizzle/schema';
 import { eq } from 'drizzle-orm';
 
-describe('Sistema de Agenda', () => {
+const hasDb = !!process.env.DATABASE_URL;
+
+describe.skipIf(!hasDb)('Sistema de Agenda', () => {
   let db: Awaited<ReturnType<typeof getDb>>;
 
   beforeAll(async () => {
     db = await getDb();
   });
 
-  it('deve criar uma sugestão de agenda', async () => {
+  it('deve criar uma sugestao de agenda', async () => {
     if (!db) throw new Error('Database not available');
 
     const testDate = '2026-01-15';
@@ -20,7 +22,7 @@ describe('Sistema de Agenda', () => {
         horario: '08h00',
         placa: 'ABC-1234',
         modelo: 'Gol 1.0',
-        tipo: 'Manutenção',
+        tipo: 'Manutencao',
         isEncaixe: 0,
       },
     ]);
@@ -38,7 +40,7 @@ describe('Sistema de Agenda', () => {
     await db.delete(sugestoes).where(eq(sugestoes.date, testDate));
   });
 
-  it('deve aprovar sugestão e criar agenda', async () => {
+  it('deve aprovar sugestao e criar agenda', async () => {
     if (!db) throw new Error('Database not available');
 
     const testDate = '2026-01-16';
@@ -48,22 +50,22 @@ describe('Sistema de Agenda', () => {
         horario: '09h00',
         placa: 'XYZ-5678',
         modelo: 'Corsa',
-        tipo: 'Diagnóstico',
+        tipo: 'Diagnostico',
         isEncaixe: 0,
       },
     ]);
 
-    // Criar sugestão
+    // Criar sugestao
     const sugestaoResult = await db.insert(sugestoes).values({
       date: testDate,
       conteudo: testConteudo,
-      mensagemWhatsapp: 'Teste aprovação',
+      mensagemWhatsapp: 'Teste aprovacao',
       status: 'pendente',
     });
 
     const sugestaoId = sugestaoResult[0].insertId;
 
-    // Simular aprovação
+    // Simular aprovacao
     const agendaItems = JSON.parse(testConteudo);
     await db.insert(agendas).values(
       agendaItems.map((item: any) => ({
@@ -105,7 +107,7 @@ describe('Sistema de Agenda', () => {
         horario: '10h00',
         placa: 'TEST-001',
         modelo: 'Teste',
-        tipo: 'Manutenção',
+        tipo: 'Manutencao',
         isEncaixe: 0,
         status: 'planejado',
       },
@@ -115,7 +117,7 @@ describe('Sistema de Agenda', () => {
         horario: '11h00',
         placa: 'TEST-002',
         modelo: 'Teste 2',
-        tipo: 'Diagnóstico',
+        tipo: 'Diagnostico',
         isEncaixe: 0,
         status: 'planejado',
       },

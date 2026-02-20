@@ -6,10 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { RefreshCw, Trophy, TrendingUp, Clock, DollarSign, AlertTriangle, X } from 'lucide-react';
 
-// Configuração do Trello
-const TRELLO_API_KEY = 'e327cf4891fd2fcb6020899e3718c45e';
-const TRELLO_TOKEN = 'ATTAa37008bfb8c135e0815e9a964d5c7f2e0b2ed2530c6bfdd202061e53ae1a6c18F1F6F8C7';
-const TRELLO_BOARD_ID = 'NkhINjF2'; // Gestão de Pátio - Doctor Auto
+import { TRELLO_API_KEY, TRELLO_TOKEN, TRELLO_BOARD_ID } from '@/lib/trello-config';
 
 interface TrelloCard {
   id: string;

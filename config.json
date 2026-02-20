@@ -69,9 +69,9 @@
   },
   "trello": {
     "enabled": true,
-    "apiKey": "e327cf4891fd2fcb6020899e3718c45e",
-    "token": "ATTAa37008bfb8c135e0815e9a964d5c7f2e0b2ed2530c6bfdd202061e53ae1a6c18F1F6F8C7",
-    "boardId": "NkhINjF2",
+    "apiKey": "",
+    "token": "",
+    "boardId": "",
     "listas": {
       "diagnostico": "Diagnóstico",
       "orcamento": "Orçamento",
@@ -91,8 +91,8 @@
   },
   "telegram": {
     "enabled": true,
-    "botToken": "7975097336:AAE5g2C34tAba8fTwLEqSQ17Zv4OJnhcMRU",
-    "chatId": "-5168046940",
+    "botToken": "",
+    "chatId": "",
     "sugestoes": {
       "enabled": true,
       "horarios": {

@@ -10,14 +10,22 @@ import requests
 import json
 from datetime import datetime, timedelta
 
-# Configurações Telegram
-TELEGRAM_BOT_TOKEN = '7975097336:AAE5g2C34tAba8fTwLEqSQ17Zv4OJnhcMRU'
-TELEGRAM_CHAT_ID = '-5168046940'
+# Configurações Telegram (lê de variáveis de ambiente ou config.json)
+import os
+_config = {}
+try:
+    with open(os.path.join(os.path.dirname(__file__), '..', 'config.json')) as f:
+        _config = json.load(f)
+except Exception:
+    pass
+
+TELEGRAM_BOT_TOKEN = os.environ.get('TELEGRAM_BOT_TOKEN', _config.get('telegram', {}).get('botToken', ''))
+TELEGRAM_CHAT_ID = os.environ.get('TELEGRAM_CHAT_ID', _config.get('telegram', {}).get('chatId', ''))
 
 # Configurações Trello
-TRELLO_API_KEY = 'e327cf4891fd2fcb6020899e3718c45e'
-TRELLO_TOKEN = 'ATTAa37008bfb8c135e0815e9a964d5c7f2e0b2ed2530c6bfdd202061e53ae1a6c18F1F6F8C7'
-TRELLO_BOARD_ID = 'NkhINjF2'
+TRELLO_API_KEY = os.environ.get('TRELLO_API_KEY', _config.get('trello', {}).get('apiKey', ''))
+TRELLO_TOKEN = os.environ.get('TRELLO_TOKEN', _config.get('trello', {}).get('token', ''))
+TRELLO_BOARD_ID = os.environ.get('TRELLO_BOARD_ID', _config.get('trello', {}).get('boardId', ''))
 
 MECANICOS = ['Samuel', 'Aldo', 'Tadeu', 'Wendel', 'JP']
 

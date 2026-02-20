@@ -129,8 +129,7 @@ router.post('/', async (req, res) => {
  * Criar card no Trello via API REST
  */
 async function createTrelloCard(lead: any) {
-  const TRELLO_API_KEY = process.env.TRELLO_API_KEY || 'e327cf4891fd2fcb6020899e3718c45e';
-  const TRELLO_TOKEN = process.env.TRELLO_TOKEN || 'ATTAa37008bfb8c135e0815e9a964d5c7f2e0b2ed2530c6bfdd202061e53ae1a6c18F1F6F8C7';
+  const { TRELLO_API_KEY, TRELLO_TOKEN } = await import('../../lib/trello-config');
   const TRELLO_LIST_ID_AGENDADOS = process.env.TRELLO_LIST_ID_AGENDADOS || '69562921014d7fe4602668c2'; // 🟢 AGENDAMENTO CONFIRMADO
   const TRELLO_CUSTOM_FIELD_DATA_ENTRADA = '6956da66bd77b3dc2271ad4b'; // ID do custom field "Data de Entrada"
   

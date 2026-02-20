@@ -10,10 +10,18 @@ import time
 import re
 from datetime import datetime
 
-# Configurações
-TELEGRAM_BOT_TOKEN = '7975097336:AAE5g2C34tAba8fTwLEqSQ17Zv4OJnhcMRU'
-TELEGRAM_CHAT_ID = '-5168046940'
-API_BASE_URL = 'https://3000-igh4wux5skge31okxfsqg-8280e67f.us2.manus.computer'
+# Configurações (lê de variáveis de ambiente ou config.json)
+import os
+_config = {}
+try:
+    with open(os.path.join(os.path.dirname(__file__), '..', 'config.json')) as f:
+        _config = json.load(f)
+except Exception:
+    pass
+
+TELEGRAM_BOT_TOKEN = os.environ.get('TELEGRAM_BOT_TOKEN', _config.get('telegram', {}).get('botToken', ''))
+TELEGRAM_CHAT_ID = os.environ.get('TELEGRAM_CHAT_ID', _config.get('telegram', {}).get('chatId', ''))
+API_BASE_URL = os.environ.get('API_BASE_URL', 'http://localhost:3000')
 
 last_update_id = 0
 

@@ -173,9 +173,9 @@ SUPABASE_URL=https://mtrmtkvhgrzhwhhfffhj.supabase.co
 SUPABASE_SERVICE_ROLE_KEY=seu_service_role_key
 
 # Trello
-TRELLO_API_KEY=e327cf4891fd2fcb6020899e3718c45e
-TRELLO_TOKEN=ATTAa37008bfb8c135e0815e9a964d5c7f2e0b2ed2530c6bfdd202061e53ae1a6c18F1F6F8C7
-TRELLO_BOARD_ID=NkhINjF2
+TRELLO_API_KEY=sua_trello_api_key
+TRELLO_TOKEN=seu_trello_token
+TRELLO_BOARD_ID=seu_trello_board_id
 TRELLO_LIST_ID_AGENDADOS=67820e0d8e9d9c1e7f6e1b8a
 
 # Webhook Security

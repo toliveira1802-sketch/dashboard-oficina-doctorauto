@@ -7,10 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 
-// Configuração do Trello
-const TRELLO_API_KEY = 'e327cf4891fd2fcb6020899e3718c45e';
-const TRELLO_TOKEN = 'ATTA1f0fa89c7b266deaf938930fb0fbf4211085a7f76b53b5bb0d697604494f5df81F2C4382';
-const TRELLO_BOARD_ID = 'NkhINjF2'; // Gestão de Pátio - Doctor Auto
+import { TRELLO_API_KEY, TRELLO_TOKEN, TRELLO_BOARD_ID } from '@/lib/trello-config';
 
 interface FinancialMetrics {
   valorFaturado: number;

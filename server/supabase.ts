@@ -1,13 +1,30 @@
-import { createClient } from '@supabase/supabase-js';
+import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 
-const supabaseUrl = process.env.SUPABASE_URL!;
-const supabaseKey = process.env.SUPABASE_ANON_KEY!;
+let _supabase: SupabaseClient | null = null;
 
-if (!supabaseUrl || !supabaseKey) {
-  throw new Error('SUPABASE_URL e SUPABASE_ANON_KEY devem estar definidos nas variáveis de ambiente');
+export function getSupabase(): SupabaseClient {
+  if (_supabase) return _supabase;
+
+  const url = process.env.SUPABASE_URL;
+  const key = process.env.SUPABASE_ANON_KEY;
+
+  if (!url || !key) {
+    throw new Error('SUPABASE_URL e SUPABASE_ANON_KEY devem estar definidos nas variáveis de ambiente');
+  }
+
+  _supabase = createClient(url, key);
+  return _supabase;
 }
 
-export const supabase = createClient(supabaseUrl, supabaseKey);
+// Proxy para manter compatibilidade com código existente que usa `supabase.from(...)` etc.
+// A conexão só é criada no primeiro uso, não na importação do módulo.
+export const supabase = new Proxy({} as SupabaseClient, {
+  get(_target, prop) {
+    const client = getSupabase();
+    const value = (client as any)[prop];
+    return typeof value === 'function' ? value.bind(client) : value;
+  },
+});
 
 // Tipos das tabelas
 export interface TrelloCard {
