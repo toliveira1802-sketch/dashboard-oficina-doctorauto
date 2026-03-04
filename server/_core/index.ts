@@ -45,6 +45,15 @@ async function startServer() {
   // Metas routes
   const metasRoutes = await import('../routes/metas.js');
   app.use('/api/metas', metasRoutes.default);
+
+  // Robô Financeiro routes
+  try {
+    const roboFinanceiroRoutes = await import('../routes/robo-financeiro.js');
+    app.use('/api/robo-financeiro', roboFinanceiroRoutes.default);
+    console.log('[Server] Robô Financeiro registrado em /api/robo-financeiro');
+  } catch (error) {
+    console.error('[Server] Erro ao carregar Robô Financeiro:', error);
+  }
   
   // Telegram routes
   const telegramRoutes = await import('../routes/telegram.js');

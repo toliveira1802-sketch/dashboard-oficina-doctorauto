@@ -11,6 +11,7 @@ import Painel from './pages/Painel';
 import PainelMetas from './pages/PainelMetas';
 import Produtividade from "./pages/Produtividade";
 import Financeiro from "./pages/Financeiro";
+import RoboFinanceiro from "./pages/RoboFinanceiro";
 import SetupSupabase from "./pages/SetupSupabase";
 
 function Router() {
@@ -24,6 +25,7 @@ function Router() {
         <Route path="/painel-metas" component={PainelMetas} />
       <Route path={"/produtividade"} component={Produtividade} />
       <Route path={"/financeiro"} component={Financeiro} />
+      <Route path={"/robo-financeiro"} component={RoboFinanceiro} />
       <Route path={"/setup-supabase"} component={SetupSupabase} />
       <Route path={"/404"} component={NotFound} />
       {/* Final fallback route */}

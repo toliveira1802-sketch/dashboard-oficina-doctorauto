@@ -39,6 +39,15 @@ async function startServer() {
     });
   });
 
+  // Import and use Robô Financeiro routes
+  try {
+    const roboFinanceiroRoutes = await import('./routes/robo-financeiro.js');
+    app.use('/api/robo-financeiro', roboFinanceiroRoutes.default);
+    console.log('[Server] Robô Financeiro registered at /api/robo-financeiro');
+  } catch (error) {
+    console.error('[Server] Failed to load Robô Financeiro routes:', error);
+  }
+
   // Import and use Trello routes
   const trelloRoutes = await import('./routes/trello.js');
   app.use('/api/trello', trelloRoutes.default);
