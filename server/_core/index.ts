@@ -239,12 +239,15 @@ async function startServer() {
   server.listen(port, async () => {
     console.log(`Server running on http://localhost:${port}/`);
     
-    // Inicia sincronização automática com Trello
-    startTrelloSync();
-    
-    // Inicia sincronização agendada Trello → Supabase (a cada 5 minutos)
-    const { startScheduledSync } = await import('../services/scheduled-sync.js');
-    startScheduledSync(5);
+    // Inicia sincronização automática com Trello (apenas se credenciais configuradas)
+    if (process.env.TRELLO_API_KEY && process.env.TRELLO_TOKEN) {
+      startTrelloSync();
+      // Inicia sincronização agendada Trello → Supabase (a cada 5 minutos)
+      const { startScheduledSync } = await import('../services/scheduled-sync.js');
+      startScheduledSync(5);
+    } else {
+      console.log('[TrelloSync] Sincronização desabilitada (credenciais não configuradas)');
+    }
   });
 }
 
