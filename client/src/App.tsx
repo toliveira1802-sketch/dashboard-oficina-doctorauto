@@ -13,6 +13,7 @@ import Produtividade from "./pages/Produtividade";
 import Financeiro from "./pages/Financeiro";
 import RoboFinanceiro from "./pages/RoboFinanceiro";
 import SetupSupabase from "./pages/SetupSupabase";
+import AIControlCenter from "./pages/AIControlCenter";
 
 function Router() {
   // make sure to consider if you need authentication for certain routes
@@ -27,6 +28,7 @@ function Router() {
       <Route path={"/financeiro"} component={Financeiro} />
       <Route path={"/robo-financeiro"} component={RoboFinanceiro} />
       <Route path={"/setup-supabase"} component={SetupSupabase} />
+      <Route path={"/ai-control"} component={AIControlCenter} />
       <Route path={"/404"} component={NotFound} />
       {/* Final fallback route */}
       <Route component={NotFound} />

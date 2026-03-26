@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Edit(/.claude/skills/kaia-consultant/**)",
+      "Edit(/.claude/skills/automation-architect/**)",
+      "Edit(/.claude/skills/content-strategist/**)",
+      "Edit(/.claude/skills/data-analyst/**)",
+      "Edit(/.claude/skills/customer-success/**)"
+    ]
+  }
+}

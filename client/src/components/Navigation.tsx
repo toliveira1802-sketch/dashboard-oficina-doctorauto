@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'wouter';
-import { LayoutDashboard, DollarSign, TrendingUp, Calendar, History, Bot } from 'lucide-react';
+import { LayoutDashboard, DollarSign, TrendingUp, Calendar, History, Bot, Brain } from 'lucide-react';
 
 export default function Navigation() {
   const [location] = useLocation();
@@ -11,6 +11,7 @@ export default function Navigation() {
     { path: '/agenda', label: 'Agenda', icon: Calendar },
     { path: '/historico', label: 'Histórico', icon: History },
     { path: '/robo-financeiro', label: '🤖 Robô', icon: Bot },
+    { path: '/ai-control', label: 'AI Control', icon: Brain },
   ];
 
   return (
