@@ -390,15 +390,33 @@ router.get('/ranking-mecanicos', async (req, res) => {
 });
 
 
-// GET /api/trello/placas - Retorna lista de placas dos carros do PostgreSQL
+// Dados mock para quando o banco não estiver disponível
+const PLACAS_MOCK = [
+  { id: '1', placa: 'ABC1D23', modelo: 'Golf GTI', marca: 'Volkswagen', ano: 2021 },
+  { id: '2', placa: 'DEF4G56', modelo: 'A4 Avant', marca: 'Audi', ano: 2020 },
+  { id: '3', placa: 'GHI7J89', modelo: 'C300 AMG', marca: 'Mercedes', ano: 2022 },
+  { id: '4', placa: 'JKL0M12', modelo: 'M3 Competition', marca: 'BMW', ano: 2023 },
+  { id: '5', placa: 'MNO3P45', modelo: 'Polo GTS', marca: 'Volkswagen', ano: 2022 },
+  { id: '6', placa: 'QRS6T78', modelo: 'Tiguan R-Line', marca: 'Volkswagen', ano: 2021 },
+  { id: '7', placa: 'UVW9X01', modelo: 'Passat TSI', marca: 'Volkswagen', ano: 2020 },
+  { id: '8', placa: 'YZA2B34', modelo: 'GLA 250', marca: 'Mercedes', ano: 2021 },
+  { id: '9', placa: 'CDE5F67', modelo: 'Arteon', marca: 'Volkswagen', ano: 2022 },
+  { id: '10', placa: 'GHI8J90', modelo: 'A3 Sedan', marca: 'Audi', ano: 2020 },
+  { id: '11', placa: 'KLM1N23', modelo: '318i Sport', marca: 'BMW', ano: 2019 },
+  { id: '12', placa: 'OPQ4R56', modelo: 'T-Cross', marca: 'Volkswagen', ano: 2023 },
+];
+
+// GET /api/trello/placas - Retorna lista de placas dos carros do banco de dados
 router.get('/placas', async (req, res) => {
   try {
     const db = await getDb();
     if (!db) {
-      return res.status(500).json({ error: 'Banco de dados não disponível', placas: [] });
+      // Sem banco disponível: retornar dados mock para desenvolvimento
+      console.log('[Trello/placas] Banco indisponível - usando dados mock');
+      return res.json({ placas: PLACAS_MOCK, mock: true });
     }
     
-    // Buscar veículos do banco de dados PostgreSQL
+    // Buscar veículos do banco de dados
     // Excluir carros entregues (com dataSaida preenchida)
     const veiculos = await db.select({
       id: veiculosTable.id,
@@ -408,6 +426,12 @@ router.get('/placas', async (req, res) => {
       ano: veiculosTable.ano,
       dataSaida: veiculosTable.dataSaida
     }).from(veiculosTable).where(isNull(veiculosTable.dataSaida)).limit(100);
+    
+    if (!veiculos || veiculos.length === 0) {
+      // Banco vazio: retornar dados mock
+      console.log('[Trello/placas] Banco vazio - usando dados mock');
+      return res.json({ placas: PLACAS_MOCK, mock: true });
+    }
     
     // Formatar resposta
     const placas = veiculos.map((v: any) => ({
@@ -421,7 +445,8 @@ router.get('/placas', async (req, res) => {
     res.json({ placas });
   } catch (error) {
     console.error('Erro ao buscar placas do banco de dados:', error);
-    res.status(500).json({ error: 'Erro ao buscar placas', placas: [] });
+    // Em caso de erro, retornar mock para não quebrar a Agenda
+    res.json({ placas: PLACAS_MOCK, mock: true });
   }
 });
 

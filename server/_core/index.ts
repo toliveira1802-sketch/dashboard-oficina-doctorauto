@@ -58,6 +58,15 @@ async function startServer() {
   // Telegram routes
   const telegramRoutes = await import('../routes/telegram.js');
   app.use('/api/telegram', telegramRoutes.default);
+
+  // WhatsApp + Claude AI routes
+  try {
+    const whatsappRoutes = await import('../routes/whatsapp.js');
+    app.use('/api/whatsapp', whatsappRoutes.default);
+    console.log('[Server] WhatsApp Bot registrado em /api/whatsapp');
+  } catch (error) {
+    console.error('[Server] Erro ao carregar WhatsApp routes:', error);
+  }
   
   // Supabase validation routes
   const supabaseValidateRoutes = await import('../routes/supabase/validate-tables.js');

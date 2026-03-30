@@ -102,6 +102,14 @@
       }
     }
   },
+  "whatsapp": {
+    "enabled": true,
+    "phoneId": "SEU_WHATSAPP_PHONE_ID",
+    "apiToken": "SEU_WHATSAPP_API_TOKEN",
+    "verifyToken": "SEU_TOKEN_VERIFICACAO",
+    "claudeModel": "claude-sonnet-4-20250514",
+    "webhookUrl": "/api/whatsapp/webhook"
+  },
   "painel": {
     "autoRefresh": 30,
     "mostrarLogo": true,
@@ -112,6 +120,7 @@
     "historico": true,
     "feedback": true,
     "automacaoTelegram": true,
+    "whatsappBot": true,
     "painelTV": true
   }
 }
