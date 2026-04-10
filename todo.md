@@ -1205,3 +1205,12 @@
 - [x] Home/Operacional: REVERTER filtro de data - deve mostrar TODOS os carros ativos no Trello (estado atual do pátio)
 - [x] Financeiro: MANTER filtro de mês - apenas carros fechados/entregues no mês vigente
 - [x] Produtividade: MANTER filtro de mês - apenas entregas do mês vigente
+
+## Dashboard de Previsão de Faturamento
+- [x] Criar página Previsao.tsx com projeção de faturamento mensal
+- [x] Calcular ritmo diário atual (faturamento acumulado / dias úteis decorridos)
+- [x] Calcular projeção para fim do mês (ritmo × dias úteis restantes)
+- [x] Mostrar probabilidade de bater a meta mensal
+- [x] Gráfico de evolução diária do faturamento acumulado vs projeção linear
+- [x] Adicionar rota /previsao no App.tsx
+- [x] Adicionar link de navegação no menu

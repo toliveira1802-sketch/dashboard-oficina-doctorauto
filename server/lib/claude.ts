@@ -53,7 +53,7 @@ const conversationTimestamps = new Map<string, number>();
  */
 function cleanExpiredConversations(): void {
   const now = Date.now();
-  for (const [phone, timestamp] of conversationTimestamps) {
+  for (const [phone, timestamp] of Array.from(conversationTimestamps)) {
     if (now - timestamp > CONVERSATION_TTL) {
       conversations.delete(phone);
       conversationTimestamps.delete(phone);
